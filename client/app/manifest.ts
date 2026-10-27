@@ -1,0 +1,22 @@
+import type { MetadataRoute } from "next";
+
+// What the phone uses when the site is added to the home screen.
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "The Laws of Ruin",
+    short_name: "Laws of Ruin",
+    description: "An investigation into the rise and fall of the most powerful men of their age.",
+    id: "/",
+    start_url: "/app",          // the installed app opens here, not on the website hero
+    scope: "/",
+    display: "standalone",
+    orientation: "portrait",
+    background_color: "#0B0A08",
+    theme_color: "#0B0A08",
+    icons: [
+      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
+  };
+}

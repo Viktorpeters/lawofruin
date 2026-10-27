@@ -1,0 +1,115 @@
+/* ---------- the "Add to" button with its small 3D phone ---------- */
+.cta {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 6px 2px;
+  perspective: 420px;
+}
+.ctaLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 70%, transparent);
+  padding: 6px 9px 5px;
+  margin-bottom: 18px;
+  transition: color 0.3s, border-color 0.3s;
+}
+.cta:hover .ctaLabel { color: var(--ivory); border-color: var(--ivory); }
+
+.phone3d {
+  display: block;
+  width: 40px;
+  transform-style: preserve-3d;
+  animation: phoneFloat 6s ease-in-out infinite;
+  filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.55));
+}
+.phoneSvg { display: block; width: 100%; height: auto; }
+.cta:hover .phone3d { animation-duration: 2.4s; }
+@keyframes phoneFloat {
+  0%, 100% { transform: rotateY(-24deg) rotateX(10deg) rotateZ(-4deg) translateY(0); }
+  50% { transform: rotateY(-8deg) rotateX(4deg) rotateZ(-1deg) translateY(-4px); }
+}
+.phoneDrop { animation: drop 3.6s cubic-bezier(0.3, 1.4, 0.5, 1) infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes drop {
+  0%, 12% { transform: translateY(-34px) scale(0.6); opacity: 0; }
+  30% { transform: translateY(0) scale(1.15); opacity: 1; }
+  38%, 84% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 0; }
+}
+
+/* ---------- the guide ---------- */
+.guide {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--ink-0) 94%, transparent);
+  backdrop-filter: blur(6px);
+  display: flex;
+  padding: calc(24px + var(--safe-top)) var(--gutter-r) calc(24px + var(--safe-bottom)) var(--gutter);
+  overflow-y: auto;
+  animation: guideIn 0.45s ease both;
+}
+@keyframes guideIn { from { opacity: 0; } to { opacity: 1; } }
+.guideInner {
+  width: min(420px, 100%);
+  margin: auto;            /* centres without clipping the top when the screen is short */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+.guideHead { display: flex; flex-direction: column; gap: 8px; }
+.guideEyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.guideTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(30px, 7vw, 40px);
+  line-height: 1.05;
+}
+.phoneStage { display: block; perspective: 900px; }
+.guidePhone {
+  display: block;
+  width: min(230px, 58vw, 26dvh);
+  height: auto;
+  transform: rotateY(-8deg) rotateX(3deg);
+  filter: drop-shadow(0 30px 30px rgba(0, 0, 0, 0.6));
+}
+.guideCaption { display: flex; flex-direction: column; gap: 6px; min-height: 84px; max-width: 34ch; }
+.guideCaption p { margin: 0; color: var(--ivory-dim); font-size: 15px; }
+.stepNo { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; color: var(--gold); }
+.stepMarks { display: flex; gap: 10px; }
+.mark, .markOn { width: 22px; height: 2px; background: var(--rule); transition: background 0.3s; padding: 8px 0; background-clip: content-box; }
+.markOn { background-color: var(--gold); }
+.linkRow { display: flex; align-items: center; gap: 14px; }
+.linkText { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; user-select: all; }
+.textBtn, .closeBtn {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 60%, transparent);
+  padding: 9px 16px;
+}
+.closeBtn { color: var(--ivory-dim); border-color: var(--rule); }
+.closeBtn:hover, .textBtn:hover { color: var(--ivory); border-color: var(--ivory); }
+
+/* animation helpers used inside the SVG phone */
+.pulse { animation: pulse 1.3s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.tap { animation: tap 1.3s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes tap { 0% { transform: scale(0.6); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(1.25); opacity: 0; } }
+.fadeIn { animation: fade 0.5s ease both; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.popIn { animation: pop 0.9s cubic-bezier(0.3, 1.5, 0.5, 1) both 0.3s; transform-box: fill-box; transform-origin: center; }
+@keyframes pop { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }

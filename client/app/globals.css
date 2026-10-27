@@ -1,0 +1,82 @@
+/* The Laws of Ruin: global tokens.
+   A single dark world, by choice: warm near-black, aged ivory, oxblood for ruin, gold for sand. */
+
+:root {
+  --ink-0: #0b0a08;          /* the stage */
+  --ink-1: #14110e;          /* raised surfaces */
+  --ivory: #ede6d8;          /* text */
+  --ivory-dim: #b9b0a1;      /* secondary text */
+  --mute: #8c8377;           /* labels */
+  --rule: #2c2620;           /* hairlines */
+  --oxblood: #a3392f;        /* ruin, on dark */
+  --gold: #c9a56b;           /* sand, focus, highlights */
+
+  --gutter: max(20px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(20px, env(safe-area-inset-right, 0px));
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--ink-0);
+  color: var(--ivory);
+}
+
+body {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 4px;
+}
+
+a {
+  color: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
