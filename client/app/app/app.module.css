@@ -1,0 +1,12 @@
+.wrap {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  text-align: center;
+  padding: calc(24px + var(--safe-top)) var(--gutter-r) calc(24px + var(--safe-bottom)) var(--gutter);
+}
+.glass { width: 140px; height: 140px; display: block; }
+.title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 7vw, 40px); line-height: 1.05; max-width: 16ch; text-wrap: balance; }
+.note { margin: 0; font-family: var(--font-accent); font-style: italic; color: var(--gold); font-size: 17px; }
