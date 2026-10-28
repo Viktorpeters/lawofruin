@@ -20,11 +20,15 @@ const WHISPERS = [
   "Not only how to take power. How to keep it.",
 ];
 
+type Props = {
+  photos: Record<string, string>;   // slug -> file name, only for photos that exist in /public/figures
+};
+
 /* One screen, no nav.
    Top: the name, the turning line, the opening date; the hourglass on the right.
    Middle: the shelves of covers.
    Bottom: the thesis and the promise (or the pulled volume's card), sound and pause, and "Add to". */
-export default function Hero() {
+export default function Hero({ photos }: Props) {
   const [motion, setMotion] = useState(true);
   const [days, setDays] = useState<number | null>(null);
   const [pulled, setPulled] = useState<string | null>(null);
@@ -79,7 +83,7 @@ export default function Hero() {
         <Hourglass motion={motion} />
       </header>
 
-      <Shelf motion={motion} pulled={pulled} onPull={onPull} />
+      <Shelf photos={photos} motion={motion} pulled={pulled} onPull={onPull} />
 
       <footer className={styles.bottom}>
         <div className={styles.left} data-pulled={fig ? "" : undefined}>
@@ -98,19 +102,21 @@ export default function Hero() {
             {fig && (
               <div className={styles.card} key={fig.slug}>
                 <span className={styles.thumb}>
-                  <Image
-                    src={`/figures/${fig.slug}.jpg`}
-                    alt=""
-                    fill
-                    sizes="56px"
-                    style={{
-                      objectFit: "cover",
-                      objectPosition: fig.focus ?? "50% 28%",
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.visibility = "hidden";
-                    }}
-                  />
+                  {photos[fig.slug] && (
+                    <Image
+                      src={`/figures/${photos[fig.slug]}`}
+                      alt=""
+                      fill
+                      sizes="56px"
+                      style={{
+                        objectFit: "cover",
+                        objectPosition: fig.focus ?? "50% 28%",
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  )}
                 </span>
                 <div className={styles.cardText}>
                   <span className={styles.cardRealm}>
