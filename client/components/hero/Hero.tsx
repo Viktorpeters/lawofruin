@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import Shelf from "./Shelf";
-import Hourglass from "./Hourglass";
+import Hourglass from "./HourGlass";
 import SoundControl from "./SoundControl";
 import InstallCta from "@/components/install/InstallCta";
 import { BY_SLUG, CIRCLE_NAME, dates } from "@/lib/figures";
@@ -32,12 +32,20 @@ export default function Hero() {
 
   useEffect(() => {
     const first = requestAnimationFrame(() => {
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) setMotion(false);
-      setDays(Math.max(0, Math.ceil((OPENS.getTime() - Date.now()) / 86400000)));
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches)
+        setMotion(false);
+      setDays(
+        Math.max(0, Math.ceil((OPENS.getTime() - Date.now()) / 86400000)),
+      );
     });
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setPulled(null); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPulled(null);
+    };
     window.addEventListener("keydown", onKey);
-    return () => { cancelAnimationFrame(first); window.removeEventListener("keydown", onKey); };
+    return () => {
+      cancelAnimationFrame(first);
+      window.removeEventListener("keydown", onKey);
+    };
   }, []);
 
   const fig = pulled ? BY_SLUG[pulled] : null;
@@ -51,12 +59,21 @@ export default function Hero() {
           <p className={styles.whisper}>
             <span className="sr-only">{WHISPERS.join(". ")}</span>
             {WHISPERS.map((w, i) => (
-              <span key={w} className={styles.whisperLine} style={{ animationDelay: `${i * 4.5 - 18.6}s` }} aria-hidden="true">{w}</span>
+              <span
+                key={w}
+                className={styles.whisperLine}
+                style={{ animationDelay: `${i * 4.5 - 18.6}s` }}
+                aria-hidden="true"
+              >
+                {w}
+              </span>
             ))}
           </p>
           <p className={styles.opens}>
             <span className={styles.opensLabel}>Opens</span> 07 · 12 · 26
-            <span className={styles.opensDays}>{days !== null ? ` · ${days} days` : ""}</span>
+            <span className={styles.opensDays}>
+              {days !== null ? ` · ${days} days` : ""}
+            </span>
           </p>
         </div>
         <Hourglass motion={motion} />
@@ -67,9 +84,16 @@ export default function Hero() {
       <footer className={styles.bottom}>
         <div className={styles.left} data-pulled={fig ? "" : undefined}>
           <div className={styles.words} aria-live="polite">
-            <div className={`${styles.thesis} ${fig ? styles.away : ""}`} aria-hidden={!!fig}>
-              <p className={styles.title}>Every empire leaves the same ruins.</p>
-              <p className={styles.tagline}>For those who seek power, and those who must keep it.</p>
+            <div
+              className={`${styles.thesis} ${fig ? styles.away : ""}`}
+              aria-hidden={!!fig}
+            >
+              <p className={styles.title}>
+                Every empire leaves the same ruins.
+              </p>
+              <p className={styles.tagline}>
+                For those who seek power, and those who must keep it.
+              </p>
             </div>
             {fig && (
               <div className={styles.card} key={fig.slug}>
@@ -79,19 +103,44 @@ export default function Hero() {
                     alt=""
                     fill
                     sizes="56px"
-                    style={{ objectFit: "cover", objectPosition: fig.focus ?? "50% 28%" }}
-                    onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
+                    style={{
+                      objectFit: "cover",
+                      objectPosition: fig.focus ?? "50% 28%",
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.visibility = "hidden";
+                    }}
                   />
                 </span>
                 <div className={styles.cardText}>
-                  <span className={styles.cardRealm}>{fig.realm} · {CIRCLE_NAME[fig.circle]}</span>
+                  <span className={styles.cardRealm}>
+                    {fig.realm} · {CIRCLE_NAME[fig.circle]}
+                  </span>
                   <span className={styles.cardName}>{fig.name}</span>
-                  {fig.known && <span className={styles.cardKnown}>“{fig.known}”</span>}
+                  {fig.known && (
+                    <span className={styles.cardKnown}>“{fig.known}”</span>
+                  )}
                   <span className={styles.cardDates}>
-                    {to ? (<>{from}<i aria-hidden="true" />{to}</>) : fig.span ? from : `Born ${from}`}
+                    {to ? (
+                      <>
+                        {from}
+                        <i aria-hidden="true" />
+                        {to}
+                      </>
+                    ) : fig.span ? (
+                      from
+                    ) : (
+                      `Born ${from}`
+                    )}
                   </span>
                   <span className={styles.cardFate}>{fig.fate}</span>
-                  <button type="button" className={styles.putBack} onClick={() => setPulled(null)}>Put it back</button>
+                  <button
+                    type="button"
+                    className={styles.putBack}
+                    onClick={() => setPulled(null)}
+                  >
+                    Put it back
+                  </button>
                 </div>
               </div>
             )}
@@ -108,9 +157,22 @@ export default function Hero() {
               title={motion ? "Pause the motion" : "Play the motion"}
             >
               {motion ? (
-                <svg viewBox="0 0 24 24" className={styles.icon} aria-hidden="true"><rect x="7" y="6" width="3" height="12" /><rect x="14" y="6" width="3" height="12" /></svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  className={styles.icon}
+                  aria-hidden="true"
+                >
+                  <rect x="7" y="6" width="3" height="12" />
+                  <rect x="14" y="6" width="3" height="12" />
+                </svg>
               ) : (
-                <svg viewBox="0 0 24 24" className={styles.icon} aria-hidden="true"><path d="M8 5.5 L18.5 12 L8 18.5 Z" /></svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  className={styles.icon}
+                  aria-hidden="true"
+                >
+                  <path d="M8 5.5 L18.5 12 L8 18.5 Z" />
+                </svg>
               )}
             </button>
           </div>
