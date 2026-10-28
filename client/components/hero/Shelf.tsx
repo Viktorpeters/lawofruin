@@ -12,12 +12,13 @@ import styles from "./shelf.module.css";
 const LEAN = [-4, 3, -2, 5, -3, 2, -5, 1, 4, -1];
 
 type Props = {
+  photos: Record<string, string>;   // slug -> file name, only for photos that exist in /public/figures
   motion: boolean;
   pulled: string | null;
   onPull: (slug: string | null) => void;
 };
 
-export default function Shelf({ motion, pulled, onPull }: Props) {
+export default function Shelf({ photos, motion, pulled, onPull }: Props) {
   const unitRef = useRef<HTMLDivElement>(null);
   const rowsRef = useRef<(HTMLDivElement | null)[]>([]);
   // Photos load only when their cover comes within a screen of view, so a visitor who never
@@ -109,20 +110,22 @@ export default function Shelf({ motion, pulled, onPull }: Props) {
                     <button
                       type="button"
                       data-cover=""
+                      data-photo={photos[slug] ? "" : undefined}
                       className={`${styles.cover} ${isPulled ? styles.out : ""}`}
                       onClick={() => onPull(isPulled ? null : slug)}
                       aria-pressed={isPulled}
                       aria-label={`${f.name}, ${to ? `${from} to ${to}` : f.span ? from : `born ${from}`}. ${isPulled ? "Put it back" : "Take it off the shelf"}`}
                     >
                       <span className={styles.photo}>
-                        {near.has(slug) && <Image
-                          src={`/figures/${f.slug}.jpg`}
+                        {photos[slug] && near.has(slug) && <Image
+                          src={`/figures/${photos[slug]}`}
                           alt=""
                           fill
                           sizes="(min-width: 900px) 240px, 170px"
                           loading={i < 3 ? "eager" : "lazy"}
                           style={{ objectFit: "cover", objectPosition: f.focus ?? "50% 28%" }}
-                          onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
+                          onLoad={(e) => { e.currentTarget.style.opacity = "1"; }}
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
                         />}
                       </span>
                       <span className={styles.realm}>{f.realm}</span>
