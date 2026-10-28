@@ -149,7 +149,7 @@
   height: 78px;
   overflow: hidden;
   border: 1px solid rgba(201, 165, 107, 0.6);
-  background: linear-gradient(#3b342d, #1d1915);
+  background: #2a231d;
   filter: grayscale(0.9) sepia(0.3);
 }
 .cardText { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
