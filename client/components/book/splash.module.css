@@ -1,0 +1,25 @@
+/* The splash: the same near-black as the hourglass animation's own background (#0d0d0d),
+   so its square edge never shows. The edge is also faded with a soft round mask. */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: #0d0d0d;
+  transition: background-color 0.9s ease;
+  pointer-events: none;
+}
+.flying { background-color: rgba(13, 13, 13, 0); }
+
+.glass {
+  display: block;
+  width: 160px;
+  height: 160px;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 52%, transparent 70%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 52%, transparent 70%);
+  transform-origin: 50% 50%;
+  transition: transform 0.95s cubic-bezier(0.55, 0.05, 0.2, 1), opacity 0.45s ease 0.5s;
+}
+.flying .glass { opacity: 0; }
