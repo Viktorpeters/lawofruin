@@ -1,0 +1,130 @@
+/* Who's Who case file and the word card. Sharp corners; paper colours from the book. */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(11, 10, 8, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 16px max(26px, env(safe-area-inset-bottom));
+  animation: fade 0.2s ease-out;
+}
+@keyframes fade { from { opacity: 0; } }
+
+/* ---------- the case file ---------- */
+.file {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 82svh;
+  overflow-y: auto;
+  background: #f6efe0;
+  color: #1d1812;
+  padding: 18px 18px 22px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(29, 24, 18, 0.12);
+  transform: rotate(-1.2deg);
+  animation: slide 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  font-family: var(--font-reading), Georgia, serif;
+}
+@keyframes slide { from { transform: translateY(40px) rotate(-1.2deg); opacity: 0; } }
+/* lined index-card paper */
+.file::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent 0 27px, rgba(80, 110, 160, 0.13) 27px 28px);
+}
+.hd {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9b2a21;
+  border-bottom: 1px solid #9b2a21;
+  padding-bottom: 7px;
+  margin-bottom: 14px;
+}
+.x { width: 32px; height: 26px; margin: -6px -8px -6px 0; font-size: 22px; line-height: 1; color: #5e5446; }
+.stamp {
+  position: absolute;
+  right: 16px;
+  top: 46px;
+  z-index: 2;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(155, 42, 33, 0.78);
+  border: 2px solid rgba(155, 42, 33, 0.6);
+  padding: 4px 7px;
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+.stampDisputed { color: rgba(29, 24, 18, 0.7); border-color: rgba(29, 24, 18, 0.5); }
+.row { position: relative; display: flex; gap: 14px; }
+.ph {
+  position: relative;
+  width: 74px;
+  height: 92px;
+  flex: none;
+  background: #2a231d;
+  border: 4px solid #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: rotate(2deg);
+  display: grid;
+  place-items: center;
+}
+.ph img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; filter: grayscale(1) contrast(1.15); display: block; }
+.ini { font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 26px; color: #e9cc88; letter-spacing: 0.04em; }
+.clip { position: absolute; left: 30px; top: -12px; width: 12px; height: 34px; border: 2px solid #8a8f96; border-radius: 6px; z-index: 2; }
+.id { position: relative; min-width: 0; padding-right: 64px; }
+.nm { font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 24px; line-height: 1.05; }
+.ka { font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 15px; color: #5e5446; margin-top: 2px; }
+.dt { font-family: var(--font-mono), monospace; font-size: 9.5px; letter-spacing: 0.12em; color: #5e5446; margin-top: 7px; }
+.role { font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #9b2a21; margin-top: 6px; line-height: 1.5; }
+.about { position: relative; font-size: 14px; line-height: 1.55; margin: 14px 0 0; }
+.lbl { position: relative; font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.22em; color: #9a8e7c; text-transform: uppercase; margin: 14px 0 6px; }
+.tip { position: relative; margin: 0; font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 15px; line-height: 1.45; color: #9b2a21; border-left: 2px solid #9b2a21; padding-left: 10px; }
+.chips { position: relative; display: flex; gap: 6px; flex-wrap: wrap; }
+.chips button { font-family: var(--font-mono), monospace; font-size: 9.5px; letter-spacing: 0.08em; border: 1px solid rgba(29, 24, 18, 0.35); color: #1d1812; padding: 6px 8px; background: none; }
+.chips button:active { background: rgba(168, 122, 58, 0.15); }
+
+/* ---------- the word card ---------- */
+.clear { position: fixed; inset: 0; z-index: 70; }
+.wcard {
+  position: fixed;
+  width: min(340px, calc(100vw - 32px));
+  background: #fbf7ee;
+  color: #1d1812;
+  padding: 16px 18px 18px;
+  border: 1px solid rgba(29, 24, 18, 0.2);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+  font-family: var(--font-reading), Georgia, serif;
+  animation: pop 0.18s ease-out;
+}
+@keyframes pop { from { opacity: 0; transform: translateY(-4px); } }
+.wcard::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--arrow, 40px) - 7px);
+  top: -8px;
+  width: 14px;
+  height: 14px;
+  background: #fbf7ee;
+  border-left: 1px solid rgba(29, 24, 18, 0.2);
+  border-top: 1px solid rgba(29, 24, 18, 0.2);
+  transform: rotate(45deg);
+}
+.above::before { top: auto; bottom: -8px; transform: rotate(225deg); }
+.w { font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 24px; line-height: 1.1; }
+.pr { font-family: var(--font-mono), monospace; font-size: 10px; color: #5e5446; letter-spacing: 0.06em; margin-top: 2px; }
+.tag { display: inline-block; font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #9b2a21; border: 1px solid rgba(155, 42, 33, 0.5); padding: 2px 5px; margin-top: 8px; }
+.meaning { font-size: 14px; line-height: 1.5; margin: 10px 0 0; }
+.use { font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 14px; color: #5e5446; border-left: 2px solid #c9a56b; padding-left: 10px; margin: 10px 0 0; }
