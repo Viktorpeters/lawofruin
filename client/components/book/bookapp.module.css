@@ -1,0 +1,46 @@
+/* The reading screen: the stage, the profile icon and the "Swipe to open" hint on the cover. */
+
+.app {
+  position: fixed;
+  inset: 0;
+  background: #0b0a08;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* profile: an outline for guests (sign-in comes with early bird sales) */
+.profile {
+  position: fixed;
+  z-index: 30;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(29, 24, 18, 0.45);
+  display: grid;
+  place-items: center;
+  background: rgba(242, 234, 219, 0.6);
+  transition: border-color 0.3s, background-color 0.3s;
+}
+.profile svg { width: 15px; height: 15px; fill: none; stroke: rgba(29, 24, 18, 0.65); stroke-width: 1.4; transition: stroke 0.3s; }
+.onDark { border-color: rgba(237, 230, 216, 0.4); background: rgba(11, 10, 8, 0.25); }
+.onDark svg { stroke: rgba(237, 230, 216, 0.75); }
+
+.hint {
+  position: fixed;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  bottom: max(30px, env(safe-area-inset-bottom));
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(233, 204, 136, 0.75);
+  pointer-events: none;
+  animation: breathe 2.6s ease-in-out infinite;
+}
+@keyframes breathe { 50% { opacity: 0.35; } }
