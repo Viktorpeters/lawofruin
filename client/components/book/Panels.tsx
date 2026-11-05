@@ -31,6 +31,7 @@ type Props = {
   left: boolean;
   setLeft: (v: boolean) => void;
   onRestart: () => void;
+  onGuide: () => void;
 };
 
 export default function Panel(props: Props) {
@@ -135,7 +136,7 @@ function Earn() {
   );
 }
 
-function Settings({ fontSize, setFontSize, left, setLeft, onRestart }: Props) {
+function Settings({ fontSize, setFontSize, left, setLeft, onRestart, onGuide }: Props) {
   const sizes = [
     { v: 15, label: "Smaller" },
     { v: 16, label: "Standard" },
@@ -155,6 +156,7 @@ function Settings({ fontSize, setFontSize, left, setLeft, onRestart }: Props) {
         <button type="button" aria-pressed={left} onClick={() => setLeft(true)}>Left hand</button>
       </div>
       <div className={s.group}>The book</div>
+      <button type="button" className={s.line} onClick={onGuide}>Show how to turn the pages</button>
       <button type="button" className={s.line} onClick={onRestart}>Read from the cover again</button>
     </>
   );

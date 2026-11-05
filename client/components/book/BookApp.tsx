@@ -12,11 +12,13 @@ import Splash from "./Splash";
 import Tray from "./Tray";
 import Panel, { type PanelId } from "./Panels";
 import { WhoCard, WordCard } from "./Cards";
+import Coach from "./Coach";
 import s from "./bookapp.module.css";
 
 const SEEN_KEY = "lor-seen";     // set once the reader has opened the cover
 const FS_KEY = "lor-fs";
 const HAND_KEY = "lor-hand";
+const GUIDE_KEY = "lor-guide";  // set once the reading guide has been seen
 const SPLASH_MIN = 1700;         // the hourglass turns at least this long before it flies
 
 function get(key: string) {
@@ -39,6 +41,7 @@ export default function BookApp() {
   const [panel, setPanel] = useState<PanelId | null>(null);
   const [who, setWho] = useState<string | null>(null);
   const [word, setWord] = useState<{ id: string; at: DOMRect } | null>(null);
+  const [guide, setGuide] = useState(false);
 
   // read the saved settings once, in the browser
   useEffect(() => {
@@ -70,11 +73,14 @@ export default function BookApp() {
   const onPage = useCallback((info: PageInfo) => {
     setPage(info);
     if (info.index > 0) set(SEEN_KEY, "1");
+    // the first time the cover is opened, show how to turn the pages
+    if (info.index > 0 && get(GUIDE_KEY) !== "1") setGuide(true);
   }, []);
   const onReady = useCallback(() => setReady(true), []);
   const onWho = useCallback((id: string) => { setWord(null); setWho(id); }, []);
   const onWord = useCallback((id: string, at: DOMRect) => setWord({ id, at }), []);
   const endSplash = useCallback(() => setSplash(false), []);
+  const endGuide = useCallback(() => { set(GUIDE_KEY, "1"); setGuide(false); }, []);
 
   const jump = useCallback((sec: string) => {
     setPanel(null);
@@ -111,8 +117,8 @@ export default function BookApp() {
             <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="3" /><path d="M2.5 14.5c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5" /></svg>
           </button>
           {/* on the closed cover: only the hint, so nothing sits on the corner the reader lifts */}
-          {page?.index === 0 ? (
-            !panel && <p className={s.hint}>Swipe to open</p>
+          {page?.index === 0 || guide ? (
+            !panel && !guide && <p className={s.hint}>Swipe to open</p>
           ) : (
             <Tray left={left} light={dark} onChoose={(id) => { setWho(null); setWord(null); setPanel(id); }} />
           )}
@@ -130,11 +136,13 @@ export default function BookApp() {
           left={left}
           setLeft={setLeft}
           onRestart={restart}
+          onGuide={() => { setPanel(null); setGuide(true); }}
         />
       )}
       {who && <WhoCard id={who} onClose={() => setWho(null)} onJump={jump} />}
       {word && <WordCard id={word.id} at={word.at} onClose={() => setWord(null)} />}
 
+      {guide && showBook && <Coach onDone={endGuide} />}
       {splash && <Splash target={splashTarget} onDone={endSplash} />}
     </main>
   );
