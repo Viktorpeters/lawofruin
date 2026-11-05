@@ -408,3 +408,32 @@
   filter: drop-shadow(-5px -5px 6px rgba(0, 0, 0, 0.45));
 }
 .backMark { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; opacity: 0.8; }
+
+/* ---------- contents opening page ---------- */
+.tocOpen { justify-content: flex-start; padding-top: 74px; }
+.tocParts { width: 100%; margin-top: 18px; border-top: 2px solid var(--ink); }
+.tocPart { display: grid; grid-template-columns: 4.2em 1fr auto; align-items: baseline; gap: 8px; padding: 13px 0; border-bottom: 1px solid rgba(29, 24, 18, 0.18); text-align: left; }
+.tocPartTitle { font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 18px; }
+
+/* ---------- a part's opening page ---------- */
+.partPage { justify-content: flex-start; padding: 46px 28px 80px; }
+.partPage > * { flex-shrink: 0; }
+.partIcon { width: 86px; height: 86px; filter: drop-shadow(0 6px 6px rgba(60, 35, 10, 0.35)) drop-shadow(0 1px 0 rgba(255, 255, 255, 0.6)); }
+.partKicker { margin-top: 12px; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 0.5em; text-transform: uppercase; color: var(--red); padding-left: 0.5em; }
+.partBig {
+  margin-top: 2px;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 -0.6px 0 rgba(60, 40, 20, 0.35);
+}
+/* the double underline */
+.partRule { width: 120px; height: 9px; margin: 10px 0 14px; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.partName { font-family: var(--font-display), Georgia, serif; font-style: italic; font-weight: 500; font-size: 25px; line-height: 1.1; text-wrap: balance; }
+.partLine { margin: 8px 0 0; font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 16px; line-height: 1.45; color: var(--soft); max-width: 28ch; }
+.partLaws { margin-top: 16px; width: 100%; max-width: 300px; border-top: 1px solid rgba(29, 24, 18, 0.25); }
+.partLaws div { padding: 5px 0; border-bottom: 1px solid rgba(29, 24, 18, 0.12); font-family: var(--font-display), Georgia, serif; font-size: 15px; line-height: 1.25; }
+.partLaws span { display: block; font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 2px; }
+.partOpens { margin-top: 12px; }

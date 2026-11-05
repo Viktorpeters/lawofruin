@@ -4,6 +4,7 @@
    buttons are caught by one listener in Book.tsx (each carries a data- attribute). */
 import s from "./book.module.css";
 import { glassSvg } from "./glass";
+import { partIcon } from "./partIcons";
 import { tokenize, type Token } from "@/lib/book/marks";
 import { PREFACE } from "@/lib/book/preface";
 import { PARTS, PASS_LINE } from "@/lib/book/content";
@@ -108,6 +109,34 @@ function endPage(): string {
     <p class="${s.endLine}">${esc(END.line)}</p></div>`;
 }
 
+/* The Contents opening page: the six parts at a glance. */
+function contentsPage(): string {
+  return `<div class="${s.center} ${s.tocOpen}">
+    <div class="${s.mono} ${s.tocKicker}">Investigation I · The Fall of Kings</div>
+    <h2 class="${s.tocTitle}">Contents</h2>
+    <p class="${s.pass}">${esc(PASS_LINE)}</p>
+    <div class="${s.tocParts}">${PARTS.map((p) => `<div class="${s.tocPart}"><span class="${s.mono}">Part ${p.n}</span><span class="${s.tocPartTitle}">${esc(p.title)}</span><span class="${s.mono} ${s.lock}">${LOCK} ${esc(p.opens)}</span></div>`).join("")}</div>
+  </div>`;
+}
+
+const WORDS_N = ["One", "Two", "Three", "Four", "Five", "Six"];
+
+/* A part's own opening page: the cast-gold emblem, PART, the big number with a double rule,
+   the title, its line, and the laws inside it. */
+function partPage(n: number): string {
+  const part = PARTS.find((p) => p.n === n)!;
+  return `<div class="${s.center} ${s.partPage}">
+    ${partIcon(n, s.partIcon)}
+    <div class="${s.partKicker}">Part</div>
+    <div class="${s.partBig}">${WORDS_N[n - 1] ?? n}</div>
+    <div class="${s.partRule}"></div>
+    <div class="${s.partName}">${esc(part.title)}</div>
+    <p class="${s.partLine}">${esc(part.line)}</p>
+    <div class="${s.partLaws}">${part.laws.map((l) => `<div><span>Law ${l.n}</span>${esc(l.title)}</div>`).join("")}</div>
+    <div class="${s.mono} ${s.lock} ${s.partOpens}">${LOCK} Opens ${esc(part.opens)}</div>
+  </div>`;
+}
+
 /* ---------------- flowing text ---------------- */
 
 type Flow =
@@ -131,7 +160,7 @@ function paraHtml(f: Extract<Flow, { kind: "para" }>, from: number, to: number, 
 
 const LOCK = `<svg width="10" height="11" viewBox="0 0 10 11" aria-hidden="true"><rect x="1" y="5" width="8" height="5.5" fill="none" stroke="currentColor"/><path d="M2.8 5V3.4a2.2 2.2 0 0 1 4.4 0V5" fill="none" stroke="currentColor"/></svg>`;
 
-function buildFlow(): { copy: Flow[]; preface: Flow[]; toc: Flow[] } {
+function buildFlow(): { copy: Flow[]; preface: Flow[]; parts: Flow[][] } {
   let seq = 0;
   const copy: Flow[] = COPYRIGHT.map((t, i) => ({
     seq: seq++, sec: "copyright", head: "", kind: "block",
@@ -167,15 +196,12 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; toc: Flow[] } {
     }
   }
 
-  const toc: Flow[] = [{
-    seq: seq++, sec: "contents", head: "Contents", kind: "block", breakBefore: true,
-    html: `<div class="${s.mono} ${s.tocKicker}">Investigation I · The Fall of Kings</div><h2 class="${s.tocTitle}">Contents</h2><p class="${s.pass}">${esc(PASS_LINE)}</p>`,
-  }];
+  // each part's laws flow on their own pages, after the part's opening page
+  const parts: Flow[][] = [];
   for (const part of PARTS) {
-    toc.push({
-      seq: seq++, sec: "contents", head: "Contents", kind: "block", minAfter: 90,
-      html: `<div class="${s.part}"><div class="${s.partNum}"><span class="${s.mono}">Part ${part.n}</span><span class="${s.mono} ${s.lock}">${LOCK} ${esc(part.opens)}</span></div><div class="${s.partTitle}">${esc(part.title)}</div></div>`,
-    });
+    const toc: Flow[] = [];
+    parts.push(toc);
+    const head = `Part ${part.n} · ${part.title}`;
     for (const law of part.laws) {
       // the short story keeps its Who's Who names and words tappable
       const seen = new Set<string>();
@@ -192,12 +218,12 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; toc: Flow[] } {
         (law.key ? `<div class="${s.key}"><span class="${s.keyLabel}">KEY</span>${esc(law.key)}</div>` : "") +
         open;
       toc.push({
-        seq: seq++, sec: "contents", head: "Contents", kind: "block",
+        seq: seq++, sec: `part-${part.n}`, head, kind: "block",
         html: `<div class="${s.entry}"><div class="${s.entryHead}"><span class="${s.mono}">Law ${law.n}</span></div><div class="${s.lawTitle}">${esc(law.title)}</div><div class="${s.opensOn}">Opens on ${esc(law.opener)} · ${esc(law.place)}</div>${extra}</div>`,
       });
     }
   }
-  return { copy, preface, toc };
+  return { copy, preface, parts };
 }
 
 /* Cut a flow into pages. `box` is the off-screen page's text area, the same size as the real one. */
@@ -281,7 +307,7 @@ function paginate(flow: Flow[], box: HTMLElement, opts: { head: boolean; folio: 
 
 /* The whole book, in order. `box` is the measuring page's text area. */
 export function buildBook(box: HTMLElement, stance: string | null): BuiltPage[] {
-  const { copy, preface, toc } = buildFlow();
+  const { copy, preface, parts } = buildFlow();
   const fixed = (html: string, sec: string, extra: Partial<BuiltPage> = {}): BuiltPage => ({ html, secs: [sec], start: { seq: -1, tok: 0 }, ...extra });
 
   const pages: BuiltPage[] = [
@@ -294,7 +320,8 @@ export function buildBook(box: HTMLElement, stance: string | null): BuiltPage[] 
     ...paginate(preface, box, { head: true, folio: true }),
     fixed(forThose(), "for-those"),
     fixed(which(stance), "which"),
-    ...paginate(toc, box, { head: true, folio: true }),
+    fixed(contentsPage(), "contents"),
+    ...PARTS.flatMap((part, i) => [fixed(partPage(part.n), `part-${part.n}`), ...paginate(parts[i], box, { head: true, folio: true })]),
     fixed(endPage(), "end"),
   ];
   // the back board must sit alone on the left in a two-page spread, so the count must be even

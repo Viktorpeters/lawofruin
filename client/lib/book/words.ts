@@ -60,6 +60,10 @@ export const WORD_CARDS: Word[] = [
   { id: "holy-roman-empire", word: "Holy Roman Empire", tag: "History · 800 to 1806", meaning: "A union of German and central European lands under an elected emperor. Its electors could be, and were, bought." },
   { id: "bourges", word: "Bourges", tag: "Place · France", meaning: "City in central France, home of Jacques Coeur, whose grand house still stands there." },
   { id: "augsburg", word: "Augsburg", tag: "Place · Germany", meaning: "City in Bavaria, seat of the Fugger banking family." },
+  { id: "basel-accords", word: "Basel Accords", tag: "Finance · International rules", meaning: "Rules agreed by the world's central banks on how much capital a bank must hold against its loans, named after the Swiss city where they are written." },
+  { id: "gdansk", word: "Gdańsk", say: "g-DINESK", tag: "Place · Poland", meaning: "Port city on the Baltic, where the shipyard strike of August 1980 gave birth to Solidarity." },
+  { id: "novosibirsk", word: "Novosibirsk", tag: "Place · Siberia, Russia", meaning: "The largest city in Siberia, where Khodorkovsky's plane was stormed on 25 October 2003." },
+  { id: "chios", word: "Chios", say: "KEE-oss", tag: "Place · Greek island", meaning: "Island in the Aegean Sea where Jacques Coeur died in 1456." },
   { id: "the-48-laws", word: "The 48 Laws of Power", tag: "Book · 1998", meaning: "Robert Greene's best-known book on how power is won." },
 ];
 
@@ -77,5 +81,5 @@ export const WORDS: Record<string, string> = {
   "Zimbabwe": "zimbabwe", "Rhodesia": "rhodesia", "Sirte": "sirte", "Libya": "libya", "Shanghai": "shanghai", "Niemen": "niemen",
   "Watergate": "watergate", "Ekiti": "ekiti", "Fortune": "fortune", "Heritage USA": "heritage-usa", "King Lear": "king-lear",
   "Cordelia": "cordelia", "Bund Summit": "bund-summit", "pawnshop mentality": "pawnshop", "Holy Roman Empire": "holy-roman-empire",
-  "Bourges": "bourges", "Augsburg": "augsburg", "The 48 Laws of Power": "the-48-laws",
+  "Bourges": "bourges", "Augsburg": "augsburg", "Basel Accords": "basel-accords", "Gdańsk": "gdansk", "Novosibirsk": "novosibirsk", "Chios": "chios", "The 48 Laws of Power": "the-48-laws",
 };

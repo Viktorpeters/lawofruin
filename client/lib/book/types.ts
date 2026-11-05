@@ -28,6 +28,7 @@ export type Part = {
   n: number;
   title: string;
   opens: string;       // release date shown on the padlock
+  line: string;        // one line under the part's title on its opening page
   laws: Law[];
 };
 

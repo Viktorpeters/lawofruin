@@ -83,7 +83,7 @@ function ContentsList({ onJump }: Props) {
       {row("contents", "", "The thirty laws")}
       <div className={s.group}>Investigation I</div>
       {PARTS.map((p) => (
-        <button key={p.n} type="button" className={s.row} onClick={() => onJump("contents")}>
+        <button key={p.n} type="button" className={s.row} onClick={() => onJump(`part-${p.n}`)}>
           <span className={s.rowNum}>Part {p.n}</span>
           <span className={s.rowTitle}>{p.title}</span>
           <span className={s.rowLock}>{p.opens}</span>
