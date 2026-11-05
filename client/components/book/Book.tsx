@@ -55,27 +55,132 @@ function measureScreen() {
   return { w: Math.round(h / 1.5), h, spread: true };
 }
 
-/* On a phone the page's hinge is the screen's left edge, and out of the box the library only
-   finishes a slow drag if the corner is pulled all the way past it. A real page goes over once
-   it passes the middle, so a slow drag that lets go past the middle now finishes the turn
-   (a quick swipe always turns). Reaches into the library's own turn controller; if a future
-   version renames it, this quietly does nothing and the library's default stays. */
+/* When the reader lets go of a page mid-turn, does it go over or fall back?
+   Out of the box the library only turns it if the corner was pulled all the way past the spine,
+   which on a phone is the screen's left edge. A real page goes over once it passes the middle,
+   so on a phone it now turns past the middle, and a quick flick always turns (`force`).
+   Reaches into the library's own turn controller; if a future version renames it, this quietly
+   does nothing and the library's default stays. */
 type TurnController = {
   calc: { getPosition(): { x: number; y: number }; getCorner(): string } | null;
   getBoundsRect(): { pageWidth: number; height: number };
   animateFlippingTo(from: object, to: object, done: boolean): void;
   stopMove(): void;
+  force?: boolean;
 };
-function finishHalfwayTurns(pf: PageFlip) {
+function turnController(pf: PageFlip): TurnController | null {
   const fc = (pf as unknown as { flipController?: TurnController }).flipController;
-  if (!fc || typeof fc.animateFlippingTo !== "function" || typeof fc.getBoundsRect !== "function") return;
+  if (!fc || typeof fc.animateFlippingTo !== "function" || typeof fc.getBoundsRect !== "function") return null;
+  return fc;
+}
+function finishHalfwayTurns(pf: PageFlip, spread: boolean) {
+  const fc = turnController(pf);
+  if (!fc) return;
   fc.stopMove = function (this: TurnController) {
     if (!this.calc) return;
     const pos = this.calc.getPosition();
     const rect = this.getBoundsRect();
     const y = this.calc.getCorner() === "bottom" ? rect.height : 0;
-    const over = pos.x <= rect.pageWidth * 0.5;
+    const over = this.force || pos.x <= (spread ? 0 : rect.pageWidth * 0.5);
+    this.force = false;
     this.animateFlippingTo(pos, { x: over ? -rect.pageWidth : rect.pageWidth, y }, over);
+  };
+}
+
+/* How a finger turns the page. The library's own handling picks the direction from WHERE the
+   finger lands (left part of the page = back) and starts the curl from the nearest corner, so a
+   finger that lands in the middle and moves right can pull the page forward. Here the direction
+   comes from which way the finger MOVES, like a real book: move left and the page in front comes
+   over; move right and the page behind comes back. The curl starts at the page's edge, at the
+   height of the finger, and follows it. A tap on the outer third of the page turns it too;
+   a tap in the middle never does, so reading and tapping names is safe. */
+function attachGestures(pf: PageFlip, block: HTMLElement): () => void {
+  type G = { id: number; x0: number; y0: number; fy0: number; t0: number; dir: "next" | "prev" | null; edgeX: number; x: number; y: number; h: number };
+  let g: G | null = null;
+  const local = (e: PointerEvent) => {
+    const r = block.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height };
+  };
+  // the page's edge moves a little faster than the finger, so the curl keeps up with it;
+  // up and down movement is damped, so the fold stays close to upright, like paper
+  const at = (gg: G) => ({
+    x: gg.edgeX + (gg.x - gg.x0) * 1.4,
+    y: Math.min(Math.max(gg.y0 + (gg.y - gg.fy0) * 0.3, 1), gg.h - 1),
+  });
+
+  const down = (e: PointerEvent) => {
+    if (!e.isPrimary || (e.pointerType === "mouse" && e.button !== 0)) return;
+    const p = local(e);
+    g = { id: e.pointerId, x0: p.x, y0: p.y, fy0: p.y, t0: performance.now(), dir: null, edgeX: 0, x: p.x, y: p.y, h: p.h };
+  };
+
+  const move = (e: PointerEvent) => {
+    if (!g || e.pointerId !== g.id) return;
+    const p = local(e);
+    g.x = p.x;
+    g.y = p.y;
+    const dx = p.x - g.x0;
+    const dy = p.y - g.y0;
+    if (!g.dir) {
+      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy) * 0.7) return;
+      g.dir = dx < 0 ? "next" : "prev";
+      // Grab the page by its outer edge. A finger near the top or bottom lifts that corner,
+      // so the page curls diagonally from it. A finger anywhere in the middle pulls the whole
+      // edge, so the fold stands upright and follows the finger across, never jumping to a corner.
+      g.edgeX = g.dir === "next" ? p.w - 2 : 2;
+      g.x0 = p.x;
+      g.fy0 = p.y;
+      const middle = p.y > p.h * 0.22 && p.y < p.h * 0.78;
+      g.y0 = middle ? (p.y < p.h / 2 ? 1 : p.h - 1) : Math.min(Math.max(p.y, 12), p.h - 12);
+      pf.startUserTouch({ x: g.edgeX, y: g.y0 });
+      pf.userMove({ x: g.edgeX + (g.dir === "next" ? -6 : 6), y: g.y0 }, true);
+      return;
+    }
+    pf.userMove(at(g), true);
+  };
+
+  const up = (e: PointerEvent) => {
+    if (!g || e.pointerId !== g.id) return;
+    const gg = g;
+    g = null;
+    const p = local(e);
+    const ms = performance.now() - gg.t0;
+    if (gg.dir) {
+      // it turns on a quick flick, or once the finger has travelled a third of the page;
+      // otherwise the page decides by how far it has come over
+      const travel = (gg.dir === "next" ? gg.x0 - p.x : p.x - gg.x0);
+      const flick = ms < 320 && travel > 24;
+      const fc = turnController(pf);
+      if (fc && (flick || travel > p.w * (p.w > 700 ? 0.18 : 0.33))) fc.force = true;
+      gg.x = p.x;
+      gg.y = p.y;
+      pf.userStop(at(gg));
+      return;
+    }
+    // a tap: only the outer thirds turn the page, and never a tap on a name, a word or a button
+    if (ms > 450 || Math.abs(p.x - gg.x0) > 8 || Math.abs(p.y - gg.y0) > 8) return;
+    if ((e.target as HTMLElement).closest("button, a")) return;
+    const corner = p.y > p.h / 2 ? "bottom" : "top";
+    if (p.x > p.w * 0.67) pf.flipNext(corner);
+    else if (p.x < p.w * 0.33) pf.flipPrev(corner);
+  };
+
+  const cancel = (e: PointerEvent) => {
+    if (!g || e.pointerId !== g.id) return;
+    const gg = g;
+    g = null;
+    if (gg.dir) pf.userStop(at(gg));
+  };
+
+  block.addEventListener("pointerdown", down);
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  window.addEventListener("pointercancel", cancel);
+  return () => {
+    block.removeEventListener("pointerdown", down);
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    window.removeEventListener("pointercancel", cancel);
   };
 }
 
@@ -134,6 +239,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, st
     let dead = false;
     let rebuildTimer = 0;
     let built = { w: 0, h: 0 };
+    let detach = () => {};
 
     async function build() {
       const el = host.current;
@@ -177,6 +283,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, st
       useSaved.current = false;
 
       // 4. hand the pages to the page-curl library
+      detach();
       flip.current?.destroy();
       bookEl.current?.remove();
       const b = document.createElement("div");
@@ -203,13 +310,13 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, st
         flippingTime: 850,
         mobileScrollSupport: false,
         swipeDistance: 24,
-        showPageCorners: true,
-        disableFlipByClick: true,
-        clickEventForward: true,
-        useMouseEvents: true,
+        showPageCorners: false,
+        disableFlipByClick: false,  // the library never sees taps (useMouseEvents is off); this lets flipPrev work in one-page view
+        useMouseEvents: false,      // fingers and the mouse are read by attachGestures below
       });
       pf.loadFromHTML(els);
-      if (!size.spread) finishHalfwayTurns(pf);
+      finishHalfwayTurns(pf, size.spread);
+      detach = attachGestures(pf, b);
       pf.on("flip", (e) => report(e.data));
       flip.current = pf;
       report(start);
@@ -236,6 +343,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, st
 
     return () => {
       dead = true;
+      detach();
       window.clearTimeout(rebuildTimer);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("keydown", onKey);
