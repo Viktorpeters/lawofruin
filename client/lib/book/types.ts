@@ -20,6 +20,8 @@ export type Law = {
   judgment?: string;   // written entries drop in here later
   eras?: [string, string, string];
   key?: string;
+  story?: string;      // the short story under the law, about four lines
+  sections?: { name: string; text: string }[];   // the twelve sections, each a short story of its own
 };
 
 export type Part = {

@@ -55,6 +55,11 @@ export const WORD_CARDS: Word[] = [
   { id: "heritage-usa", word: "Heritage USA", tag: "Place · South Carolina", meaning: "PTL's Christian theme park, opened in 1978 and once among the most visited in the United States." },
   { id: "king-lear", word: "King Lear", tag: "Play · c. 1606", meaning: "Shakespeare's tragedy of an old king who divides his kingdom among the daughters who flatter him." },
   { id: "cordelia", word: "Cordelia", tag: "Character · King Lear", meaning: "Lear's youngest daughter, the only one who loves him, and the only one who will not flatter him." },
+  { id: "bund-summit", word: "Bund Summit", tag: "Event · Shanghai", meaning: "A yearly finance conference on Shanghai's riverfront, the Bund. Jack Ma's speech there on 24 October 2020 began his fall." },
+  { id: "pawnshop", word: "pawnshop mentality", tag: "Jack Ma's phrase · 2020", meaning: "His charge that China's banks only lent against property put up as security, like a pawnshop, instead of judging the borrower." },
+  { id: "holy-roman-empire", word: "Holy Roman Empire", tag: "History · 800 to 1806", meaning: "A union of German and central European lands under an elected emperor. Its electors could be, and were, bought." },
+  { id: "bourges", word: "Bourges", tag: "Place · France", meaning: "City in central France, home of Jacques Coeur, whose grand house still stands there." },
+  { id: "augsburg", word: "Augsburg", tag: "Place · Germany", meaning: "City in Bavaria, seat of the Fugger banking family." },
   { id: "the-48-laws", word: "The 48 Laws of Power", tag: "Book · 1998", meaning: "Robert Greene's best-known book on how power is won." },
 ];
 
@@ -71,5 +76,6 @@ export const WORDS: Record<string, string> = {
   "Florence": "florence", "Milan": "milan", "Montgomery": "montgomery", "Medellín": "medellin", "Berlin": "berlin", "Vienna": "vienna",
   "Zimbabwe": "zimbabwe", "Rhodesia": "rhodesia", "Sirte": "sirte", "Libya": "libya", "Shanghai": "shanghai", "Niemen": "niemen",
   "Watergate": "watergate", "Ekiti": "ekiti", "Fortune": "fortune", "Heritage USA": "heritage-usa", "King Lear": "king-lear",
-  "Cordelia": "cordelia", "The 48 Laws of Power": "the-48-laws",
+  "Cordelia": "cordelia", "Bund Summit": "bund-summit", "pawnshop mentality": "pawnshop", "Holy Roman Empire": "holy-roman-empire",
+  "Bourges": "bourges", "Augsburg": "augsburg", "The 48 Laws of Power": "the-48-laws",
 };

@@ -177,10 +177,20 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; toc: Flow[] } {
       html: `<div class="${s.part}"><div class="${s.partNum}"><span class="${s.mono}">Part ${part.n}</span><span class="${s.mono} ${s.lock}">${LOCK} ${esc(part.opens)}</span></div><div class="${s.partTitle}">${esc(part.title)}</div></div>`,
     });
     for (const law of part.laws) {
+      // the short story keeps its Who's Who names and words tappable
+      const seen = new Set<string>();
+      const story = law.story
+        ? `<p class="${s.story}">${tokenize(law.story, seen).map((t) => t.t === "text" ? esc(t.s) : `<button type="button" class="${t.t === "who" ? s.who : s.word}" data-${t.t}="${t.id}">${esc(t.s)}</button>${esc(t.tail)}`).join("")}</p>`
+        : "";
+      const open = law.sections?.length
+        ? `<button type="button" class="${s.openLaw}" data-law="${law.n}">Open the ${law.sections.length} sections <span aria-hidden="true">→</span></button>`
+        : "";
       const extra =
         (law.judgment ? `<div class="${s.judg}">${esc(law.judgment)}</div>` : "") +
         (law.eras ? `<div class="${s.stamps}">${law.eras.map((e) => `<span>${esc(e)}</span>`).join("")}</div>` : "") +
-        (law.key ? `<div class="${s.key}"><span class="${s.keyLabel}">KEY</span>${esc(law.key)}</div>` : "");
+        story +
+        (law.key ? `<div class="${s.key}"><span class="${s.keyLabel}">KEY</span>${esc(law.key)}</div>` : "") +
+        open;
       toc.push({
         seq: seq++, sec: "contents", head: "Contents", kind: "block",
         html: `<div class="${s.entry}"><div class="${s.entryHead}"><span class="${s.mono}">Law ${law.n}</span></div><div class="${s.lawTitle}">${esc(law.title)}</div><div class="${s.opensOn}">Opens on ${esc(law.opener)} · ${esc(law.place)}</div>${extra}</div>`,

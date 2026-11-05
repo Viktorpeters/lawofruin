@@ -4,6 +4,7 @@
 import { NAMES } from "./whoswho";
 import { WORDS } from "./words";
 import { PREFACE } from "./preface";
+import { PARTS } from "./content";
 
 export type Token =
   | { t: "text"; s: string }                        // one word with its trailing space, if any
@@ -42,13 +43,19 @@ export function tokenize(text: string, seen: Set<string>): Token[] {
   return out;
 }
 
-/* Which Preface sections each card appears in, for the "Appears in" chips on the card. */
+/* Where each card appears (Preface sections and laws), for the "Appears in" chips on the card. */
 export const APPEARS: Record<string, { id: string; label: string }[]> = (() => {
   const map: Record<string, { id: string; label: string }[]> = {};
   for (const sec of PREFACE) {
     const seen = new Set<string>();
     for (const b of sec.blocks) tokenize(b.t, seen);
     for (const id of seen) (map[id] ??= []).push({ id: sec.id, label: `Preface ${sec.num}` });
+  }
+  for (const part of PARTS) for (const law of part.laws) {
+    const seen = new Set<string>();
+    if (law.story) tokenize(law.story, seen);
+    for (const sec of law.sections ?? []) tokenize(sec.text, seen);
+    for (const id of seen) (map[id] ??= []).push({ id: `law-${law.n}`, label: `Law ${law.n}` });
   }
   return map;
 })();

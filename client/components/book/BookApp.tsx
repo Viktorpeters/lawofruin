@@ -13,6 +13,7 @@ import Tray from "./Tray";
 import Panel, { type PanelId } from "./Panels";
 import { WhoCard, WordCard } from "./Cards";
 import Coach from "./Coach";
+import LawSheet from "./LawSheet";
 import s from "./bookapp.module.css";
 
 const SEEN_KEY = "lor-seen";     // set once the reader has opened the cover
@@ -42,6 +43,7 @@ export default function BookApp() {
   const [who, setWho] = useState<string | null>(null);
   const [word, setWord] = useState<{ id: string; at: DOMRect } | null>(null);
   const [guide, setGuide] = useState(false);
+  const [law, setLaw] = useState<number | null>(null);
 
   // read the saved settings once, in the browser
   useEffect(() => {
@@ -85,6 +87,9 @@ export default function BookApp() {
   const jump = useCallback((sec: string) => {
     setPanel(null);
     setWho(null);
+    // "law-1" and the like open that law's sheet; everything else is a page in the book
+    if (sec.startsWith("law-")) { setLaw(Number(sec.slice(4))); return; }
+    setLaw(null);
     book.current?.jumpTo(sec);
   }, []);
 
@@ -109,6 +114,7 @@ export default function BookApp() {
         onPage={onPage}
         onWho={onWho}
         onWord={onWord}
+        onLaw={setLaw}
       />
 
       {showBook && (
@@ -139,6 +145,7 @@ export default function BookApp() {
           onGuide={() => { setPanel(null); setGuide(true); }}
         />
       )}
+      {law !== null && <LawSheet n={law} onClose={() => setLaw(null)} onWho={onWho} onWord={onWord} />}
       {who && <WhoCard id={who} onClose={() => setWho(null)} onJump={jump} />}
       {word && <WordCard id={word.id} at={word.at} onClose={() => setWord(null)} />}
 

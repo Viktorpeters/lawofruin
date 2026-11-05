@@ -31,6 +31,7 @@ type Props = {
   onPage: (info: PageInfo) => void;
   onWho: (id: string) => void;
   onWord: (id: string, rect: DOMRect) => void;
+  onLaw: (n: number) => void;
 };
 
 const PLACE_KEY = "lor-place";
@@ -196,14 +197,14 @@ async function fontsReady() {
   await document.fonts.ready;
 }
 
-const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, startFromPlace, onReady, onPage, onWho, onWord }, ref) {
+const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, startFromPlace, onReady, onPage, onWho, onWord, onLaw }, ref) {
   const host = useRef<HTMLDivElement>(null);
   const flip = useRef<PageFlip | null>(null);
   const pages = useRef<BuiltPage[]>([]);
   const bookEl = useRef<HTMLDivElement | null>(null);
   // keep the latest callbacks without rebuilding the book when they change
-  const cb = useRef({ onReady, onPage, onWho, onWord });
-  cb.current = { onReady, onPage, onWho, onWord };
+  const cb = useRef({ onReady, onPage, onWho, onWord, onLaw });
+  cb.current = { onReady, onPage, onWho, onWord, onLaw };
   const useSaved = useRef(startFromPlace);
 
   useImperativeHandle(ref, () => ({
@@ -361,10 +362,11 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, st
     const el = host.current;
     if (!el) return;
     const onClick = (e: MouseEvent) => {
-      const t = (e.target as HTMLElement).closest<HTMLElement>("[data-who],[data-word],[data-stance]");
+      const t = (e.target as HTMLElement).closest<HTMLElement>("[data-who],[data-word],[data-stance],[data-law]");
       if (!t) return;
       e.stopPropagation();
-      if (t.dataset.who) cb.current.onWho(t.dataset.who);
+      if (t.dataset.law) cb.current.onLaw(Number(t.dataset.law));
+      else if (t.dataset.who) cb.current.onWho(t.dataset.who);
       else if (t.dataset.word) cb.current.onWord(t.dataset.word, t.getBoundingClientRect());
       else if (t.dataset.stance) {
         const v = t.dataset.stance;
