@@ -6,7 +6,7 @@ import s from "./book.module.css";
 import { glassSvg } from "./glass";
 import { tokenize, type Token } from "@/lib/book/marks";
 import { PREFACE } from "@/lib/book/preface";
-import { PARTS, PASS_LINE } from "@/lib/book/contents";
+import { PARTS, PASS_LINE } from "@/lib/book/content";
 import { TITLE, COPYRIGHT, DEDICATION, EPIGRAPHS, FOR_THOSE, WHICH, END } from "@/lib/book/front";
 
 export type Anchor = { seq: number; tok: number };

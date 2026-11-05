@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { PREFACE } from "@/lib/book/preface";
-import { PARTS } from "@/lib/book/contents";
+import { PARTS } from "@/lib/book/content";
 import { PEOPLE } from "@/lib/book/whoswho";
 import type { TrayItemId } from "./trayItems";
 import s from "./panels.module.css";
