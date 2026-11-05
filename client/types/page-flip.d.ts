@@ -36,6 +36,9 @@ declare module "page-flip" {
     flipNext(corner?: "top" | "bottom"): void;
     flipPrev(corner?: "top" | "bottom"): void;
     getCurrentPageIndex(): number;
+    startUserTouch(pos: { x: number; y: number }): void;
+    userMove(pos: { x: number; y: number }, isTouch: boolean): void;
+    userStop(pos: { x: number; y: number }, isSwipe?: boolean): void;
     getPageCount(): number;
     getOrientation(): "portrait" | "landscape";
     on(event: "flip", cb: (e: FlipEvent<number>) => void): PageFlip;

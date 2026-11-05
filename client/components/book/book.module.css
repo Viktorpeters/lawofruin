@@ -13,7 +13,7 @@
   transition: opacity 0.6s ease;
 }
 .hidden { opacity: 0; pointer-events: none; }
-.host { position: relative; }
+.host { position: relative; touch-action: none; }
 /* the page-curl library's own wrapper must fill the book's box */
 .host :global(.stf__wrapper) { height: 100%; }
 
