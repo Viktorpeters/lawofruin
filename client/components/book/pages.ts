@@ -203,24 +203,23 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; parts: Flow[][] } {
     parts.push(toc);
     const head = `Part ${part.n} · ${part.title}`;
     for (const law of part.laws) {
-      // the short story keeps its Who's Who names and words tappable
-      const seen = new Set<string>();
-      const story = law.story
-        ? `<p class="${s.story}">${tokenize(law.story, seen).map((t) => t.t === "text" ? esc(t.s) : `<button type="button" class="${t.t === "who" ? s.who : s.word}" data-${t.t}="${t.id}">${esc(t.s)}</button>${esc(t.tail)}`).join("")}</p>`
-        : "";
-      const open = law.sections?.length
-        ? `<button type="button" class="${s.openLaw}" data-law="${law.n}">Open the ${law.sections.length} sections <span aria-hidden="true">→</span></button>`
-        : "";
-      const extra =
-        (law.judgment ? `<div class="${s.judg}">${esc(law.judgment)}</div>` : "") +
-        (law.eras ? `<div class="${s.stamps}">${law.eras.map((e) => `<span>${esc(e)}</span>`).join("")}</div>` : "") +
-        story +
-        (law.key ? `<div class="${s.key}"><span class="${s.keyLabel}">KEY</span>${esc(law.key)}</div>` : "") +
-        open;
+      // An entry is cut into pieces so a long one can run on to the next page like any text:
+      // its head (number, title, opener, Judgment, stamps) never splits and keeps a few lines
+      // after it; the story is a paragraph that can break between words; then the Key and the button.
+      const stamps = law.eras ? `<div class="${s.stamps}">${law.eras.map((e) => `<span>${esc(e)}</span>`).join("")}</div>` : "";
       toc.push({
-        seq: seq++, sec: `part-${part.n}`, head, kind: "block",
-        html: `<div class="${s.entry}"><div class="${s.entryHead}"><span class="${s.mono}">Law ${law.n}</span></div><div class="${s.lawTitle}">${esc(law.title)}</div><div class="${s.opensOn}">Opens on ${esc(law.opener)} · ${esc(law.place)}</div>${extra}</div>`,
+        seq: seq++, sec: `part-${part.n}`, head, kind: "block", minAfter: law.story ? 60 : 0,
+        html: `<div class="${s.entry}"><div class="${s.entryHead}"><span class="${s.mono}">Law ${law.n}</span></div><div class="${s.lawTitle}">${esc(law.title)}</div><div class="${s.opensOn}">Opens on ${esc(law.opener)} · ${esc(law.place)}</div>${law.judgment ? `<div class="${s.judg}">${esc(law.judgment)}</div>` : ""}${stamps}</div>`,
       });
+      if (law.story) {
+        toc.push({ seq: seq++, sec: `part-${part.n}`, head, kind: "para", cls: `${s.first} ${s.story}`, tokens: tokenize(law.story, new Set<string>()) });
+      }
+      if (law.key) {
+        toc.push({ seq: seq++, sec: `part-${part.n}`, head, kind: "block", html: `<div class="${s.key}"><span class="${s.keyLabel}">KEY</span>${esc(law.key)}</div>` });
+      }
+      if (law.sections?.length) {
+        toc.push({ seq: seq++, sec: `part-${part.n}`, head, kind: "block", html: `<button type="button" class="${s.openLaw}" data-law="${law.n}">Open the ${law.sections.length} sections <span aria-hidden="true">→</span></button>` });
+      }
     }
   }
   return { copy, preface, parts };

@@ -9,7 +9,7 @@ import InstallCta from "@/components/install/InstallCta";
 import { BY_SLUG, CIRCLE_NAME, dates } from "@/lib/figures";
 import styles from "./hero.module.css";
 
-const OPENS = new Date("2026-12-07T00:00:00+01:00");
+const OPENS = new Date("2026-12-17T00:00:00+01:00");
 
 /* The small line under the name. It turns slowly through four lines; the promise in the
    bottom band ("For those who seek power...") never moves, so the key is always on screen. */

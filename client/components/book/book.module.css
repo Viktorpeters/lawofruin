@@ -299,7 +299,7 @@
 .part { margin: 18px 0 4px; padding-top: 14px; border-top: 2px solid var(--ink); }
 .partNum { display: flex; justify-content: space-between; align-items: center; }
 .partTitle { margin: 6px 0 4px; font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 22px; letter-spacing: 0.04em; }
-.entry { border-top: 1px solid rgba(29, 24, 18, 0.18); padding: 12px 0; }
+.entry { border-top: 1px solid rgba(29, 24, 18, 0.18); padding: 12px 0 2px; }
 .entryHead { display: flex; justify-content: space-between; align-items: center; }
 .lock { display: inline-flex; align-items: center; gap: 5px; }
 .lawTitle { margin: 5px 0 4px; font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 19px; line-height: 1.18; }
@@ -311,7 +311,7 @@
 .story { margin: 8px 0 6px; font-size: 13.5px; line-height: 1.55; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
 .openLaw {
   display: block;
-  margin-top: 10px;
+  margin: 10px 0 14px;
   padding: 8px 10px;
   border: 1px solid var(--gold);
   font-family: var(--font-mono), monospace;
