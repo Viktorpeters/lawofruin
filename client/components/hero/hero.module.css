@@ -153,6 +153,14 @@
   filter: grayscale(0.9) sepia(0.3);
 }
 .cardText { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 6px;
+  margin-top: 3px;
+}
 .cardRealm { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
 .cardName { font-family: var(--font-display); font-weight: 500; font-size: 21px; line-height: 1.05; }
 .cardKnown { font-family: var(--font-accent); font-style: italic; font-size: 14px; color: var(--ivory-dim); }
@@ -168,13 +176,12 @@
 .cardDates i { width: 22px; height: 1px; background: var(--gold); }
 .cardFate { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--oxblood); }
 .putBack {
-  margin-top: 4px;
   font-family: var(--font-ui);
-  font-size: 12px;
+  font-size: 11.5px;
   letter-spacing: 0.04em;
   color: var(--ivory-dim);
   border: 1px solid var(--rule);
-  padding: 6px 12px;
+  padding: 4px 11px;
 }
 .putBack:hover { color: var(--ivory); border-color: var(--ivory-dim); }
 

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import Shelf from "./Shelf";
-import Hourglass from "./HourGlass";
+import Hourglass from "./Hourglass";
 import SoundControl from "./SoundControl";
 import InstallCta from "@/components/install/InstallCta";
 import { BY_SLUG, CIRCLE_NAME, dates } from "@/lib/figures";
@@ -74,7 +74,7 @@ export default function Hero({ photos }: Props) {
             ))}
           </p>
           <p className={styles.opens}>
-            <span className={styles.opensLabel}>Opens</span> 07 · 12 · 26
+            <span className={styles.opensLabel}>Opens</span> 17 · 12 · 26
             <span className={styles.opensDays}>
               {days !== null ? ` · ${days} days` : ""}
             </span>
@@ -126,27 +126,31 @@ export default function Hero({ photos }: Props) {
                   {fig.known && (
                     <span className={styles.cardKnown}>“{fig.known}”</span>
                   )}
-                  <span className={styles.cardDates}>
-                    {to ? (
-                      <>
-                        {from}
-                        <i aria-hidden="true" />
-                        {to}
-                      </>
-                    ) : fig.span ? (
-                      from
-                    ) : (
-                      `Born ${from}`
-                    )}
+                  {/* dates, fate and the button share one line, so the card stays short
+                     and never climbs over the shelves on a small window */}
+                  <span className={styles.cardMeta}>
+                    <span className={styles.cardDates}>
+                      {to ? (
+                        <>
+                          {from}
+                          <i aria-hidden="true" />
+                          {to}
+                        </>
+                      ) : fig.span ? (
+                        from
+                      ) : (
+                        `Born ${from}`
+                      )}
+                    </span>
+                    <span className={styles.cardFate}>{fig.fate}</span>
+                    <button
+                      type="button"
+                      className={styles.putBack}
+                      onClick={() => setPulled(null)}
+                    >
+                      Put it back
+                    </button>
                   </span>
-                  <span className={styles.cardFate}>{fig.fate}</span>
-                  <button
-                    type="button"
-                    className={styles.putBack}
-                    onClick={() => setPulled(null)}
-                  >
-                    Put it back
-                  </button>
                 </div>
               </div>
             )}

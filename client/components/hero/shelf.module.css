@@ -2,8 +2,10 @@
    All sizes come from the shelf height, so the covers always stand whole on any phone. */
 
 .unit {
-  /* what is left of the screen after the top band and the words at the bottom */
-  --shelf: clamp(300px, calc(100dvh - 282px - var(--safe-top) - var(--safe-bottom)), 72dvh);
+  /* what is left of the screen after the top band and the words at the bottom. The lower limit is
+     small on purpose: on a short window the shelves shrink, so the card of a pulled volume never
+     climbs over them. */
+  --shelf: clamp(232px, calc(100dvh - 290px - var(--safe-top) - var(--safe-bottom)), 72dvh);
   --bay: calc(var(--shelf) / 2);
   --ch: calc(var(--bay) * 0.77);        /* cover height */
   --cw: calc(var(--ch) * 0.7);          /* cover width */
@@ -272,6 +274,6 @@
 .total { margin-left: auto; }
 
 @media (min-width: 900px) {
-  .unit { --shelf: clamp(320px, calc(100dvh - 330px - var(--safe-top) - var(--safe-bottom)), 70dvh); }
+  .unit { --shelf: clamp(210px, calc(100dvh - 330px - var(--safe-top) - var(--safe-bottom)), 70dvh); }
   .count { font-size: 10px; }
 }
