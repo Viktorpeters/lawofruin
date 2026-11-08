@@ -20,6 +20,11 @@
 .cta:hover .ctaLabel,
 .cta:focus-visible .ctaLabel { color: var(--ivory); border-color: var(--ivory); }
 
+/* the phone or the laptop under the label; it fades in once the device is known */
+.device { display: grid; place-items: end center; min-height: 102px; opacity: 0; transition: opacity 0.5s ease; }
+.device[data-device="computer"] { min-height: 98px; }
+.deviceIn { opacity: 1; }
+
 /* ---------- the guide ---------- */
 .guide {
   position: fixed;

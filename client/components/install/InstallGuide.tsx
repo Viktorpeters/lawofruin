@@ -29,7 +29,7 @@ const STEPS: Record<Mode, string[]> = {
     "In the browser, tap Add to again.",
   ],
   desktop: [
-    "Open lawofruin.io on your phone to add it to your home screen.",
+    "This browser cannot install apps. Open this page in Chrome or Edge and press Add to again. On a Mac in Safari, choose File, then Add to Dock. Or open it on your phone.",
   ],
 };
 
@@ -37,7 +37,7 @@ const TITLE: Record<Mode, string> = {
   ios: "Add to your iPhone",
   android: "Add to your phone",
   inapp: "Open in your browser first",
-  desktop: "Best on your phone",
+  desktop: "Add it to this computer",
 };
 
 export default function InstallGuide({ mode, onClose }: { mode: Mode; onClose: () => void }) {

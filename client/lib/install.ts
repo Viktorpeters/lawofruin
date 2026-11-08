@@ -19,6 +19,20 @@ export function isStandalone() {
   return window.matchMedia("(display-mode: standalone)").matches || nav.standalone === true;
 }
 
+/* Which picture to show under "Add to": a phone or a laptop. Decided by the device itself, never
+   by the width of the window, so a narrow desktop window still gets the laptop. A finger as the
+   main pointer, or a phone or tablet in the user agent, means a phone. (Chrome's device mode in
+   the inspector pretends to be a phone in both ways, so it shows the phone, which is what a real
+   phone would see.) */
+export type Device = "phone" | "computer";
+export function detectDevice(): Device {
+  const ua = navigator.userAgent;
+  const handheld = /Android|iPhone|iPad|iPod|Mobile|Silk|Kindle|Opera Mini/i.test(ua)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);   // iPad asking for the desktop site
+  const finger = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(hover: hover)").matches;
+  return handheld || finger ? "phone" : "computer";
+}
+
 export function detectRoute(hasPrompt: boolean): InstallRoute {
   if (isStandalone()) return "installed";
   const ua = navigator.userAgent;
