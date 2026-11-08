@@ -13,13 +13,24 @@ import s from "./cards.module.css";
 
 const STAMP = { verified: "Verified", disputed: "Disputed", personal: "From the author", organisation: "On record" } as const;
 
+/* A card's photo is /figures/<id>.<ext>. The file may be .jpg, .jpeg, .png or .webp: the card tries
+   each in turn and shows initials only when none is there. A few photos carry a longer name than
+   the card's id; PHOTO_NAME points the card at them. */
+const EXT = ["jpg", "jpeg", "png", "webp"];
+const PHOTO_NAME: Record<string, string> = {
+  "maximilian-i": "maximilian-i-mexico",
+};
+
 function initials(name: string) {
   return name.replace(/^(Dr|Engr|Lord|King|The)\s+/g, "").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 }
 
 export function WhoCard({ id, onClose, onJump }: { id: string; onClose: () => void; onJump: (sec: string) => void }) {
   const p = BY_ID[id];
-  const [photo, setPhoto] = useState(true);
+  // which extension we are trying for this person; past the last one, the card shows initials
+  const [attempt, setAttempt] = useState({ id, n: 0 });
+  const n = attempt.id === id ? attempt.n : 0;
+  const photo = n < EXT.length;
   const fileNo = String(PEOPLE.findIndex((x) => x.id === id) + 1).padStart(3, "0");
   const appears = APPEARS[id] ?? [];
 
@@ -43,7 +54,12 @@ export function WhoCard({ id, onClose, onJump }: { id: string; onClose: () => vo
             <span className={s.clip} aria-hidden="true" />
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/figures/${p.id}.jpg`} alt="" onError={() => setPhoto(false)} />
+              <img
+                key={`${id}-${n}`}
+                src={`/figures/${PHOTO_NAME[p.id] ?? p.id}.${EXT[n]}`}
+                alt=""
+                onError={() => setAttempt({ id, n: n + 1 })}
+              />
             ) : (
               <span className={s.ini}>{initials(p.name)}</span>
             )}
