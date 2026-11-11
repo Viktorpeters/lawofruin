@@ -157,7 +157,8 @@ export default function Shelf({ photos, motion, pulled, onPull }: Props) {
         ))}
       </section>
 
-      <div className={styles.count}>
+      {/* the browsing hint steps aside while a volume is out, so its card always has room */}
+      <div className={styles.count} data-quiet={pulled ? "" : undefined}>
         <button type="button" className={styles.swipe} onClick={() => slide(-1)} aria-label="Slide the shelves back">‹</button>
         <span>Swipe the shelves</span>
         <button type="button" className={styles.swipe} onClick={() => slide(1)} aria-label="Slide the shelves on">›</button>
