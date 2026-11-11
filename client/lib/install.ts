@@ -2,10 +2,11 @@
 
 export type InstallRoute =
   | "installed"     // already running as the installed app
-  | "prompt"        // Chrome, Edge, Samsung Internet: the browser's own install prompt
+  | "prompt"        // Chrome and Edge: the browser's own install prompt
   | "ios"           // iPhone or iPad: Share, then Add to Home Screen
   | "android"       // Android without a prompt: browser menu, then Install app
   | "inapp"         // inside WhatsApp, Instagram, Facebook, X, TikTok: open in a real browser first
+  | "chrome"        // Samsung Internet: its installs are flagged by Play Protect, so install from Chrome
   | "desktop";      // a computer with no install support: open it on your phone
 
 export type BeforeInstallPromptEvent = Event & {
@@ -40,8 +41,19 @@ export function detectRoute(hasPrompt: boolean): InstallRoute {
   const ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const android = /Android/i.test(ua);
   if (inApp) return "inapp";
+  // Samsung Internet offers an install, but Google Play Protect currently flags what it installs as
+  // "built for an older version of Android". Chrome installs the same app cleanly, so send them there.
+  if (android && /SamsungBrowser/i.test(ua)) return "chrome";
   if (hasPrompt) return "prompt";
   if (ios) return "ios";
   if (android) return "android";
   return "desktop";
+}
+
+/* Opens this same page in Chrome on Android. If Chrome is not installed, Android stays on the
+   page instead (the fallback URL), so the visitor is never stranded. */
+export function openInChrome() {
+  const here = location.href;
+  const target = here.replace(/^https?:\/\//, "");
+  location.href = `intent://${target}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(here)};end`;
 }
