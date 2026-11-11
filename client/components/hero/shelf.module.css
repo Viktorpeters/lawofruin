@@ -254,7 +254,9 @@
 .cover:focus-visible { outline: 1px solid var(--gold); outline-offset: 3px; }
 
 /* ---------- under the shelves ---------- */
+.count[data-quiet] { opacity: 0; visibility: hidden; }
 .count {
+  transition: opacity 0.3s ease, visibility 0.3s;
   display: flex;
   align-items: center;
   gap: 10px;
