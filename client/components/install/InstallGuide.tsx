@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { InstallRoute } from "@/lib/install";
+import { openInChrome, type InstallRoute } from "@/lib/install";
 import styles from "./install.module.css";
 
 /* A full-screen guide that shows, on an animated phone, exactly what to tap.
    It plays on its own; tap the phone or the step marks to move at your own pace. */
 
-type Mode = Extract<InstallRoute, "ios" | "android" | "inapp" | "desktop">;
+type Mode = Extract<InstallRoute, "ios" | "android" | "inapp" | "chrome" | "desktop">;
 
 const STEPS: Record<Mode, string[]> = {
   ios: [
@@ -28,6 +28,9 @@ const STEPS: Record<Mode, string[]> = {
     "Tap Open in browser. On iPhone it may say Open in Safari.",
     "In the browser, tap Add to again.",
   ],
+  chrome: [
+    "Samsung Internet cannot install apps safely right now, and Android would warn you. Open this page in Chrome, then press Add to again.",
+  ],
   desktop: [
     "This browser cannot install apps. Open this page in Chrome or Edge and press Add to again. On a Mac in Safari, choose File, then Add to Dock. Or open it on your phone.",
   ],
@@ -37,6 +40,7 @@ const TITLE: Record<Mode, string> = {
   ios: "Add to your iPhone",
   android: "Add to your phone",
   inapp: "Open in your browser first",
+  chrome: "Install it from Chrome",
   desktop: "Add it to this computer",
 };
 
@@ -75,7 +79,7 @@ export default function InstallGuide({ mode, onClose }: { mode: Mode; onClose: (
           <h2 id="guide-title" className={styles.guideTitle}>{TITLE[mode]}</h2>
         </div>
 
-        {mode !== "desktop" && (
+        {mode !== "desktop" && mode !== "chrome" && (
           <button className={styles.phoneStage} onClick={() => setStep((s) => (s + 1) % steps.length)} aria-label="Next step">
             <GuidePhone mode={mode} step={step} />
           </button>
@@ -94,6 +98,12 @@ export default function InstallGuide({ mode, onClose }: { mode: Mode; onClose: (
           </div>
         )}
 
+        {mode === "chrome" && (
+          <div className={styles.linkRow} style={{ justifyContent: "center" }}>
+            <button className={styles.textBtn} style={{ whiteSpace: "nowrap" }} onClick={openInChrome}>Open in Chrome</button>
+          </div>
+        )}
+
         {(mode === "inapp" || mode === "desktop") && (
           <div className={styles.linkRow}>
             <span className={styles.linkText}>lawofruin.io</span>
@@ -109,7 +119,7 @@ export default function InstallGuide({ mode, onClose }: { mode: Mode; onClose: (
 
 /* ---------------- the animated phone ---------------- */
 
-function GuidePhone({ mode, step }: { mode: Exclude<Mode, "desktop">; step: number }) {
+function GuidePhone({ mode, step }: { mode: Exclude<Mode, "desktop" | "chrome">; step: number }) {
   return (
     <svg viewBox="0 0 300 600" className={styles.guidePhone} data-step={step} aria-hidden="true">
       <defs>

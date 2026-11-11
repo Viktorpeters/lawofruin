@@ -12,12 +12,13 @@ import styles from "./install.module.css";
    One button, the right behaviour for each device:
    Android and desktop Chrome or Edge get the browser's own install prompt; iPhone gets the
    animated guide; WhatsApp, Instagram and other in-app browsers are asked to open the page in a
-   real browser first; a computer browser with no install support is told how to get it. */
+   real browser first; Samsung Internet is sent to Chrome, because Play Protect flags its installs;
+   a computer browser with no install support is told how to get it. */
 export default function InstallCta() {
   const promptRef = useRef<BeforeInstallPromptEvent | null>(null);
   const [route, setRoute] = useState<InstallRoute | null>(null);
   const [device, setDevice] = useState<Device | null>(null);
-  const [guide, setGuide] = useState<null | "ios" | "android" | "inapp" | "desktop">(null);
+  const [guide, setGuide] = useState<null | "ios" | "android" | "inapp" | "chrome" | "desktop">(null);
 
   useEffect(() => {
     const first = requestAnimationFrame(() => {
