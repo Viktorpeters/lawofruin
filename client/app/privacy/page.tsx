@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import LegalPage from "@/components/legal/LegalPage";
+import LegalPage from "@/components/Legal/LegalPage";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = { title: `Privacy Policy · ${SITE.book}` };

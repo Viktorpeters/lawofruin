@@ -3,9 +3,9 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import Shelf from "./Shelf";
-import Hourglass from "./Hourglass";
+import Hourglass from "./HourGlass";
 import SoundControl from "./SoundControl";
-import LegalLinks from "@/components/legal/LegalLinks";
+import LegalLinks from "@/components/Legal/LegalLinks";
 import InstallCta from "@/components/install/InstallCta";
 import { BY_SLUG, CIRCLE_NAME, dates } from "@/lib/figures";
 import styles from "./hero.module.css";
