@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/Legal/LegalPage";
-import styles from "@/components/legal/legal.module.css";
+import styles from "@/components/Legal/legal.module.css";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = { title: `Refund Policy · ${SITE.book}` };
