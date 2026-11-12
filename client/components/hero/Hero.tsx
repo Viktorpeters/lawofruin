@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import Shelf from "./Shelf";
-import Hourglass from "./HourGlass";
+import Hourglass from "./Hourglass";
 import SoundControl from "./SoundControl";
+import LegalLinks from "@/components/legal/LegalLinks";
 import InstallCta from "@/components/install/InstallCta";
 import { BY_SLUG, CIRCLE_NAME, dates } from "@/lib/figures";
 import styles from "./hero.module.css";
 
-const OPENS = new Date("2026-12-17T00:00:00+01:00");
+const OPENS = new Date("2026-12-20T00:00:00+01:00");
 
 /* The small line under the name. It turns slowly through four lines; the promise in the
    bottom band ("For those who seek power...") never moves, so the key is always on screen. */
@@ -74,7 +75,7 @@ export default function Hero({ photos }: Props) {
             ))}
           </p>
           <p className={styles.opens}>
-            <span className={styles.opensLabel}>Opens</span> 17 · 12 · 26
+            <span className={styles.opensLabel}>Opens</span> 20 · 12 · 26
             <span className={styles.opensDays}>
               {days !== null ? ` · ${days} days` : ""}
             </span>
@@ -186,6 +187,8 @@ export default function Hero({ photos }: Props) {
               )}
             </button>
           </div>
+
+          <LegalLinks className={styles.legal} />
         </div>
 
         <div className={styles.install}>
