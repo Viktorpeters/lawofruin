@@ -208,6 +208,18 @@
 .wave { width: 46px; height: 22px; display: block; fill: currentColor; }
 .icon { width: 14px; height: 14px; fill: currentColor; display: block; }
 
+/* Terms, Privacy, Refunds, Contact: one quiet line under the thesis */
+.left .legal { gap: 4px 16px; font-size: 9.5px; }
+.left[data-pulled] .legal { display: none; }
+
+/* phones: the links take the place of sound and pause */
+@media (max-width: 899px) {
+  .controls { display: none; }
+}
+@media (max-width: 400px) {
+  .left .legal { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 2px 18px; }   /* two neat pairs instead of one word left over */
+}
+
 .install { flex: none; }
 
 /* ---------- short phones ---------- */
@@ -232,4 +244,5 @@
   .ctrl { height: 38px; min-width: 38px; padding: 0 12px; }
   .wave { width: 58px; height: 24px; }
   .cardName { font-size: 26px; }
+  .left .legal { font-size: 10.5px; gap: 6px 20px; }
 }
