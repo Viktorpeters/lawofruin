@@ -85,16 +85,17 @@
 
 .label {
   position: absolute;
-  top: calc(100% + 5px);
+  top: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
+  padding: 3px 6px 2px;
+  background: rgba(11, 10, 8, 0.88);   /* a small dark plate: the word reads on cream paper and on dark pages alike */
   font-family: var(--font-mono), monospace;
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #f2e2b8;
+  color: #ffffff;
   white-space: nowrap;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
   pointer-events: none;
 }
 

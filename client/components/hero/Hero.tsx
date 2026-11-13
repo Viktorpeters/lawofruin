@@ -7,6 +7,7 @@ import Hourglass from "./HourGlass";
 import SoundControl from "./SoundControl";
 import LegalLinks from "@/components/Legal/LegalLinks";
 import InstallCta from "@/components/install/InstallCta";
+import { isStandalone } from "@/lib/install";
 import { BY_SLUG, CIRCLE_NAME, dates } from "@/lib/figures";
 import styles from "./hero.module.css";
 
@@ -34,6 +35,22 @@ export default function Hero({ photos }: Props) {
   const [days, setDays] = useState<number | null>(null);
   const [pulled, setPulled] = useState<string | null>(null);
   const onPull = useCallback((slug: string | null) => setPulled(slug), []);
+
+  /* Once the book is installed, its window must open on the book, never on this page.
+     Chrome on a computer moves the current tab into the new app window right after
+     installing, so this page also watches for that moment and steps aside. */
+  useEffect(() => {
+    const toBook = () => { if (isStandalone()) window.location.replace("/app"); };
+    toBook();
+    const mq = window.matchMedia("(display-mode: standalone)");
+    const later = () => window.setTimeout(toBook, 400);
+    mq.addEventListener("change", toBook);
+    window.addEventListener("appinstalled", later);
+    return () => {
+      mq.removeEventListener("change", toBook);
+      window.removeEventListener("appinstalled", later);
+    };
+  }, []);
 
   useEffect(() => {
     const first = requestAnimationFrame(() => {
