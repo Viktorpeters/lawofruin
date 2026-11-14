@@ -2,7 +2,8 @@
 
 /* Splash B: the hourglass turns on dark, then flies down and shrinks onto the gold hourglass
    stamped on the cover, while the cover rises behind it. Shown on the first open only;
-   a returning reader goes straight to their page. */
+   a returning reader goes straight to their page. If the picture cannot load, the splash
+   steps aside at once and the cover shows, so a reader never sees a broken image. */
 
 import { useEffect, useRef, useState } from "react";
 import s from "./splash.module.css";
@@ -35,7 +36,7 @@ export default function Splash({ target, onDone }: Props) {
   return (
     <div className={`${s.splash} ${flying ? s.flying : ""}`} aria-hidden="true">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img ref={glass} src="/loader/hourglass.webp" alt="" width={160} height={160} className={s.glass} style={style} />
+      <img ref={glass} src="/loader/hourglass.webp" alt="" width={160} height={160} className={s.glass} style={style} onError={onDone} />
     </div>
   );
 }
