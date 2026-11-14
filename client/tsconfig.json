@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "../server/src/content/en/front.ts", "../server/src/content/en/marks.ts", "../server/src/content/en/whoswho.ts", "../server/src/content/en/preface.ts", "../server/src/content/en/words.ts", "../server/src/content/en/content.ts", "../server/src/content/en/types.ts"  ],
   "exclude": ["node_modules"]
 }
