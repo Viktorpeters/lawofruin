@@ -1,0 +1,46 @@
+1:"$Sreact.fragment"
+2:"/_next/static/chunks/3j1mj2n4bs-y_.js"
+3:I[39756,["$2"],"default"]
+4:I[37457,["$2"],"default"]
+5:I[33613,["$2"],"default"]
+8:"/_next/static/chunks/21poqdgvjdll4.js"
+9:"/_next/static/chunks/15u43iclycfev.js"
+a:I[88838,["$2","$8","$9"],"default"]
+10:"ViewportBoundary"
+11:I[97367,["$2"],"$10"]
+13:"MetadataBoundary"
+14:I[97367,["$2"],"$13"]
+15:"$Sreact.suspense"
+18:I[68027,["$2"],"default",1]
+:HL["/_next/static/chunks/3x4ecraos-e3l.css","style"]
+:HL["/_next/static/media/CormorantGaramond_Italic_VariableFont_wght-s.p.29tp2nxuzq5dl.ttf","font",{"crossOrigin":"","type":"font/ttf"}]
+:HL["/_next/static/media/CormorantGaramond_VariableFont_wght-s.p.0t862p5bz3kp7.ttf","font",{"crossOrigin":"","type":"font/ttf"}]
+:HL["/_next/static/media/IBMPlexMono_Regular-s.p.0cei-sz1qy0m0.ttf","font",{"crossOrigin":"","type":"font/ttf"}]
+:HL["/_next/static/media/InstrumentSerif_Italic-s.p.0rjubnekyqxwt.ttf","font",{"crossOrigin":"","type":"font/ttf"}]
+:HL["/_next/static/media/InstrumentSerif_Regular-s.p.1sam8bhx61h9z.ttf","font",{"crossOrigin":"","type":"font/ttf"}]
+:HL["/_next/static/media/PlusJakartaSans_VariableFont_wght-s.p.07wcpaq0qx7tm.ttf","font",{"crossOrigin":"","type":"font/ttf"}]
+:HL["/_next/static/chunks/2nlpil0f0m--s.css","style"]
+6:X
+f:X
+7:[["children",{"s":"__PAGE__","h":514,"d":{"r":["$","$1","c",{"children":[["$","$La",null,{"photos":{"adolf-hitler":"adolf-hitler.png","amado-carrillo-fuentes":"amado-carrillo-fuentes.jpg","arellano-felix-brothers":"arellano-felix-brothers.jpg","augusto-pinochet":"augusto-pinochet.png","benito-mussolini":"benito-mussolini.jpg","buka-suka-dimka":"buka-suka-dimka.jpg","carlos-lehder":"carlos-lehder.jpg","charles-taylor":"charles-taylor.jpg","chukwuma-nzeogwu":"chukwuma-nzeogwu.jpg","ernesto-fonseca-carrillo":"ernesto-fonseca-carrillo.jpg","ferdinand-marcos":"ferdinand-marcos.jpg","fulgencio-batista":"fulgencio-batista.jpg","gideon-orkar":"gideon-orkar.jpg","gilberto-rodriguez-orejuela":"gilberto-rodriguez-orejuela.jpg","gonzalo-rodriguez-gacha":"gonzalo-rodriguez-gacha.jpg","haile-selassie":"haile-selassie.jpg","helmer-herrera":"helmer-herrera.jpg","hosni-mubarak":"hosni-mubarak.jpg","idi-amin":"idi-amin.jpg","jean-bedel-bokassa":"jean-bedel-bokassa.webp","joaquin-guzman":"joaquin-guzman.jpg","johnson-aguiyi-ironsi":"johnson-aguiyi-ironsi.jpg","jorge-luis-ochoa":"jorge-luis-ochoa.jpg","jose-santacruz-londono":"jose-santacruz-londono.jpg","juan-garcia-abrego":"juan-garcia-abrego.jpg","king-solomon":"king-solomon.jpg","kwame-nkrumah":"kwame-nkrumah.jpg","louis-xvi":"louis-xvi.jpg","manuel-noriega":"manuel-noriega.jpg","marie-antoinette":"marie-antoinette.jpg","maximilian-i-mexico":"maximilian-i-mexico.jpg","miguel-angel-felix-gallardo":"miguel-angel-felix-gallardo.jpg","miguel-rodriguez-orejuela":"miguel-rodriguez-orejuela.jpg","mobutu-sese-seko":"mobutu-sese-seko.jpg","mohammad-reza-pahlavi":"mohammad-reza-pahlavi.jpg","muammar-gaddafi":"muammar-gaddafi.jpg","murtala-mohammed":"murtala-mohammed.jpg","napoleon-bonaparte":"napoleon-bonaparte.jpg","napoleon-iii":"napoleon-iii.jpg","nicholas-ii":"nicholas-ii.png","nicolae-ceausescu":"nicolae-ceausescu.png","omar-al-bashir":"omar-al-bashir.jpg","osiel-cardenas-guillen":"osiel-cardenas-guillen.jpg","pablo-acosta":"pablo-acosta.jpg","pablo-escobar":"pablo-escobar.jpg","pol-pot":"pol-pot.png","rafael-caro-quintero":"rafael-caro-quintero.jpg","richard-nixon":"richard-nixon.jpg","robert-mugabe":"robert-mugabe.jpg","saddam-hussein":"saddam-hussein.jpg","samuel-doe":"samuel-doe.jpg","sani-abacha":"sani-abacha.jpg","shaka-zulu":"shaka-zulu.jpg","slobodan-milosevic":"slobodan-milosevic.jpg","tewodros-ii":"tewodros-ii.jpg","wilhelm-ii":"wilhelm-ii.jpg"}}],["$Lb","$Lc","$Ld"],"$Le"]}],"p":true,"v":"$f"}}]]
+17:X
+19:X
+1a:X
+0:{"P":null,"c":["",""],"q":"","i":false,"t":{"t":{"s":"","h":530,"d":{"r":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/3x4ecraos-e3l.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/_next/static/chunks/3j1mj2n4bs-y_.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"g7BNbq_variable JqUeVW_variable ZHEsrW_variable sTKiaq_variable MjskZa_variable","children":["$","body",null,{"children":[["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}],["$","$L5",null,{}]]}]}]]}],"p":true,"v":"$6"},"c":"$Q7"},"h":{"r":["$","$1","h",{"children":[null,["$","$L11",null,{"children":"$L12"}],["$","$L14",null,{"children":[["$","div",null,{"hidden":true,"children":["$","$15",null,{"name":"Next.Metadata","children":"$L16"}]}],null]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"p":true,"v":"$17"}},"m":"$undefined","G":["$18",[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/3x4ecraos-e3l.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"r":"$19","s":"$1a","a":"$@1b","l":"$undefined","p":"$undefined","d":"$undefined","b":"Fp28BWosVi_O0L17WuyPn","u":"$@1c"}
+1d:I[97367,["$2"],"OutletBoundary"]
+b:["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/2nlpil0f0m--s.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]
+c:["$","script","script-0",{"src":"/_next/static/chunks/21poqdgvjdll4.js","async":true,"nonce":"$undefined"}]
+d:["$","script","script-1",{"src":"/_next/static/chunks/15u43iclycfev.js","async":true,"nonce":"$undefined"}]
+e:["$","$L1d",null,{"children":["$","$15",null,{"name":"Next.MetadataOutlet","children":"$@1e"}]}]
+1a:300
+12:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1, viewport-fit=cover"}],["$","meta","2",{"name":"theme-color","content":"#0B0A08"}],["$","meta","3",{"name":"color-scheme","content":"dark"}]]
+1f:I[27201,["$2"],"IconMark"]
+16:[["$","title","0",{"children":"The Laws of Ruin"}],["$","meta","1",{"name":"description","content":"An investigation into the rise and fall of the most powerful men of their age. For those who seek power, and those who must keep it."}],["$","meta","2",{"name":"application-name","content":"The Laws of Ruin"}],["$","link","3",{"rel":"manifest","href":"/manifest.webmanifest","crossOrigin":"$undefined"}],["$","meta","4",{"name":"mobile-web-app-capable","content":"yes"}],["$","meta","5",{"name":"apple-mobile-web-app-title","content":"Laws of Ruin"}],["$","meta","6",{"name":"apple-mobile-web-app-status-bar-style","content":"black-translucent"}],["$","link","7",{"rel":"icon","href":"/icon.png?icon.0tto1jy93qeys.png","sizes":"64x64","type":"image/png"}],["$","link","8",{"rel":"apple-touch-icon","href":"/apple-icon.png?apple-icon.25tlece9bn_ap.png","sizes":"180x180","type":"image/png"}],["$","$L1f","9",{}]]
+1e:null
+1a:C
+17:C
+19:C
+f:C
+6:C
+1c:false
+1b:null

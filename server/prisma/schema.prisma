@@ -1,0 +1,82 @@
+// The database: readers, their sign-in codes, what they bought, who sent them, and Ask usage.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String?
+  refCode      String     @unique             // the reader's own link: lawofruin.io/r/<refCode>
+  referredById String?                        // who sent them, set once, at their first sign-in
+  referredAt   DateTime?                      // when they clicked that link
+  referredBy   User?      @relation("Referrals", fields: [referredById], references: [id])
+  referrals    User[]     @relation("Referrals")
+  purchases    Purchase[]
+  earnings     Earning[]
+  createdAt    DateTime   @default(now())
+}
+
+model EmailCode {
+  id        String   @id @default(cuid())
+  email     String
+  codeHash  String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model Purchase {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  investigation Int                          // 1 = Investigation I
+  provider      String                       // "flutterwave" or "paystack"
+  reference     String   @unique             // the processor's transaction reference
+  amount        Int                          // in the smallest unit: kobo or cents
+  currency      String                       // "NGN" or "USD"
+  status        String   @default("paid")    // "paid" or "refunded"
+  createdAt     DateTime @default(now())
+  earning       Earning?
+
+  @@unique([userId, investigation])
+}
+
+model ReferralClick {
+  id        String   @id @default(cuid())
+  code      String
+  visitorId String
+  createdAt DateTime @default(now())
+
+  @@unique([code, visitorId])                // one visitor counts once per link
+}
+
+model Earning {
+  id          String   @id @default(cuid())
+  userId      String                         // the reader who shared the link
+  user        User     @relation(fields: [userId], references: [id])
+  purchaseId  String   @unique
+  purchase    Purchase @relation(fields: [purchaseId], references: [id])
+  amount      Int                            // smallest unit
+  currency    String
+  status      String   @default("pending")   // pending, available, paid, cancelled
+  availableAt DateTime                       // pending until the refund window closes
+  createdAt   DateTime @default(now())
+}
+
+model AskUsage {
+  id     String @id @default(cuid())
+  userId String
+  day    String                              // "2026-11-14"
+  count  Int    @default(0)
+
+  @@unique([userId, day])
+}

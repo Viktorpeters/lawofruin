@@ -1,0 +1,13 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/app/page": "/app",
+  "/apple-icon.png/route": "/apple-icon.png",
+  "/contact/page": "/contact",
+  "/icon.png/route": "/icon.png",
+  "/manifest.webmanifest/route": "/manifest.webmanifest",
+  "/page": "/",
+  "/privacy/page": "/privacy",
+  "/refunds/page": "/refunds",
+  "/terms/page": "/terms"
+}

@@ -1,0 +1,15 @@
+{
+  "pages": {},
+  "app": {
+    "[project]/app/app/page": [
+      "static/media/CormorantGaramond_VariableFont_wght-s.p.0t862p5bz3kp7.ttf",
+      "static/media/CormorantGaramond_Italic_VariableFont_wght-s.p.29tp2nxuzq5dl.ttf",
+      "static/media/PlusJakartaSans_VariableFont_wght-s.p.07wcpaq0qx7tm.ttf",
+      "static/media/IBMPlexMono_Regular-s.p.0cei-sz1qy0m0.ttf",
+      "static/media/InstrumentSerif_Regular-s.p.1sam8bhx61h9z.ttf",
+      "static/media/InstrumentSerif_Italic-s.p.0rjubnekyqxwt.ttf"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pagesUsingSizeAdjust": false
+}
