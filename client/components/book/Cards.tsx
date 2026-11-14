@@ -8,7 +8,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BY_ID, PEOPLE } from "@/lib/book/whoswho";
 import { WORD_BY_ID } from "@/lib/book/words";
-import { APPEARS } from "@/lib/book/marks";
+import { appears as appearsIn } from "@/lib/book/marks";
 import s from "./cards.module.css";
 
 const STAMP = { verified: "Verified", disputed: "Disputed", personal: "From the author", organisation: "On record" } as const;
@@ -32,7 +32,7 @@ export function WhoCard({ id, onClose, onJump }: { id: string; onClose: () => vo
   const n = attempt.id === id ? attempt.n : 0;
   const photo = n < EXT.length;
   const fileNo = String(PEOPLE.findIndex((x) => x.id === id) + 1).padStart(3, "0");
-  const appears = APPEARS[id] ?? [];
+  const appears = appearsIn(id);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };

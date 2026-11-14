@@ -7,7 +7,9 @@ import { glassSvg } from "./glass";
 import { partIcon } from "./partIcons";
 import { tokenize, type Token } from "@/lib/book/marks";
 import { PREFACE } from "@/lib/book/preface";
-import { PARTS, PASS_LINE } from "@/lib/book/content";
+import { PARTS, PASS_LINE } from "@/lib/book/contents";
+import { LANG } from "@/lib/book/content";
+import { t } from "@/lib/i18n";
 import { TITLE, COPYRIGHT, DEDICATION, EPIGRAPHS, FOR_THOSE, WHICH, END } from "@/lib/book/front";
 
 export type Anchor = { seq: number; tok: number };
@@ -115,7 +117,7 @@ function contentsPage(): string {
     <div class="${s.mono} ${s.tocKicker}">Investigation I · The Fall of Kings</div>
     <h2 class="${s.tocTitle}">Contents</h2>
     <p class="${s.pass}">${esc(PASS_LINE)}</p>
-    <div class="${s.tocParts}">${PARTS.map((p) => `<div class="${s.tocPart}"><span class="${s.mono}">Part ${p.n}</span><span class="${s.tocPartTitle}">${esc(p.title)}</span><span class="${s.mono} ${s.lock}">${LOCK} ${esc(p.opens)}</span></div>`).join("")}</div>
+    <div class="${s.tocParts}">${PARTS.map((p) => `<div class="${s.tocPart}"><span class="${s.mono}">${t(LANG, "part")} ${p.n}</span><span class="${s.tocPartTitle}">${esc(p.title)}</span><span class="${s.mono} ${s.lock}">${LOCK} ${esc(p.opens)}</span></div>`).join("")}</div>
   </div>`;
 }
 
@@ -127,13 +129,13 @@ function partPage(n: number): string {
   const part = PARTS.find((p) => p.n === n)!;
   return `<div class="${s.center} ${s.partPage}">
     ${partIcon(n, s.partIcon)}
-    <div class="${s.partKicker}">Part</div>
-    <div class="${s.partBig}">${WORDS_N[n - 1] ?? n}</div>
+    <div class="${s.partKicker}">${t(LANG, "part")}</div>
+    <div class="${s.partBig}">${LANG === "en" ? WORDS_N[n - 1] ?? n : n}</div>
     <div class="${s.partRule}"></div>
     <div class="${s.partName}">${esc(part.title)}</div>
     <p class="${s.partLine}">${esc(part.line)}</p>
-    <div class="${s.partLaws}">${part.laws.map((l) => `<div><span>Law ${l.n}</span>${esc(l.title)}</div>`).join("")}</div>
-    <div class="${s.mono} ${s.lock} ${s.partOpens}">${LOCK} Opens ${esc(part.opens)}</div>
+    <div class="${s.partLaws}">${part.laws.map((l) => `<div><span>${t(LANG, "law")} ${l.n}</span>${esc(l.title)}</div>`).join("")}</div>
+    ${part.open ? "" : `<div class="${s.mono} ${s.lock} ${s.partOpens}">${LOCK} ${t(LANG, "opens")} ${esc(part.opens)}</div>`}
   </div>`;
 }
 
@@ -152,7 +154,11 @@ function paraHtml(f: Extract<Flow, { kind: "para" }>, from: number, to: number, 
   for (let i = from; i < to; i++) {
     const t = f.tokens[i];
     if (t.t === "text") html += esc(t.s);
-    else html += `<button type="button" class="${t.t === "who" ? s.who : s.word}" data-${t.t}="${t.id}">${esc(t.s)}</button>${esc(t.tail)}`;
+    else {
+      // the punctuation after a name stays on the same line as the name
+      const mark = t.tail.trimEnd();
+      html += `<span style="white-space:nowrap"><button type="button" class="${t.t === "who" ? s.who : s.word}" data-${t.t}="${t.id}">${esc(t.s)}</button>${esc(mark)}</span>${esc(t.tail.slice(mark.length))}`;
+    }
   }
   // a cut paragraph must not end on a space, or the justified last line stretches oddly
   return `<p class="${cls.join(" ")}">${split ? html.trimEnd() : html}</p>`;
@@ -201,7 +207,7 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; parts: Flow[][] } {
   for (const part of PARTS) {
     const toc: Flow[] = [];
     parts.push(toc);
-    const head = `Part ${part.n} · ${part.title}`;
+    const head = `${t(LANG, "part")} ${part.n} · ${part.title}`;
     for (const law of part.laws) {
       // An entry is cut into pieces so a long one can run on to the next page like any text:
       // its head (number, title, opener, Judgment, stamps) never splits and keeps a few lines
@@ -209,16 +215,16 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; parts: Flow[][] } {
       const stamps = law.eras ? `<div class="${s.stamps}">${law.eras.map((e) => `<span>${esc(e)}</span>`).join("")}</div>` : "";
       toc.push({
         seq: seq++, sec: `part-${part.n}`, head, kind: "block", minAfter: law.story ? 60 : 0,
-        html: `<div class="${s.entry}"><div class="${s.entryHead}"><span class="${s.mono}">Law ${law.n}</span></div><div class="${s.lawTitle}">${esc(law.title)}</div><div class="${s.opensOn}">Opens on ${esc(law.opener)} · ${esc(law.place)}</div>${law.judgment ? `<div class="${s.judg}">${esc(law.judgment)}</div>` : ""}${stamps}</div>`,
+        html: `<div class="${s.entry}"><div class="${s.entryHead}"><span class="${s.mono}">${t(LANG, "law")} ${law.n}</span></div><div class="${s.lawTitle}">${esc(law.title)}</div><div class="${s.opensOn}">${t(LANG, "opensOn")} ${esc(law.opener)} · ${esc(law.place)}</div>${law.judgment ? `<div class="${s.judg}">${esc(law.judgment)}</div>` : ""}${stamps}</div>`,
       });
       if (law.story) {
         toc.push({ seq: seq++, sec: `part-${part.n}`, head, kind: "para", cls: `${s.first} ${s.story}`, tokens: tokenize(law.story, new Set<string>()) });
       }
       if (law.key) {
-        toc.push({ seq: seq++, sec: `part-${part.n}`, head, kind: "block", html: `<div class="${s.key}"><span class="${s.keyLabel}">KEY</span>${esc(law.key)}</div>` });
+        toc.push({ seq: seq++, sec: `part-${part.n}`, head, kind: "block", html: `<div class="${s.key}"><span class="${s.keyLabel}">${t(LANG, "key")}</span>${esc(law.key)}</div>` });
       }
       if (law.sections?.length) {
-        toc.push({ seq: seq++, sec: `part-${part.n}`, head, kind: "block", html: `<button type="button" class="${s.openLaw}" data-law="${law.n}">Open the ${law.sections.length} sections <span aria-hidden="true">→</span></button>` });
+        toc.push({ seq: seq++, sec: `part-${part.n}`, head, kind: "block", html: `<button type="button" class="${s.openLaw}" data-law="${law.n}">${t(LANG, "openSections", { n: law.sections.length })} <span aria-hidden="true">→</span></button>` });
       }
     }
   }

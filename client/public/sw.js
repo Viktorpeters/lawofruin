@@ -3,8 +3,9 @@
    - pages (/app): network first, the saved copy when offline;
    - the app's code, fonts and styles (/_next/static), the hourglass, icons and photos:
      saved the first time they load, then served from the phone.
-   The Who's Who and word cards live inside the app's code, so they come with it. */
-const SHELL = "lor-shell-v2";
+   - the book's words (/api/book on the server): fetched fresh, the saved copy when offline,
+     so a reader who opened the book once can read it on a plane. */
+const SHELL = "lor-shell-v3";
 const ASSETS = "lor-assets-v2";
 const PRECACHE = ["/app", "/icons/icon-192.png", "/loader/hourglass.webp"];
 
@@ -32,6 +33,20 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+
+  // the book's words: fresh when there is signal, the last copy when there is none
+  if (url.pathname === "/api/book") {
+    const key = url.origin + url.pathname + url.search;   // one saved copy per language
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res.ok) { const copy = res.clone(); caches.open(SHELL).then((c) => c.put(key, copy)); }
+          return res;
+        })
+        .catch(() => caches.match(key).then((hit) => hit || Response.error()))
+    );
+    return;
+  }
 
   // the app's files never change under the same name, so the saved copy is always right
   if (isAsset(url)) {

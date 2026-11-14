@@ -42,12 +42,12 @@
 }
 .how {
   margin: 8px 0 0;
-  font-family: var(--font-accent), Georgia, serif;
-  font-style: italic;
-  font-size: 14.5px;
+  font-family: var(--font-mono), monospace;
+  font-style: normal; text-transform: uppercase; letter-spacing: 0.1em;
+  font-size: 10.5px;
   line-height: 1.35;
   color: #d9d1c3;
-  max-width: 13ch;
+  max-width: 17ch;
 }
 .middle .how { max-width: 15ch; }
 .example {

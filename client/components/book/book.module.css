@@ -135,9 +135,9 @@
 }
 .sig {
   margin: 0;
-  font-family: var(--font-accent), Georgia, serif;
-  font-style: italic;
-  font-size: calc(var(--fs) * 1.05);
+  font-family: var(--font-mono), monospace;
+  font-style: normal; text-transform: uppercase; letter-spacing: 0.1em;
+  font-size: calc(var(--fs) * 0.76);
   line-height: 1.45;
   text-align: right;
 }
@@ -240,9 +240,9 @@
   line-height: 0.98;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 -0.6px 0 rgba(60, 40, 20, 0.35);
 }
-.subTitle { font-family: var(--font-display), Georgia, serif; font-style: italic; font-size: 22px; color: var(--soft); }
+.subTitle { font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 16px; color: var(--soft); }
 .shortRule { width: 40px; height: 1px; background: var(--ink); opacity: 0.4; margin: 34px 0; }
-.by { font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 16px; color: var(--soft); }
+.by { font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 11.5px; color: var(--soft); }
 .house { margin-top: 8px; font-family: var(--font-mono), monospace; font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink); }
 .bottomLine { margin-top: auto; }
 
@@ -290,12 +290,12 @@
 .turn { margin-top: 22px; text-align: center; }
 
 .endTitle { margin: 14px 0 12px; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 30px; line-height: 1.1; text-wrap: balance; }
-.endLine { margin: 0; font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 17px; line-height: 1.5; color: var(--soft); }
+.endLine { margin: 0; font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 12px; line-height: 1.5; color: var(--soft); }
 
 /* ---------- contents ---------- */
 .tocKicker { color: var(--red); }
 .tocTitle { margin: 8px 0 6px; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 36px; line-height: 1; }
-.pass { margin: 0 0 18px; font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 15px; color: var(--soft); }
+.pass { margin: 0 0 18px; font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; color: var(--soft); }
 .part { margin: 18px 0 4px; padding-top: 14px; border-top: 2px solid var(--ink); }
 .partNum { display: flex; justify-content: space-between; align-items: center; }
 .partTitle { margin: 6px 0 4px; font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 22px; letter-spacing: 0.04em; }
@@ -303,7 +303,7 @@
 .entryHead { display: flex; justify-content: space-between; align-items: center; }
 .lock { display: inline-flex; align-items: center; gap: 5px; }
 .lawTitle { margin: 5px 0 4px; font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 19px; line-height: 1.18; }
-.opensOn { font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 14.5px; line-height: 1.35; color: var(--soft); }
+.opensOn { font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10.5px; line-height: 1.35; color: var(--soft); }
 .judg { margin-top: 6px; font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 14.5px; line-height: 1.4; color: var(--ink); }
 .stamps { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 6px; }
 .stamps span { font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.1em; border: 1px solid rgba(29, 24, 18, 0.3); padding: 3px 5px; color: var(--soft); }
@@ -432,7 +432,7 @@
 /* the double underline */
 .partRule { width: 120px; height: 9px; margin: 10px 0 14px; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); }
 .partName { font-family: var(--font-display), Georgia, serif; font-style: italic; font-weight: 500; font-size: 25px; line-height: 1.1; text-wrap: balance; }
-.partLine { margin: 8px 0 0; font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 16px; line-height: 1.45; color: var(--soft); max-width: 28ch; }
+.partLine { margin: 8px 0 0; font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 11.5px; line-height: 1.45; color: var(--soft); max-width: 28ch; }
 .partLaws { margin-top: 16px; width: 100%; max-width: 300px; border-top: 1px solid rgba(29, 24, 18, 0.25); }
 .partLaws div { padding: 5px 0; border-bottom: 1px solid rgba(29, 24, 18, 0.12); font-family: var(--font-display), Georgia, serif; font-size: 15px; line-height: 1.25; }
 .partLaws span { display: block; font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 2px; }

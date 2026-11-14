@@ -52,4 +52,4 @@
 .who { border-bottom: 1px dotted #a87a3a; }
 .word { border-bottom: 1px dashed rgba(29, 24, 18, 0.4); }
 
-.foot { margin: 22px 0 0; font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 14px; color: #5e5446; }
+.foot { margin: 22px 0 0; font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; color: #5e5446; }

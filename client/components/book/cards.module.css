@@ -86,7 +86,7 @@
 .clip { position: absolute; left: 30px; top: -12px; width: 12px; height: 34px; border: 2px solid #8a8f96; border-radius: 6px; z-index: 2; }
 .id { position: relative; min-width: 0; padding-right: 64px; }
 .nm { font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 24px; line-height: 1.05; }
-.ka { font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 15px; color: #5e5446; margin-top: 2px; }
+.ka { font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; color: #5e5446; margin-top: 2px; }
 .dt { font-family: var(--font-mono), monospace; font-size: 9.5px; letter-spacing: 0.12em; color: #5e5446; margin-top: 7px; }
 .role { font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #9b2a21; margin-top: 6px; line-height: 1.5; }
 .about { position: relative; font-size: 14px; line-height: 1.55; margin: 14px 0 0; }
@@ -127,4 +127,4 @@
 .pr { font-family: var(--font-mono), monospace; font-size: 10px; color: #5e5446; letter-spacing: 0.06em; margin-top: 2px; }
 .tag { display: inline-block; font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #9b2a21; border: 1px solid rgba(155, 42, 33, 0.5); padding: 2px 5px; margin-top: 8px; }
 .meaning { font-size: 14px; line-height: 1.5; margin: 10px 0 0; }
-.use { font-family: var(--font-accent), Georgia, serif; font-style: italic; font-size: 14px; color: #5e5446; border-left: 2px solid #c9a56b; padding-left: 10px; margin: 10px 0 0; }
+.use { font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; color: #5e5446; border-left: 2px solid #c9a56b; padding-left: 10px; margin: 10px 0 0; }
