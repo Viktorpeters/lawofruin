@@ -4,7 +4,8 @@
    First open: the splash (the hourglass turns, then flies onto the cover), then the cover,
    which the reader swings open into the book.
    Every open after that: straight to the page they stopped on. No splash, no cover.
-   Over the book: the profile icon top right, the tray button bottom right. */
+   The words come from the server, in the reader's language, and only what this reader may read.
+   Over the book: the language button and the profile icon top right; Ask and the tray bottom right. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Book, { type BookHandle, type PageInfo } from "./Book";
@@ -14,6 +15,9 @@ import Panel, { type PanelId } from "./Panels";
 import { WhoCard, WordCard } from "./Cards";
 import Coach from "./Coach";
 import LawSheet from "./LawSheet";
+import { api, token, type Me } from "@/lib/api";
+import { setBook, VERSION, type BookPayload } from "@/lib/book/content";
+import { LANGS, savedLang, saveLang, t, type Lang } from "@/lib/i18n";
 import s from "./bookapp.module.css";
 
 const SEEN_KEY = "lor-seen";     // set once the reader has opened the cover
@@ -44,19 +48,49 @@ export default function BookApp() {
   const [word, setWord] = useState<{ id: string; at: DOMRect } | null>(null);
   const [guide, setGuide] = useState(false);
   const [law, setLaw] = useState<number | null>(null);
+  const [lang, setLangState] = useState<Lang>("en");
+  const [langOpen, setLangOpen] = useState(false);
+  const [version, setVersion] = useState(0);
+  const [offline, setOffline] = useState(false);
+  const [me, setMe] = useState<Me | null>(null);
+  const [owner, setOwner] = useState(false);
+  const whoFromList = useRef(false);   // a card opened from the Who's Who list goes back to the list
 
-  // read the saved settings once, in the browser
+  /* fetch the book this reader may read, in this language, and hand it to the reader */
+  const loadBook = useCallback(async (l: Lang) => {
+    try {
+      const b = await api<BookPayload>(`/api/book?lang=${l}`);
+      setBook(b);
+      setOwner(b.owner);
+      setOffline(false);
+      setVersion(VERSION);
+    } catch {
+      setOffline(true);
+    }
+  }, []);
+
+  // read the saved settings once, in the browser, then fetch the reader and the book
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       const fs = Number(get(FS_KEY));
       if (fs === 15 || fs === 16 || fs === 17.5) setFontSizeState(fs);
       setLeftState(get(HAND_KEY) === "left");
+      const l = savedLang();
+      setLangState(l);
       const returning = get(SEEN_KEY) === "1" && !!get("lor-place");
       setSplash(!returning);
       setBoot({ returning });
+
+      if (token.get()) api<{ user: Me }>("/api/auth/me").then((r) => setMe(r.user)).catch(() => setMe(null));
+      loadBook(l);
     });
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [loadBook]);
+
+  // no signal and no saved book: the splash steps aside so the reader sees why
+  useEffect(() => {
+    if (offline && version === 0) setSplash(false);
+  }, [offline, version]);
 
   // the splash turns for a moment before it may fly
   useEffect(() => {
@@ -79,7 +113,7 @@ export default function BookApp() {
     if (info.index > 0 && get(GUIDE_KEY) !== "1") setGuide(true);
   }, []);
   const onReady = useCallback(() => setReady(true), []);
-  const onWho = useCallback((id: string) => { setWord(null); setWho(id); }, []);
+  const onWho = useCallback((id: string) => { setWord(null); whoFromList.current = false; setWho(id); }, []);
   const onWord = useCallback((id: string, at: DOMRect) => setWord({ id, at }), []);
   const endSplash = useCallback(() => setSplash(false), []);
   const endGuide = useCallback(() => { set(GUIDE_KEY, "1"); setGuide(false); }, []);
@@ -87,46 +121,108 @@ export default function BookApp() {
   const jump = useCallback((sec: string) => {
     setPanel(null);
     setWho(null);
+    whoFromList.current = false;
     // "law-1" and the like open that law's sheet; everything else is a page in the book
     if (sec.startsWith("law-")) { setLaw(Number(sec.slice(4))); return; }
     setLaw(null);
     book.current?.jumpTo(sec);
   }, []);
 
+  const closeWho = useCallback(() => {
+    setWho(null);
+    // opened from the list: the list comes back, at the same name and the same search
+    if (whoFromList.current) { whoFromList.current = false; setPanel("whoswho"); }
+  }, []);
+
   const setFontSize = useCallback((n: number) => { set(FS_KEY, String(n)); setFontSizeState(n); }, []);
   const setLeft = useCallback((v: boolean) => { set(HAND_KEY, v ? "left" : null); setLeftState(v); }, []);
   const restart = useCallback(() => { setPanel(null); book.current?.flipTo(0); }, []);
+
+  const chooseLang = useCallback((l: Lang) => {
+    setLangOpen(false);
+    saveLang(l);
+    setLangState(l);
+    document.documentElement.lang = l;
+    loadBook(l);
+  }, [loadBook]);
+
+  const signedIn = useCallback((tok: string, user: Me) => {
+    token.set(tok);
+    setMe(user);
+    loadBook(lang);   // they may own the book: the laws open
+  }, [lang, loadBook]);
+
+  const signOut = useCallback(() => {
+    token.set(null);
+    setMe(null);
+    setPanel(null);
+    loadBook(lang);
+  }, [lang, loadBook]);
 
   if (!boot) return <main className={s.app} />;
 
   // the book shows once it is built: at once for a returning reader, behind the flight for a new one
   const showBook = ready && (!splash || !!splashTarget);
   const dark = page?.dark ?? true;
+  const current = LANGS.find((x) => x.code === lang)!;
 
   return (
     <main className={s.app}>
-      <Book
-        ref={book}
-        fontSize={fontSize}
-        visible={showBook}
-        startFromPlace={boot.returning}
-        onReady={onReady}
-        onPage={onPage}
-        onWho={onWho}
-        onWord={onWord}
-        onLaw={setLaw}
-      />
+      {version > 0 && (
+        <Book
+          ref={book}
+          fontSize={fontSize}
+          version={version}
+          visible={showBook}
+          startFromPlace={boot.returning}
+          onReady={onReady}
+          onPage={onPage}
+          onWho={onWho}
+          onWord={onWord}
+          onLaw={setLaw}
+        />
+      )}
+
+      {offline && version === 0 && !splash && (
+        <div className={s.offline}>
+          <p>{t(lang, "noConnection")}</p>
+          <button type="button" onClick={() => loadBook(lang)}>{t(lang, "retry")}</button>
+        </div>
+      )}
 
       {showBook && (
         <>
-          <button type="button" className={`${s.profile} ${dark ? s.onDark : ""}`} onClick={() => setPanel("account")} aria-label="Your account">
+          <button type="button" className={`${s.lang} ${dark ? s.onDark : ""}`} onClick={() => setLangOpen((o) => !o)} aria-label={t(lang, "language")} aria-expanded={langOpen}>
+            {current.short}
+          </button>
+          {langOpen && (
+            <>
+              <div className={s.langScrim} onClick={() => setLangOpen(false)} aria-hidden="true" />
+              <ul className={s.langList} role="listbox" aria-label={t(lang, "language")}>
+                {LANGS.map((x) => (
+                  <li key={x.code}>
+                    <button type="button" role="option" aria-selected={x.code === lang} onClick={() => chooseLang(x.code)}>
+                      <span>{x.short}</span>{x.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <button type="button" className={`${s.profile} ${dark ? s.onDark : ""} ${me ? s.signedIn : ""}`} onClick={() => setPanel("account")} aria-label={t(lang, "account")}>
             <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="3" /><path d="M2.5 14.5c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5" /></svg>
           </button>
           {/* on the closed cover: only the hint, so nothing sits on the corner the reader lifts */}
           {page?.index === 0 || guide ? (
-            !panel && !guide && <p className={s.hint}>Swipe to open</p>
+            !panel && !guide && <p className={s.hint}>{t(lang, "swipe")}</p>
           ) : (
-            <Tray left={left} light={dark} onChoose={(id) => { setWho(null); setWord(null); setPanel(id); }} />
+            <Tray
+              left={left}
+              light={dark}
+              lang={lang}
+              onChoose={(id) => { setWho(null); setWord(null); setPanel(id); }}
+              onAsk={() => { setWho(null); setWord(null); setPanel("ask"); }}
+            />
           )}
         </>
       )}
@@ -134,9 +230,18 @@ export default function BookApp() {
       {panel && (
         <Panel
           id={panel}
+          lang={lang}
+          me={me}
+          owner={owner}
+          section={page?.secs[0]}
+          law={law ?? undefined}
           onClose={() => setPanel(null)}
+          onOpen={setPanel}
           onJump={jump}
-          onWho={(id) => { setPanel(null); setWho(id); }}
+          onWho={(id) => { setPanel(null); whoFromList.current = true; setWho(id); }}
+          onSignedIn={signedIn}
+          onSignOut={signOut}
+          onLang={chooseLang}
           fontSize={fontSize}
           setFontSize={setFontSize}
           left={left}
@@ -146,7 +251,7 @@ export default function BookApp() {
         />
       )}
       {law !== null && <LawSheet n={law} onClose={() => setLaw(null)} onWho={onWho} onWord={onWord} />}
-      {who && <WhoCard id={who} onClose={() => setWho(null)} onJump={jump} />}
+      {who && <WhoCard id={who} onClose={closeWho} onJump={jump} />}
       {word && <WordCard id={word.id} at={word.at} onClose={() => setWord(null)} />}
 
       {guide && showBook && <Coach onDone={endGuide} />}
