@@ -25,6 +25,7 @@ export type PageInfo = { index: number; count: number; dark: boolean; secs: stri
 
 type Props = {
   fontSize: number;                       // 15, 16 or 17.5
+  version: number;                        // a new book arrived (language, sign-in, purchase): rebuild the pages
   visible: boolean;
   startFromPlace: boolean;                // returning reader: open where they stopped
   onReady: () => void;
@@ -197,7 +198,7 @@ async function fontsReady() {
   await document.fonts.ready;
 }
 
-const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, startFromPlace, onReady, onPage, onWho, onWord, onLaw }, ref) {
+const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, visible, startFromPlace, onReady, onPage, onWho, onWord, onLaw }, ref) {
   const host = useRef<HTMLDivElement>(null);
   const flip = useRef<PageFlip | null>(null);
   const pages = useRef<BuiltPage[]>([]);
@@ -206,6 +207,9 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, st
   const cb = useRef({ onReady, onPage, onWho, onWord, onLaw });
   cb.current = { onReady, onPage, onWho, onWord, onLaw };
   const useSaved = useRef(startFromPlace);
+  // where the reader is, kept outside the page-curl library so a rebuild (new text size,
+  // new language) can reopen on the same words even after the old book is taken down
+  const here = useRef<Anchor | null>(null);
 
   useImperativeHandle(ref, () => ({
     flipTo: (i) => {
@@ -230,6 +234,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, st
   function report(i: number) {
     const p = pages.current[i];
     if (!p) return;
+    here.current = p.start;
     const size = measureScreen();
     write(PLACE_KEY, { i, ...p.start, sec: p.secs[0], w: size.w, h: size.h, fs: fontSize } satisfies Place);
     cb.current.onPage({ index: i, count: pages.current.length, dark: !!p.dark, secs: p.secs });
@@ -262,7 +267,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, st
       if (dead) { probe.remove(); return; }
 
       // 2. cut the book into pages
-      const before = flip.current ? pages.current[flip.current.getCurrentPageIndex()]?.start : null;
+      const before = useSaved.current ? null : here.current;
       let stance: string | null = null;
       try { stance = localStorage.getItem(STANCE_KEY); } catch { /* ignore */ }
       const built_ = buildBook(box, stance);
@@ -353,9 +358,9 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, visible, st
       bookEl.current?.remove();
       bookEl.current = null;
     };
-    // rebuild only for a new text size; `report` reads the latest values through refs
+    // rebuild only for a new text size or a new book; `report` reads the latest values through refs
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fontSize]);
+  }, [fontSize, version]);
 
   // one listener for every tap inside the pages
   useEffect(() => {
