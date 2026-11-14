@@ -1,31 +1,37 @@
 "use client";
 
-/* What each tray item (and the profile icon) opens: a sheet from the bottom on phones,
-   a side panel on wide screens. */
+/* What each tray item, the Ask button and the profile icon open: a sheet from the bottom on
+   phones, a side panel on wide screens. */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { PREFACE } from "@/lib/book/preface";
-import { PARTS } from "@/lib/book/content";
+import { PARTS } from "@/lib/book/contents";
 import { PEOPLE } from "@/lib/book/whoswho";
+import { api, ApiError, referral, type Me } from "@/lib/api";
+import { LANGS, t, type Key, type Lang } from "@/lib/i18n";
 import type { TrayItemId } from "./trayItems";
 import s from "./panels.module.css";
 
-export type PanelId = TrayItemId | "account";
+export type PanelId = TrayItemId | "account" | "ask";
 
-const TITLES: Record<PanelId, string> = {
-  contents: "Contents",
-  whoswho: "Who's Who",
-  ask: "Ask the book",
-  earn: "Get paid while reading",
-  settings: "Settings",
-  account: "Your account",
+const TITLE: Record<PanelId, Key> = {
+  contents: "contents", whoswho: "whoswho", purchases: "purchases", earn: "earn", appearance: "appearance", account: "account", ask: "askTitle",
 };
 
 type Props = {
   id: PanelId;
+  lang: Lang;
+  me: Me | null;
+  owner: boolean;
+  section?: string;       // the page the reader is on, for Ask
+  law?: number;           // the law sheet open, for Ask
   onClose: () => void;
+  onOpen: (id: PanelId) => void;
   onJump: (sec: string) => void;
   onWho: (id: string) => void;
+  onSignedIn: (token: string, user: Me) => void;
+  onSignOut: () => void;
+  onLang: (l: Lang) => void;
   fontSize: number;
   setFontSize: (n: number) => void;
   left: boolean;
@@ -35,7 +41,7 @@ type Props = {
 };
 
 export default function Panel(props: Props) {
-  const { id, onClose } = props;
+  const { id, onClose, lang } = props;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -44,25 +50,28 @@ export default function Panel(props: Props) {
 
   return (
     <div className={s.wrap} onClick={onClose}>
-      <section className={s.panel} role="dialog" aria-label={TITLES[id]} onClick={(e) => e.stopPropagation()}>
+      <section className={s.panel} role="dialog" aria-label={t(lang, TITLE[id])} onClick={(e) => e.stopPropagation()} data-panel={id}>
         <header className={s.head}>
-          <h2 className={s.title}>{TITLES[id]}</h2>
-          <button type="button" className={s.close} onClick={onClose} aria-label="Close">×</button>
+          <h2 className={s.title}>{t(lang, TITLE[id])}</h2>
+          <button type="button" className={s.close} onClick={onClose} aria-label={t(lang, "close")}>×</button>
         </header>
         <div className={s.body}>
           {id === "contents" && <ContentsList {...props} />}
           {id === "whoswho" && <WhoList {...props} />}
-          {id === "ask" && <Ask />}
-          {id === "earn" && <Earn />}
-          {id === "settings" && <Settings {...props} />}
-          {id === "account" && <Account />}
+          {id === "ask" && <Ask {...props} />}
+          {id === "earn" && <Earn {...props} />}
+          {id === "purchases" && <Purchases {...props} />}
+          {id === "appearance" && <Appearance {...props} />}
+          {id === "account" && <Account {...props} />}
         </div>
       </section>
     </div>
   );
 }
 
-function ContentsList({ onJump }: Props) {
+/* ---------- Contents ---------- */
+
+function ContentsList({ onJump, lang }: Props) {
   const row = (sec: string, label: string, title: string) => (
     <button key={sec} type="button" className={s.row} onClick={() => onJump(sec)}>
       <span className={s.rowNum}>{label}</span>
@@ -71,40 +80,66 @@ function ContentsList({ onJump }: Props) {
   );
   return (
     <>
-      <div className={s.group}>Opening pages</div>
-      {row("cover", "", "The cover")}
-      {row("title", "", "Title page")}
-      {row("dedication", "", "Dedication")}
-      {row("epigraph", "", "Epigraph")}
-      <div className={s.group}>Preface · The Cycle</div>
+      <div className={s.group}>{t(lang, "openingPages")}</div>
+      {row("cover", "", t(lang, "cover"))}
+      {row("title", "", t(lang, "titlePage"))}
+      {row("dedication", "", t(lang, "dedication"))}
+      {row("epigraph", "", t(lang, "epigraph"))}
+      <div className={s.group}>{t(lang, "prefaceGroup")}</div>
       {PREFACE.map((sec) => row(sec.id, sec.num, sec.title))}
-      <div className={s.group}>Before the laws</div>
-      {row("which", "", "Which are you?")}
-      {row("contents", "", "The thirty laws")}
-      <div className={s.group}>Investigation I</div>
+      <div className={s.group}>{t(lang, "beforeLaws")}</div>
+      {row("which", "", t(lang, "which"))}
+      {row("contents", "", t(lang, "thirtyLaws"))}
+      <div className={s.group}>{t(lang, "investigation")}</div>
       {PARTS.map((p) => (
         <button key={p.n} type="button" className={s.row} onClick={() => onJump(`part-${p.n}`)}>
-          <span className={s.rowNum}>Part {p.n}</span>
+          <span className={s.rowNum}>{t(lang, "part")} {p.n}</span>
           <span className={s.rowTitle}>{p.title}</span>
-          <span className={s.rowLock}>{p.opens}</span>
+          {!p.open && <span className={s.rowLock}>{p.opens}</span>}
         </button>
       ))}
     </>
   );
 }
 
-function WhoList({ onWho }: Props) {
-  const [q, setQ] = useState("");
+/* ---------- Who's Who ----------
+   The search and the scroll position outlive the panel, so closing a card brings the reader
+   back to the same name in the same list. */
+
+let whoQuery = "";
+let whoScroll = 0;
+
+function WhoList({ onWho, lang }: Props) {
+  const [q, setQ] = useState(whoQuery);
+  const top = useRef<HTMLDivElement>(null);
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return [...PEOPLE]
       .filter((p) => !needle || p.name.toLowerCase().includes(needle) || (p.known ?? "").toLowerCase().includes(needle) || p.role.toLowerCase().includes(needle))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [q]);
+
+  // the panel is the scrolling box: put it back where it was, and remember where it goes
+  useLayoutEffect(() => {
+    const box = top.current?.closest("section");
+    if (!box) return;
+    box.scrollTop = whoScroll;
+    const onScroll = () => { whoScroll = box.scrollTop; };
+    box.addEventListener("scroll", onScroll, { passive: true });
+    return () => box.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <>
-      <input className={s.search} type="search" placeholder="Find a name" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Find a name" />
-      <p className={s.count}>{list.length} files · all readable offline</p>
+    <div ref={top}>
+      <input
+        className={s.search}
+        type="search"
+        placeholder={t(lang, "findName")}
+        value={q}
+        onChange={(e) => { whoQuery = e.target.value; whoScroll = 0; setQ(e.target.value); }}
+        aria-label={t(lang, "findName")}
+      />
+      <p className={s.count}>{t(lang, "files", { n: list.length })}</p>
       {list.map((p) => (
         <button key={p.id} type="button" className={s.row} onClick={() => onWho(p.id)}>
           <span className={s.rowTitle}>{p.name}</span>
@@ -112,66 +147,290 @@ function WhoList({ onWho }: Props) {
           <span className={s.rowRole}>{p.role}</span>
         </button>
       ))}
-    </>
+    </div>
   );
 }
 
-function Ask() {
+/* ---------- Ask ----------
+   The conversation outlives the panel, so closing and reopening keeps it. */
+
+type Msg = { role: "user" | "assistant"; text: string };
+let askLog: Msg[] = [];
+
+function Ask({ lang, me, owner, section, law, onOpen }: Props) {
+  const [log, setLog] = useState<Msg[]>(askLog);
+  const [q, setQ] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const end = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { askLog = log; end.current?.scrollIntoView({ block: "end" }); }, [log, busy]);
+
+  if (!me) {
+    return (
+      <>
+        <p className={s.text}>{t(lang, "askMember")}</p>
+        <button type="button" className={s.line} onClick={() => onOpen("account")}>{t(lang, "signInToAsk")}</button>
+      </>
+    );
+  }
+
+  const send = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const question = q.trim();
+    if (question.length < 2 || busy) return;
+    const history = log.slice(-6);
+    setLog((l) => [...l, { role: "user", text: question }]);
+    setQ("");
+    setBusy(true);
+    setErr("");
+    try {
+      const r = await api<{ answer: string }>("/api/ask", { method: "POST", body: { question, lang, history, section, law } });
+      setLog((l) => [...l, { role: "assistant", text: r.answer }]);
+    } catch (x) {
+      setErr((x as ApiError).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <>
-      <p className={s.text}>Soon you will be able to ask the book anything: why it was written, what a law means, what happened next to any figure in it.</p>
-      <p className={s.text}>Every answer will come from the book itself, and will show you the page it came from.</p>
-      <p className={s.soon}>Opens with early bird sales, 10 November</p>
+      <p className={s.small}>{t(lang, owner ? "askOwner" : "askMember")}</p>
+      <div className={s.chat}>
+        {log.map((m, i) => (
+          <p key={i} className={m.role === "user" ? s.qMsg : s.aMsg}>{m.text}</p>
+        ))}
+        {busy && <p className={`${s.aMsg} ${s.thinking}`}>{t(lang, "thinking")}<span>.</span><span>.</span><span>.</span></p>}
+        {err && <p className={s.error}>{err}</p>}
+        <div ref={end} />
+      </div>
+      <form className={s.askForm} onSubmit={send}>
+        <input className={s.search} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t(lang, "askPh")} aria-label={t(lang, "askPh")} maxLength={600} />
+        <button type="submit" className={s.send} disabled={busy || q.trim().length < 2}>{t(lang, "send")}</button>
+      </form>
     </>
   );
 }
 
-function Earn() {
+/* ---------- Earn ---------- */
+
+type Money = { currency: string; amount: number }[];
+type Stats = { link: string; clicks: number; paid: number; pending: Money; available: Money; paidOut: Money };
+
+const money = (m: Money) =>
+  m.length ? m.map((x) => (x.currency === "NGN" ? `₦${(x.amount / 100).toLocaleString("en-NG")}` : `$${(x.amount / 100).toFixed(2).replace(/\.00$/, "")}`)).join(" · ") : "0";
+
+function Earn({ lang, me, onOpen }: Props) {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [err, setErr] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!me) return;
+    api<Stats>("/api/referrals/me").then(setStats).catch((x: ApiError) => setErr(x.message));
+  }, [me]);
+
+  useEffect(() => {
+    if (!copied) return;
+    const tm = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(tm);
+  }, [copied]);
+
+  if (!me) {
+    return (
+      <>
+        <p className={s.text}>{t(lang, "earnLead")}</p>
+        <button type="button" className={s.line} onClick={() => onOpen("account")}>{t(lang, "signInToEarn")}</button>
+      </>
+    );
+  }
+
+  const copy = async () => {
+    if (!stats) return;
+    try { await navigator.clipboard.writeText(stats.link); } catch {
+      // older browsers: select the text so the reader can copy it by hand
+      const el = document.getElementById("lor-link");
+      if (el) { const r = document.createRange(); r.selectNodeContents(el); getSelection()?.removeAllRanges(); getSelection()?.addRange(r); }
+    }
+    setCopied(true);
+  };
+
   return (
     <>
-      <p className={s.text}>Every reader gets their own link. When someone buys the book through your link, you earn $2.</p>
-      <p className={s.text}>You will see everyone who joined through you, and what you have earned, right here.</p>
-      <p className={s.soon}>Opens with early bird sales, 10 November</p>
+      <p className={s.text}>{t(lang, "earnLead")}</p>
+
+      <div className={s.group}>{t(lang, "yourLink")}</div>
+      <div className={s.linkRow}>
+        <span id="lor-link" className={s.link}>{stats ? stats.link.replace(/^https?:\/\//, "") : "…"}</span>
+        <span className={`${s.copied} ${copied ? s.copiedOn : ""}`} aria-live="polite">{copied ? t(lang, "copied") : ""}</span>
+        <button type="button" className={s.copy} onClick={copy} aria-label={t(lang, "copy")} disabled={!stats}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" /><path d="M15.5 8.5V4.5h-11v11h4" /></svg>
+        </button>
+      </div>
+
+      <div className={s.stats}>
+        <div><b>{stats?.clicks ?? "–"}</b><span>{t(lang, "clicks")}</span></div>
+        <div><b>{stats?.paid ?? "–"}</b><span>{t(lang, "paid")}</span></div>
+        <div><b>{stats ? money(stats.available) : "–"}</b><span>{t(lang, "earned")}</span></div>
+      </div>
+      {stats && stats.pending.length > 0 && <p className={s.pending}>{t(lang, "pending", { x: money(stats.pending) })}</p>}
+      {err && <p className={s.error}>{err}</p>}
+
+      <p className={s.small}>{t(lang, "earnRules")}</p>
     </>
   );
 }
 
-function Settings({ fontSize, setFontSize, left, setLeft, onRestart, onGuide }: Props) {
+/* ---------- Purchases ---------- */
+
+type Price = { currency: "NGN" | "USD"; display: string; standard: string; phase: string; detected: "NGN" | "USD" };
+type Item = { n: number; title: string; owned: boolean };
+
+function Purchases({ lang, me, onOpen }: Props) {
+  const [items, setItems] = useState<Item[] | null>(null);
+  const [price, setPrice] = useState<Price | null>(null);
+  const [cur, setCur] = useState<"NGN" | "USD" | null>(null);
+
+  useEffect(() => {
+    api<{ items: Item[] }>("/api/purchases").then((r) => setItems(r.items)).catch(() => setItems([]));
+  }, [me]);
+  useEffect(() => {
+    api<Price>(`/api/pricing${cur ? `?currency=${cur}` : ""}`).then(setPrice).catch(() => {});
+  }, [cur]);
+
+  const other = price?.currency === "NGN" ? "USD" : "NGN";
+
+  return (
+    <>
+      {(items ?? []).map((it) => (
+        <div key={it.n} className={s.item}>
+          <div className={s.itemHead}>
+            <span className={s.rowTitle}>{it.title}</span>
+            {it.owned && <span className={s.owned}>{t(lang, "owned")}</span>}
+          </div>
+          {!it.owned && price && (
+            <>
+              <p className={s.price}>{price.display}</p>
+              {price.phase !== "standard" && <p className={s.small}>{t(lang, "thenPrice", { price: price.standard })}</p>}
+              <p className={s.small}>{t(lang, "includes")}</p>
+              {me ? (
+                <button type="button" className={s.line} disabled>{t(lang, "checkoutSoon")}</button>
+              ) : (
+                <button type="button" className={s.line} onClick={() => onOpen("account")}>{t(lang, "signInToBuy")}</button>
+              )}
+              <button type="button" className={s.switch} onClick={() => setCur(other)}>
+                {t(lang, other === "NGN" ? "payNaira" : "payDollars")}
+              </button>
+            </>
+          )}
+        </div>
+      ))}
+    </>
+  );
+}
+
+/* ---------- Appearance ---------- */
+
+function Appearance({ lang, onLang, fontSize, setFontSize, left, setLeft, onRestart, onGuide }: Props) {
   const sizes = [
-    { v: 15, label: "Smaller" },
-    { v: 16, label: "Standard" },
-    { v: 17.5, label: "Larger" },
+    { v: 15, label: t(lang, "smaller") },
+    { v: 16, label: t(lang, "standard") },
+    { v: 17.5, label: t(lang, "larger") },
   ];
   return (
     <>
-      <div className={s.group}>Text size</div>
+      <div className={s.group}>{t(lang, "textSize")}</div>
       <div className={s.seg}>
         {sizes.map((z) => (
           <button key={z.v} type="button" aria-pressed={fontSize === z.v} onClick={() => setFontSize(z.v)} style={{ fontSize: `${z.v - 1}px` }}>{z.label}</button>
         ))}
       </div>
-      <div className={s.group}>Menu button</div>
-      <div className={s.seg}>
-        <button type="button" aria-pressed={!left} onClick={() => setLeft(false)}>Right hand</button>
-        <button type="button" aria-pressed={left} onClick={() => setLeft(true)}>Left hand</button>
+      <div className={s.group}>{t(lang, "language")}</div>
+      <div className={s.langs}>
+        {LANGS.map((l) => (
+          <button key={l.code} type="button" aria-pressed={lang === l.code} onClick={() => onLang(l.code)}>{l.name}</button>
+        ))}
       </div>
-      <div className={s.group}>The book</div>
-      <button type="button" className={s.line} onClick={onGuide}>Show how to turn the pages</button>
-      <button type="button" className={s.line} onClick={onRestart}>Read from the cover again</button>
+      <div className={s.group}>{t(lang, "menuButton")}</div>
+      <div className={s.seg}>
+        <button type="button" aria-pressed={!left} onClick={() => setLeft(false)}>{t(lang, "rightHand")}</button>
+        <button type="button" aria-pressed={left} onClick={() => setLeft(true)}>{t(lang, "leftHand")}</button>
+      </div>
+      <div className={s.group}>{t(lang, "theBook")}</div>
+      <button type="button" className={s.line} onClick={onGuide}>{t(lang, "showTurn")}</button>
+      <button type="button" className={s.line} onClick={onRestart}>{t(lang, "fromCover")}</button>
     </>
   );
 }
 
-function Account() {
+/* ---------- Account ---------- */
+
+function Account({ lang, me, onSignedIn, onSignOut }: Props) {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  const start = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true); setErr("");
+    try {
+      await api("/api/auth/email/start", { method: "POST", body: { email } });
+      setSent(true);
+    } catch (x) { setErr((x as ApiError).message); } finally { setBusy(false); }
+  };
+
+  const verify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true); setErr("");
+    try {
+      const r = await api<{ token: string; user: Me }>("/api/auth/email/verify", { method: "POST", body: { email, code, ref: referral.get() } });
+      onSignedIn(r.token, r.user);
+    } catch (x) { setErr((x as ApiError).message); } finally { setBusy(false); }
+  };
+
   return (
     <>
-      <p className={s.text}>Sign in to buy the book, keep your place on every device and get your own referral link.</p>
-      <button type="button" className={s.line} disabled>Continue with Google</button>
-      <p className={s.soon}>Sign-in opens with early bird sales, 10 November</p>
-      <div className={s.group}>About</div>
-      <p className={s.text}>The Laws of Ruin is researched, written and published by the Publications Team of Orion Learning Innovations, an edtech company in Lagos, Nigeria.</p>
-      <div className={s.group}>Licence</div>
-      <p className={s.small}>© 2026 Orion Learning Innovations. All rights reserved. This book is licensed for reading inside this app, to the account that bought it.</p>
+      {me ? (
+        <>
+          <div className={s.group}>{t(lang, "signedInAs")}</div>
+          <p className={s.text}>{me.email}</p>
+          <button type="button" className={s.line} onClick={onSignOut}>{t(lang, "signOut")}</button>
+        </>
+      ) : (
+        <>
+          <p className={s.text}>{t(lang, "signInLead")}</p>
+          {!sent ? (
+            <form onSubmit={start}>
+              <input className={s.search} type="email" autoComplete="email" required placeholder={t(lang, "emailPh")} value={email} onChange={(e) => setEmail(e.target.value)} />
+              <button type="submit" className={s.line} disabled={busy || !email}>{t(lang, "sendCode")}</button>
+            </form>
+          ) : (
+            <form onSubmit={verify}>
+              <p className={s.small}>{t(lang, "codeSent", { email })}</p>
+              <input
+                className={`${s.search} ${s.code}`}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={7}
+                placeholder={t(lang, "codePh")}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/[^\d ]/g, ""))}
+                autoFocus
+              />
+              <button type="submit" className={s.line} disabled={busy || code.replace(/\s/g, "").length !== 6}>{t(lang, "signIn")}</button>
+              <button type="button" className={s.switch} onClick={() => { setSent(false); setCode(""); setErr(""); }}>{t(lang, "changeEmail")}</button>
+            </form>
+          )}
+          {err && <p className={s.error}>{err}</p>}
+        </>
+      )}
+      <div className={s.group}>{t(lang, "about")}</div>
+      <p className={s.small}>{t(lang, "aboutText")}</p>
+      <div className={s.group}>{t(lang, "licence")}</div>
+      <p className={s.small}>{t(lang, "licenceText")}</p>
     </>
   );
 }

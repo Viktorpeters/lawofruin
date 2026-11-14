@@ -99,6 +99,50 @@
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .item, .ring { transition: none; }
+/* Ask: its own button, centred directly above the tray button, always in reach.
+   It steps aside while the tray is open, so the fan of items has the space. */
+.ask {
+  position: fixed;
+  z-index: 40;
+  right: calc(max(18px, env(safe-area-inset-right)) + 6px);
+  bottom: calc(max(18px, env(safe-area-inset-bottom)) + 54px + 30px);
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(201, 165, 107, 0.5);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2b2620, #121010 70%);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  color: #e9cc88;
+  cursor: pointer;
+  transition: opacity 0.25s, transform 0.3s;
 }
+.ask.left { right: auto; left: calc(max(18px, env(safe-area-inset-left)) + 6px); }
+.ask:hover, .ask:focus-visible { border-color: #c9a56b; outline: none; }
+.askAway { opacity: 0; transform: scale(0.6); pointer-events: none; }
+.askLabel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 5px 1px;
+  background: rgba(11, 10, 8, 0.88);
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item, .ring, .ask { transition: none; }
+}
+
+/* the first item sits at the top, near the screen edge: its label goes above it and leans
+   inward, so it is never cut off and never runs under the next icon */
+.item:first-child .label { top: auto; bottom: calc(100% + 6px); transform: translateX(-75%); }
+.left .item:first-child .label { transform: translateX(-25%); }
