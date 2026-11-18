@@ -7,7 +7,11 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { PREFACE } from "@/lib/book/preface";
 import { PARTS } from "@/lib/book/contents";
 import { PEOPLE } from "@/lib/book/whoswho";
-import { api, ApiError, referral, type Me } from "@/lib/api";
+import type { ApiError, Me } from "@/lib/api";
+import { useEarnStats, usePricing, usePurchases } from "@/lib/queries";
+import { useAsk, useStartEmail, useVerifyEmail } from "@/lib/actions";
+import type { Money } from "@/lib/services/referrals.service";
+import type { Currency } from "@/lib/services/shop.service";
 import { LANGS, t, type Key, type Lang } from "@/lib/i18n";
 import type { TrayItemId } from "./trayItems";
 import s from "./panels.module.css";
@@ -29,7 +33,6 @@ type Props = {
   onOpen: (id: PanelId) => void;
   onJump: (sec: string) => void;
   onWho: (id: string) => void;
-  onSignedIn: (token: string, user: Me) => void;
   onSignOut: () => void;
   onLang: (l: Lang) => void;
   fontSize: number;
@@ -160,8 +163,10 @@ let askLog: Msg[] = [];
 function Ask({ lang, me, owner, section, law, onOpen }: Props) {
   const [log, setLog] = useState<Msg[]>(askLog);
   const [q, setQ] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
+  const [left, setLeft] = useState<number | null>(null);
+  const ask = useAsk();
+  const busy = ask.isPending;
+  const err = ask.error ? (ask.error as ApiError).message : "";
   const end = useRef<HTMLDivElement>(null);
 
   useEffect(() => { askLog = log; end.current?.scrollIntoView({ block: "end" }); }, [log, busy]);
@@ -182,16 +187,10 @@ function Ask({ lang, me, owner, section, law, onOpen }: Props) {
     const history = log.slice(-6);
     setLog((l) => [...l, { role: "user", text: question }]);
     setQ("");
-    setBusy(true);
-    setErr("");
-    try {
-      const r = await api<{ answer: string }>("/api/ask", { method: "POST", body: { question, lang, history, section, law } });
-      setLog((l) => [...l, { role: "assistant", text: r.answer }]);
-    } catch (x) {
-      setErr((x as ApiError).message);
-    } finally {
-      setBusy(false);
-    }
+    ask.mutate(
+      { question, lang, history, section, law },
+      { onSuccess: (r) => { setLog((l) => [...l, { role: "assistant", text: r.answer }]); if (r.mode === "owner") setLeft(r.left); } },
+    );
   };
 
   return (
@@ -203,6 +202,7 @@ function Ask({ lang, me, owner, section, law, onOpen }: Props) {
         ))}
         {busy && <p className={`${s.aMsg} ${s.thinking}`}>{t(lang, "thinking")}<span>.</span><span>.</span><span>.</span></p>}
         {err && <p className={s.error}>{err}</p>}
+        {left !== null && !busy && <p className={s.pending}>{t(lang, "askLeft", { n: Math.max(0, left) })}</p>}
         <div ref={end} />
       </div>
       <form className={s.askForm} onSubmit={send}>
@@ -215,21 +215,14 @@ function Ask({ lang, me, owner, section, law, onOpen }: Props) {
 
 /* ---------- Earn ---------- */
 
-type Money = { currency: string; amount: number }[];
-type Stats = { link: string; clicks: number; paid: number; pending: Money; available: Money; paidOut: Money };
-
 const money = (m: Money) =>
   m.length ? m.map((x) => (x.currency === "NGN" ? `₦${(x.amount / 100).toLocaleString("en-NG")}` : `$${(x.amount / 100).toFixed(2).replace(/\.00$/, "")}`)).join(" · ") : "0";
 
 function Earn({ lang, me, onOpen }: Props) {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [err, setErr] = useState("");
+  const q = useEarnStats(!!me);
+  const stats = q.data ?? null;
+  const err = q.error ? (q.error as ApiError).message : "";
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (!me) return;
-    api<Stats>("/api/referrals/me").then(setStats).catch((x: ApiError) => setErr(x.message));
-  }, [me]);
 
   useEffect(() => {
     if (!copied) return;
@@ -284,20 +277,10 @@ function Earn({ lang, me, onOpen }: Props) {
 
 /* ---------- Purchases ---------- */
 
-type Price = { currency: "NGN" | "USD"; display: string; standard: string; phase: string; detected: "NGN" | "USD" };
-type Item = { n: number; title: string; owned: boolean };
-
 function Purchases({ lang, me, onOpen }: Props) {
-  const [items, setItems] = useState<Item[] | null>(null);
-  const [price, setPrice] = useState<Price | null>(null);
-  const [cur, setCur] = useState<"NGN" | "USD" | null>(null);
-
-  useEffect(() => {
-    api<{ items: Item[] }>("/api/purchases").then((r) => setItems(r.items)).catch(() => setItems([]));
-  }, [me]);
-  useEffect(() => {
-    api<Price>(`/api/pricing${cur ? `?currency=${cur}` : ""}`).then(setPrice).catch(() => {});
-  }, [cur]);
+  const [cur, setCur] = useState<Currency | undefined>(undefined);
+  const items = usePurchases().data;
+  const price = usePricing(cur).data;
 
   const other = price?.currency === "NGN" ? "USD" : "NGN";
 
@@ -366,29 +349,26 @@ function Appearance({ lang, onLang, fontSize, setFontSize, left, setLeft, onRest
 
 /* ---------- Account ---------- */
 
-function Account({ lang, me, onSignedIn, onSignOut }: Props) {
+function Account({ lang, me, onSignOut }: Props) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [code, setCode] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
+  const startEmail = useStartEmail();
+  const verifyEmail = useVerifyEmail();
+  const busy = startEmail.isPending || verifyEmail.isPending;
+  const failed = (startEmail.error ?? verifyEmail.error) as ApiError | null;
+  const err = failed?.message ?? "";
 
-  const start = async (e: React.FormEvent) => {
+  const start = (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true); setErr("");
-    try {
-      await api("/api/auth/email/start", { method: "POST", body: { email } });
-      setSent(true);
-    } catch (x) { setErr((x as ApiError).message); } finally { setBusy(false); }
+    verifyEmail.reset();
+    startEmail.mutate({ email, lang }, { onSuccess: () => setSent(true) });
   };
 
-  const verify = async (e: React.FormEvent) => {
+  const verify = (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true); setErr("");
-    try {
-      const r = await api<{ token: string; user: Me }>("/api/auth/email/verify", { method: "POST", body: { email, code, ref: referral.get() } });
-      onSignedIn(r.token, r.user);
-    } catch (x) { setErr((x as ApiError).message); } finally { setBusy(false); }
+    startEmail.reset();
+    verifyEmail.mutate({ email, code, lang });   // on success the reader appears everywhere at once
   };
 
   return (
@@ -421,7 +401,7 @@ function Account({ lang, me, onSignedIn, onSignOut }: Props) {
                 autoFocus
               />
               <button type="submit" className={s.line} disabled={busy || code.replace(/\s/g, "").length !== 6}>{t(lang, "signIn")}</button>
-              <button type="button" className={s.switch} onClick={() => { setSent(false); setCode(""); setErr(""); }}>{t(lang, "changeEmail")}</button>
+              <button type="button" className={s.switch} onClick={() => { setSent(false); setCode(""); startEmail.reset(); verifyEmail.reset(); }}>{t(lang, "changeEmail")}</button>
             </form>
           )}
           {err && <p className={s.error}>{err}</p>}
