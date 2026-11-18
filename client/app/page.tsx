@@ -20,7 +20,7 @@ function photosOnDisk(): Record<string, string> {
   }
 }
 
-// lawofruin.io: one cinematic screen. The installed app opens at /app instead.
+// lawofruin.app: one cinematic screen. The installed app opens at /app instead.
 export default function Home() {
   return <Hero photos={photosOnDisk()} />;
 }
