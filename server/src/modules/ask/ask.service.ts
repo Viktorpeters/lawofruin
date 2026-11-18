@@ -61,7 +61,8 @@ function openText(b: ReturnType<typeof bookFor>, input: AskInput) {
         : `Law ${l.n} is not open yet: Part ${p.n} opens ${p.opens}. Do not describe its content.`);
     }
   }
-  return out.length ? `BOOK TEXT THE READER HAS OPEN\n${out.join("\n\n")}` : "The reader has no law or Preface page open. Answer from the list of laws only, and suggest which law to open.";
+  // the [[ ]] marks that colour key lines red are for the page, not for the AI
+  return out.length ? `BOOK TEXT THE READER HAS OPEN\n${out.join("\n\n").replace(/\[\[|\]\]/g, "")}` : "The reader has no law or Preface page open. Answer from the list of laws only, and suggest which law to open.";
 }
 
 /* quotations that are not in the book lose their quotation marks; the answer is flagged */
