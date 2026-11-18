@@ -68,6 +68,7 @@ Rules:
 - Return only the JSON, with exactly the same keys, the same structure and the same number of items.
 - Never change the values of these keys: ${KEEP.join(", ")}.
 - Keep every person's name exactly as written in English (Pablo Escobar, Ibn Khaldun, Louis XVI). Place names may take their usual ${NAME[lang]} form.
+- Keep every [[ and ]] marker around the words that carry the same meaning, and keep the | in side notes ("Label|Text"): translate both sides of it.
 - Keep quotation marks, numbers and dates accurate. Use the punctuation that is correct in ${NAME[lang]}.
 - Do not add notes or explanations.
 
