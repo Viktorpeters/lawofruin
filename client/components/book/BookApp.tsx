@@ -15,8 +15,9 @@ import Panel, { type PanelId } from "./Panels";
 import { WhoCard, WordCard } from "./Cards";
 import Coach from "./Coach";
 import LawSheet from "./LawSheet";
-import { api, token, type Me } from "@/lib/api";
-import { setBook, VERSION, type BookPayload } from "@/lib/book/content";
+import { setBook, VERSION } from "@/lib/book/content";
+import { useBook, useMe } from "@/lib/queries";
+import { useSignOut } from "@/lib/actions";
 import { LANGS, savedLang, saveLang, t, type Lang } from "@/lib/i18n";
 import s from "./bookapp.module.css";
 
@@ -51,23 +52,21 @@ export default function BookApp() {
   const [lang, setLangState] = useState<Lang>("en");
   const [langOpen, setLangOpen] = useState(false);
   const [version, setVersion] = useState(0);
-  const [offline, setOffline] = useState(false);
-  const [me, setMe] = useState<Me | null>(null);
-  const [owner, setOwner] = useState(false);
   const whoFromList = useRef(false);   // a card opened from the Who's Who list goes back to the list
 
-  /* fetch the book this reader may read, in this language, and hand it to the reader */
-  const loadBook = useCallback(async (l: Lang) => {
-    try {
-      const b = await api<BookPayload>(`/api/book?lang=${l}`);
-      setBook(b);
-      setOwner(b.owner);
-      setOffline(false);
-      setVersion(VERSION);
-    } catch {
-      setOffline(true);
-    }
-  }, []);
+  // the reader (null when signed out) and the book they may read, in their language
+  const me = useMe().data ?? null;
+  const words = useBook(lang, !!boot);
+  const owner = words.data?.owner ?? false;
+  const offline = words.isError && version === 0;
+  const signOutNow = useSignOut();
+
+  // a new book arrived (first load, another language, a sign-in): hand it to the reader
+  useEffect(() => {
+    if (!words.data) return;
+    setBook(words.data);
+    setVersion(VERSION);
+  }, [words.data]);
 
   // read the saved settings once, in the browser, then fetch the reader and the book
   useEffect(() => {
@@ -80,12 +79,9 @@ export default function BookApp() {
       const returning = get(SEEN_KEY) === "1" && !!get("lor-place");
       setSplash(!returning);
       setBoot({ returning });
-
-      if (token.get()) api<{ user: Me }>("/api/auth/me").then((r) => setMe(r.user)).catch(() => setMe(null));
-      loadBook(l);
     });
     return () => cancelAnimationFrame(raf);
-  }, [loadBook]);
+  }, []);
 
   // no signal and no saved book: the splash steps aside so the reader sees why
   useEffect(() => {
@@ -142,22 +138,10 @@ export default function BookApp() {
     setLangOpen(false);
     saveLang(l);
     setLangState(l);
-    document.documentElement.lang = l;
-    loadBook(l);
-  }, [loadBook]);
+    document.documentElement.lang = l;   // the book for this language is fetched by useBook
+  }, []);
 
-  const signedIn = useCallback((tok: string, user: Me) => {
-    token.set(tok);
-    setMe(user);
-    loadBook(lang);   // they may own the book: the laws open
-  }, [lang, loadBook]);
-
-  const signOut = useCallback(() => {
-    token.set(null);
-    setMe(null);
-    setPanel(null);
-    loadBook(lang);
-  }, [lang, loadBook]);
+  const signOut = useCallback(() => { signOutNow(); setPanel(null); }, [signOutNow]);
 
   if (!boot) return <main className={s.app} />;
 
@@ -186,7 +170,7 @@ export default function BookApp() {
       {offline && version === 0 && !splash && (
         <div className={s.offline}>
           <p>{t(lang, "noConnection")}</p>
-          <button type="button" onClick={() => loadBook(lang)}>{t(lang, "retry")}</button>
+          <button type="button" onClick={() => words.refetch()}>{t(lang, "retry")}</button>
         </div>
       )}
 
@@ -210,7 +194,12 @@ export default function BookApp() {
             </>
           )}
           <button type="button" className={`${s.profile} ${dark ? s.onDark : ""} ${me ? s.signedIn : ""}`} onClick={() => setPanel("account")} aria-label={t(lang, "account")}>
-            <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="3" /><path d="M2.5 14.5c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5" /></svg>
+            {me ? (
+              // signed in: the first letter of their email, in gold
+              <span className={s.initial} aria-hidden="true">{(me.name || me.email).trim().charAt(0).toUpperCase()}</span>
+            ) : (
+              <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="3" /><path d="M2.5 14.5c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5" /></svg>
+            )}
           </button>
           {/* on the closed cover: only the hint, so nothing sits on the corner the reader lifts */}
           {page?.index === 0 || guide ? (
@@ -239,7 +228,6 @@ export default function BookApp() {
           onOpen={setPanel}
           onJump={jump}
           onWho={(id) => { setPanel(null); whoFromList.current = true; setWho(id); }}
-          onSignedIn={signedIn}
           onSignOut={signOut}
           onLang={chooseLang}
           fontSize={fontSize}
