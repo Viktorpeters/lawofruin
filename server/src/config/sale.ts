@@ -18,4 +18,20 @@ export const REFERRAL_WINDOW_DAYS = 30;     // the buyer must sign in within 30 
 export const EARNING_HOLD_DAYS = 14;        // pending until the refund window closes
 export const PAYOUT_MIN = { NGN: 500_000, USD: 500 } as const;   // ₦5,000 or $5 before a payout
 
-export const ASK_DAILY = { owner: 60, member: 12 };   // questions a day: owners, and signed-in readers who have not bought
+/* Ask. Only owners ever reach the AI. These numbers are what keep the bill safe:
+   - perMinute stops one person firing questions in a loop;
+   - perDay and perMonth cap what one reader can cost (at about $0.006 a question, 150 a month
+     is under $1, against the $7 or $10 they paid);
+   - dailyBudgetUsd is the ceiling for everyone together: when today's AI spend reaches it,
+     Ask rests until midnight (UTC) for every reader, so the Anthropic balance can never be drained.
+   priceInPerM and priceOutPerM are the model's prices per million tokens: copy them from
+   anthropic.com/pricing for the model in ASK_MODEL, so the spend counted here matches the bill. */
+export const ASK = {
+  member: { perDay: 30 },
+  owner: { perDay: 20, perMonth: 150 },
+  perMinute: 4,
+  dailyBudgetUsd: 1,
+  priceInPerM: 1,
+  priceOutPerM: 5,
+  maxAnswerTokens: 450,
+};

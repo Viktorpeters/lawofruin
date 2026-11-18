@@ -34,7 +34,7 @@ function facts(lang: Lang, owner: boolean) {
   const b = bookFor(lang, owner);
   const usd = priceFor("USD");
   const ngn = priceFor("NGN");
-  const dates = b.parts.map((p) => `Part ${p.n}, ${p.title}: opens ${p.opens}`).join("\n");
+  const dates = b.parts.map((p: any) => `Part ${p.n}, ${p.title}: opens ${p.opens}`).join("\n");
   return { b, sale:
 `The Laws of Ruin, Investigation I: The Fall of Kings. A history book in a reading app, published by the Publications Team of Orion Learning Innovations, Lagos, Nigeria. It studies men who rose to great power and fell, and draws out the lessons of their rise and ruin. Written to teach, never to celebrate crimes.
 30 laws in 6 parts. Release dates:
@@ -44,7 +44,7 @@ Pay by card (Visa, Mastercard, American Express, Verve), Apple Pay, UK and EU ba
 }
 
 function ownerContext(b: ReturnType<typeof bookFor>, input: AskInput) {
-  const laws = b.parts.flatMap((p) => p.laws.map((l) => `Law ${l.n} (Part ${p.n}): ${l.title}. Opens on ${l.opener}, ${l.place}.`)).join("\n");
+  const laws = b.parts.flatMap((p: any) => p.laws.map((l: any) => `Law ${l.n} (Part ${p.n}): ${l.title}. Opens on ${l.opener}, ${l.place}.`)).join("\n");
   const blocks: string[] = [`THE THIRTY LAWS\n${laws}`];
   const sec = b.preface.find((s) => s.id === input.section);
   if (sec) blocks.push(`THE PAGE THE READER IS ON: Preface ${sec.num}, ${sec.title}\n${sec.blocks.map((x) => x.t).join("\n")}`);
@@ -54,7 +54,7 @@ function ownerContext(b: ReturnType<typeof bookFor>, input: AskInput) {
       if (l.n !== lawN) continue;
       if (!l.sections) { blocks.push(`Law ${l.n} is not open to this reader yet: its part opens ${p.opens}.`); continue; }
       blocks.push(`THE LAW THE READER HAS OPEN: Law ${l.n}, ${l.title}\nJudgment: ${l.judgment ?? ""}\n${l.story ?? ""}\nKey: ${l.key ?? ""}\n` +
-        l.sections.map((x) => `${x.name}: ${x.text}`).join("\n"));
+        l.sections.map((x: any) => `${x.name}: ${x.text}`).join("\n"));
     }
   }
   return blocks.join("\n\n");

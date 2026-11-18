@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import * as FRONT from "../../content/en/front";
 import { PREFACE } from "../../content/en/preface";
-import { PARTS, PASS_LINE } from "../../content/en/contents";
+import { PARTS, PASS_LINE } from "../../content/en/content";
 import { PEOPLE, NAMES } from "../../content/en/whoswho";
 import { WORD_CARDS, WORDS } from "../../content/en/words";
 import type { Law, Part } from "../../content/en/types";

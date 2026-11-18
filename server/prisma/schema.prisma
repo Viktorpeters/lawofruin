@@ -5,8 +5,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   // pooled: what the running server uses
+  directUrl = env("DIRECT_URL")     // direct: what `npm run db:push` uses to build the tables
 }
 
 model User {
@@ -73,10 +74,31 @@ model Earning {
 }
 
 model AskUsage {
-  id     String @id @default(cuid())
-  userId String
-  day    String                              // "2026-11-14"
-  count  Int    @default(0)
+  id        String @id @default(cuid())
+  userId    String
+  day       String                           // "2026-11-14"
+  count     Int    @default(0)               // questions asked that day
+  tokensIn  Int    @default(0)               // what the AI read, all questions that day
+  tokensOut Int    @default(0)               // what the AI wrote
+  cost      Float  @default(0)               // in US dollars, worked out from the tokens
 
   @@unique([userId, day])
+  @@index([day])
+}
+
+/* every AI answer, kept so you can read what readers ask and check the answers */
+model AskLog {
+  id        String   @id @default(cuid())
+  userId    String
+  question  String
+  answer    String
+  law       Int?
+  section   String?
+  lang      String
+  cached    Boolean  @default(false)         // answered from the cache: cost nothing
+  flagged   Boolean  @default(false)         // a quotation could not be found in the book
+  cost      Float    @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
