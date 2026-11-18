@@ -5,7 +5,9 @@ import crypto from "crypto";
 import { prisma } from "../../lib/prisma";
 import { HttpError } from "../../lib/http";
 import { sendMail } from "../../lib/mailer";
+import { otpMail, welcomeMail } from "../../emails/templates";
 import { signToken } from "../../lib/tokens";
+import { env } from "../../config/env";
 import { REFERRAL_WINDOW_DAYS } from "../../config/sale";
 
 const CODE_MINUTES = 10;
@@ -28,18 +30,7 @@ export async function startEmail(email: string) {
   const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
   await prisma.emailCode.create({ data: { email, codeHash: hash(`${email}:${code}`), expiresAt: new Date(Date.now() + CODE_MINUTES * 60_000) } });
 
-  const spaced = `${code.slice(0, 3)} ${code.slice(3)}`;
-  await sendMail(
-    email,
-    `${spaced} is your Laws of Ruin code`,
-    `<div style="font-family:Georgia,serif;background:#0b0a08;color:#ede6d8;padding:40px 28px;text-align:center">
-      <p style="font-family:monospace;letter-spacing:.24em;font-size:11px;color:#c9a56b;margin:0 0 18px">THE LAWS OF RUIN</p>
-      <p style="font-size:17px;margin:0 0 22px">Your sign-in code</p>
-      <p style="font-family:monospace;font-size:34px;letter-spacing:.2em;color:#c9a56b;margin:0 0 22px">${spaced}</p>
-      <p style="font-size:14px;color:#a39a8b;margin:0">It works for ${CODE_MINUTES} minutes. If you did not ask for it, ignore this email.</p>
-    </div>`,
-    `Your Laws of Ruin sign-in code is ${spaced}. It works for ${CODE_MINUTES} minutes.`,
-  );
+  await sendMail(email, otpMail(code, CODE_MINUTES));
 }
 
 export async function verifyEmail(email: string, code: string, ref: RefClaim) {
@@ -66,15 +57,23 @@ async function signIn(who: { email: string }, ref: RefClaim) {
       const sharer = await prisma.user.findUnique({ where: { refCode: ref.code } });
       if (sharer && sharer.email !== who.email) { referredById = sharer.id; referredAt = new Date(ref.at); }
     }
+    let created = false;
     for (let i = 0; i < 5 && !user; i++) {
       try {
         user = await prisma.user.create({ data: { email: who.email, refCode: newRefCode(), referredById, referredAt } });
+        created = true;
       } catch (e) {
         if (i === 4) throw e;   // a clash on the link code: try another
       }
     }
+    // the welcome email goes out in the background: a slow mail service never delays sign-in
+    if (created && user) sendWelcome(who.email, user.refCode).catch((e) => console.error("Welcome email failed:", e));
   }
   return { token: signToken({ sub: user!.id, email: user!.email }), user: publicUser(user!) };
+}
+
+async function sendWelcome(email: string, refCode: string) {
+  await sendMail(email, welcomeMail(`${env.APP_URL.replace(/\/$/, "")}/r/${refCode}`));
 }
 
 export function publicUser(u: { id: string; email: string; name: string | null; refCode: string }) {
