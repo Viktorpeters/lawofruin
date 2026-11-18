@@ -15,7 +15,7 @@ const schema = z.object({
   CORS_ORIGINS: z.string().transform(list),
   BREVO_API_KEY: z.string().min(1),
   MAIL_FROM_EMAIL: z.string().email(),
-  MAIL_FROM_NAME: z.string().default("The Laws of Ruin"),
+  MAIL_FROM_NAME: z.string().default("Orion Publications"),
   ANTHROPIC_API_KEY: z.string().default(""),
   ASK_MODEL: z.string().default("claude-haiku-5-5"),
   TRANSLATE_MODEL: z.string().default("claude-sonnet-5-5"),

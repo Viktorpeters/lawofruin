@@ -1,0 +1,248 @@
+/* Layout: exactly one screen tall, built for phones first.
+   Row 1: the name, the turning line and the opening date; the hourglass on the right.
+   Row 2: the shelves (their height is set in shelf.module.css).
+   Row 3: "Swipe the shelves" and the count.
+   Row 4: the thesis and the promise, sound and pause; "Add to" on the right. */
+
+.hero {
+  height: 100dvh;
+  min-height: 560px;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  row-gap: 8px;
+  padding:
+    calc(14px + var(--safe-top)) var(--gutter-r)
+    calc(12px + var(--safe-bottom)) var(--gutter);
+  overflow: hidden;
+  background:
+    radial-gradient(90% 55% at 50% 42%, rgba(120, 72, 36, 0.22), rgba(0, 0, 0, 0) 70%),
+    linear-gradient(#120d09, var(--ink-0));
+}
+
+/* ---------- top ---------- */
+.top {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 74px;
+}
+.brand { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding-right: 50px; }
+.brandName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(16px, 4.6vw, 20px);
+  line-height: 1;
+  letter-spacing: 0.09em;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+/* the turning line: four lines share one place, each shows for a few seconds */
+.whisper {
+  display: grid;
+  margin: 0;
+  min-height: 17px;
+  max-width: calc(100% - 80px);   /* stops before the hourglass; long lines wrap instead of running under it */
+}
+.whisperLine {
+  grid-area: 1 / 1;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  text-wrap: balance;
+  color: color-mix(in srgb, var(--gold) 80%, var(--ivory));
+  opacity: 0;
+  animation: whisper 18s linear infinite;
+}
+@keyframes whisper {
+  0% { opacity: 0; transform: translateY(5px); }
+  3%, 22% { opacity: 1; transform: none; }
+  25%, 100% { opacity: 0; transform: translateY(-4px); }
+}
+/* paused: the first line stays */
+.hero[data-motion="off"] .whisperLine { animation: none; }
+.hero[data-motion="off"] .whisperLine:nth-child(2) { opacity: 1; }
+
+.opens {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.opensLabel { color: var(--mute); }
+.opensDays { color: var(--oxblood); }
+
+/* the hourglass: the picture is wider than the glass so the full turn fits inside it.
+   It is painted on the page colour with its shadow built in (a third of the weight of a
+   transparent one), and its edges fade softly so no box can ever show. */
+.glass {
+  position: absolute;
+  top: -17px;
+  right: -21px;
+  width: 89px;
+  height: auto;
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 10px, #000 calc(100% - 10px), transparent),
+    linear-gradient(to bottom, transparent, #000 10px, #000 calc(100% - 10px), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 10px, #000 calc(100% - 10px), transparent),
+    linear-gradient(to bottom, transparent, #000 10px, #000 calc(100% - 10px), transparent);
+  mask-composite: intersect;
+}
+
+/* ---------- bottom ---------- */
+.bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 0;
+}
+.left { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1 1 auto; }
+.words { display: grid; align-items: end; min-width: 0; }
+.thesis, .card { grid-area: 1 / 1; }
+.thesis {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: opacity 0.4s, transform 0.4s;
+}
+.away { opacity: 0; transform: translateY(6px); pointer-events: none; }
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(24px, 6.8vw, 32px);
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.tagline {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.7;
+  color: var(--gold);
+  text-wrap: balance;
+}
+
+/* the pulled volume's card */
+.card {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  column-gap: 12px;
+  align-items: start;
+  animation: cardIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.thumb {
+  position: relative;
+  width: 56px;
+  height: 78px;
+  overflow: hidden;
+  border: 1px solid rgba(201, 165, 107, 0.6);
+  background: #2a231d;
+  filter: grayscale(0.9) sepia(0.3);
+}
+.cardText { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 6px;
+  margin-top: 3px;
+}
+.cardRealm { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+.cardName { font-family: var(--font-display); font-weight: 500; font-size: 21px; line-height: 1.05; }
+.cardKnown { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ivory-dim); }
+.cardDates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--ivory-dim);
+}
+.cardDates i { width: 22px; height: 1px; background: var(--gold); }
+.cardFate { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--oxblood); }
+.putBack {
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--ivory-dim);
+  border: 1px solid var(--rule);
+  padding: 4px 11px;
+}
+.putBack:hover { color: var(--ivory); border-color: var(--ivory-dim); }
+
+/* sound and pause */
+.controls { display: flex; gap: 8px; align-items: center; }
+.left[data-pulled] .controls { display: none; }   /* the card takes their place while a volume is out */
+.ctrl {
+  height: 34px;
+  min-width: 34px;
+  padding: 0 10px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--ivory) 22%, transparent);
+  color: var(--ivory-dim);
+  transition: color 0.3s, border-color 0.3s;
+}
+.ctrl:hover { color: var(--ivory); border-color: color-mix(in srgb, var(--ivory) 55%, transparent); }
+.ctrlOn { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 60%, transparent); }
+.ctrl:disabled { opacity: 0.4; cursor: default; }
+.wave { width: 46px; height: 22px; display: block; fill: currentColor; }
+.icon { width: 14px; height: 14px; fill: currentColor; display: block; }
+
+/* Terms, Privacy, Refunds, Contact: one quiet line under the thesis */
+.left .legal { gap: 4px 16px; font-size: 9.5px; }
+.left[data-pulled] .legal { display: none; }
+
+/* phones: the links take the place of sound and pause */
+@media (max-width: 899px) {
+  .controls { display: none; }
+}
+@media (max-width: 400px) {
+  .left .legal { display: grid; grid-template-columns: auto auto; justify-content: start; gap: 2px 18px; }   /* two neat pairs instead of one word left over */
+}
+
+.install { flex: none; }
+
+/* ---------- short phones ---------- */
+@media (max-height: 700px) {
+  .hero { row-gap: 6px; padding-top: calc(10px + var(--safe-top)); }
+  .title { font-size: 22px; }
+  .tagline { font-size: 10px; }
+  .ctrl { height: 30px; min-width: 30px; }
+}
+
+/* ---------- wide screens ---------- */
+@media (min-width: 900px) {
+  .hero { row-gap: 12px; padding-top: calc(24px + var(--safe-top)); padding-bottom: calc(20px + var(--safe-bottom)); }
+  .brandName { font-size: 24px; }
+  .whisperLine { font-size: 12px; }
+  .whisper { max-width: none; }
+  .whisperLine { white-space: nowrap; }   /* wide screens have room: one line, as before */
+  .opens { font-size: 10.5px; }
+  .glass { width: 110px; top: -23px; right: -23px; }
+  .title { font-size: clamp(32px, 3vw, 44px); }
+  .tagline { font-size: 12.5px; }
+  .ctrl { height: 38px; min-width: 38px; padding: 0 12px; }
+  .wave { width: 58px; height: 24px; }
+  .cardName { font-size: 26px; }
+  .left .legal { font-size: 10.5px; gap: 6px 20px; }
+}

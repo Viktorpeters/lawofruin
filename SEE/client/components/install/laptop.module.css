@@ -1,0 +1,204 @@
+/* The 3D laptop. Like the phone, it is drawn at twice its size and shown at half (zoom),
+   so the tiny window title and taskbar icons stay sharp. */
+
+.stage {
+  display: block;
+  width: 236px;
+  height: 196px;
+  zoom: 0.5;
+  perspective: 900px;
+  perspective-origin: 50% 20%;
+  filter: drop-shadow(0 18px 14px rgba(0, 0, 0, 0.55));
+}
+
+.lap {
+  --w: 196px;          /* lid width */
+  --h: 128px;          /* lid height */
+  --hinge: 132px;      /* where the lid meets the deck, from the top of the stage */
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(-14deg) rotateY(-32deg);
+  animation: show 7s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+@keyframes show {
+  0%, 12% { transform: rotateX(-14deg) rotateY(-32deg) translateY(0); }
+  45%, 62% { transform: rotateX(-12deg) rotateY(30deg) translateY(-5px); }
+  100% { transform: rotateX(-14deg) rotateY(-32deg) translateY(0); }
+}
+[data-motion="off"] .lap { animation-play-state: paused; }   /* the pause button on the hero */
+
+/* ---------- the deck: lies flat, coming towards the viewer ---------- */
+.deck {
+  position: absolute;
+  left: calc(50% - var(--w) / 2 - 8px);
+  top: var(--hinge);
+  width: calc(var(--w) + 16px);
+  height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 16px 0;
+  transform-origin: 50% 0;
+  transform: rotateX(90deg);
+  background: linear-gradient(#d9d1c2, #b9b0a1 60%, #a59c8d);   /* the same titanium as the phone */
+  border-radius: 0 0 9px 9px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+.keys {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2.4px;
+  width: 100%;
+  padding: 5px;
+  background: #2b2621;
+  border-radius: 3px;
+}
+.keys i { display: block; height: 9px; background: #181512; border-radius: 1.5px; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08); }
+.pad {
+  display: block;
+  width: 44%;
+  height: 46px;
+  border-radius: 4px;
+  background: linear-gradient(#cfc7b8, #c2b9aa);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+/* the front edge of the deck, so it has thickness */
+.lip {
+  position: absolute;
+  left: calc(50% - var(--w) / 2 - 8px);
+  top: var(--hinge);
+  width: calc(var(--w) + 16px);
+  height: 7px;
+  transform-origin: 50% 0;
+  transform: translateZ(132px) rotateX(0deg);
+  background: linear-gradient(#9b9284, #6f675b);
+  border-radius: 0 0 6px 6px;
+}
+
+/* ---------- the lid: stands at the hinge, leaning back ---------- */
+.lid {
+  position: absolute;
+  left: calc(50% - var(--w) / 2);
+  top: calc(var(--hinge) - var(--h));
+  width: var(--w);
+  height: var(--h);
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
+  transform: rotateX(12deg);
+}
+.lidBack {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px 8px 2px 2px;
+  transform: translateZ(-3px) rotateY(180deg);
+  background: linear-gradient(135deg, #e8e0d0, #8d8578 45%, #f0e9dc 75%, #7b7365);
+  backface-visibility: hidden;
+}
+.bezel {
+  position: absolute;
+  inset: 0;
+  display: block;
+  padding: 7px 7px 9px;
+  border-radius: 8px 8px 2px 2px;
+  background: #0b0b0b;
+  box-shadow: 0 0 0 1.5px #a59c8d;
+  backface-visibility: hidden;
+}
+.cam {
+  position: absolute;
+  top: 2.5px;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  margin-left: -1.5px;
+  border-radius: 50%;
+  background: #2a2a2a;
+}
+.screen {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 2px;
+  background:
+    radial-gradient(120% 80% at 15% 10%, #5a3a26, transparent 60%),
+    radial-gradient(120% 90% at 90% 100%, #2a3a4a, transparent 60%),
+    linear-gradient(#24170f, #120d09);
+}
+
+/* the book's own window */
+.win {
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 8%;
+  bottom: 22%;
+  display: flex;
+  flex-direction: column;
+  background: #120d09;
+  border: 0.6px solid rgba(201, 165, 107, 0.55);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+.winBar {
+  display: flex;
+  align-items: center;
+  height: 9px;
+  padding: 0 4px;
+  background: #1d1510;
+  border-bottom: 0.6px solid rgba(201, 165, 107, 0.3);
+}
+.winDots { margin-left: auto; display: flex; gap: 2.5px; }
+.winDots i { width: 3px; height: 3px; border-radius: 50%; background: #6f675b; }
+.winBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background:
+    radial-gradient(70% 60% at 50% 40%, rgba(120, 72, 36, 0.35), transparent 70%),
+    #120d09;
+}
+.winIcon { width: 34px; height: 34px; border-radius: 7px; box-shadow: 0 0 0 0.8px rgba(201, 165, 107, 0.6), 0 4px 10px rgba(0, 0, 0, 0.6); }
+.rule { width: 30px; height: 3px; border-top: 0.8px solid #c9a56b; border-bottom: 0.8px solid #c9a56b; }
+
+/* the taskbar, with our icon lit */
+.bar {
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 3px 5px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 0.6px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+}
+.barIcon { position: relative; display: block; width: 11px; height: 11px; }
+.barIcon img { width: 100%; height: 100%; border-radius: 2.5px; display: block; }
+.ours::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -2.5px;
+  width: 4px;
+  height: 1.2px;
+  margin-left: -2px;
+  background: #c9a56b;
+  border-radius: 1px;
+}
+.ours img { box-shadow: 0 0 0 0.8px #c9a56b, 0 0 6px rgba(201, 165, 107, 0.7); }
+
+.glare {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 38%);
+  pointer-events: none;
+}
