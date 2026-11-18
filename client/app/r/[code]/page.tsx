@@ -1,4 +1,4 @@
-/* A reader's referral link: lawofruin.io/r/<code>. Remembers who sent this visitor (for 30 days),
+/* A reader's referral link: lawofruin.app/r/<code>. Remembers who sent this visitor (for 30 days),
    counts the click once, and goes on to the home page. */
 import { Suspense } from "react";
 import Go from "./Go";
