@@ -3,7 +3,10 @@
 import { env } from "../config/env";
 import { HttpError } from "./http";
 
-export async function sendMail(to: string, subject: string, html: string, text: string) {
+import type { Mail } from "../emails/templates";
+
+export async function sendMail(to: string, mail: Mail) {
+  const { subject, html, text, unsubscribeUrl } = mail;
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": env.BREVO_API_KEY, "content-type": "application/json", accept: "application/json" },
@@ -13,6 +16,8 @@ export async function sendMail(to: string, subject: string, html: string, text: 
       subject,
       htmlContent: html,
       textContent: text,
+      // marketing emails: Gmail and Apple Mail show their own Unsubscribe button from this
+      ...(unsubscribeUrl ? { headers: { "List-Unsubscribe": `<${unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } } : {}),
     }),
   });
   if (!res.ok) {
