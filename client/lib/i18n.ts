@@ -33,7 +33,7 @@ const en = {
   signInToEarn: "Sign in to get your link",
   askOwner: "Ask about any law, any person or any moment in the book.",
   askMember: "Before you buy, I can tell you about release dates, the price, the languages and how to buy. Everything else opens once the book is yours.",
-  askPh: "Your question", send: "Send", signInToAsk: "Sign in to ask", thinking: "Thinking",
+  askLeft: "{n} questions left today", askPh: "Your question", send: "Send", signInToAsk: "Sign in to ask", thinking: "Thinking",
   law: "Law", opensOn: "Opens on", key: "KEY", openSections: "Open the {n} sections", opens: "Opens", noConnection: "Connect to the internet once to download the book.", retry: "Try again",
 };
 
@@ -61,7 +61,7 @@ const fr: Dict = {
   signInToEarn: "Se connecter pour obtenir votre lien",
   askOwner: "Posez une question sur n'importe quelle loi, personne ou moment du livre.",
   askMember: "Avant l'achat, je peux vous parler des dates de sortie, du prix, des langues et de la façon d'acheter. Le reste s'ouvre quand le livre est à vous.",
-  askPh: "Votre question", send: "Envoyer", signInToAsk: "Se connecter pour demander", thinking: "Réflexion",
+  askLeft: "Encore {n} questions aujourd'hui", askPh: "Votre question", send: "Envoyer", signInToAsk: "Se connecter pour demander", thinking: "Réflexion",
   law: "Loi", opensOn: "S'ouvre sur", key: "CLÉ", openSections: "Ouvrir les {n} sections", opens: "Ouvre le", noConnection: "Connectez-vous à Internet une fois pour télécharger le livre.", retry: "Réessayer",
 };
 
@@ -87,7 +87,7 @@ const es: Dict = {
   signInToEarn: "Inicia sesión para obtener tu enlace",
   askOwner: "Pregunta sobre cualquier ley, persona o momento del libro.",
   askMember: "Antes de comprar, puedo hablarte de las fechas, el precio, los idiomas y cómo comprar. Todo lo demás se abre cuando el libro sea tuyo.",
-  askPh: "Tu pregunta", send: "Enviar", signInToAsk: "Inicia sesión para preguntar", thinking: "Pensando",
+  askLeft: "Te quedan {n} preguntas hoy", askPh: "Tu pregunta", send: "Enviar", signInToAsk: "Inicia sesión para preguntar", thinking: "Pensando",
   law: "Ley", opensOn: "Empieza con", key: "CLAVE", openSections: "Abrir las {n} secciones", opens: "Abre el", noConnection: "Conéctate a internet una vez para descargar el libro.", retry: "Reintentar",
 };
 
@@ -113,7 +113,7 @@ const pt: Dict = {
   signInToEarn: "Entre para receber seu link",
   askOwner: "Pergunte sobre qualquer lei, pessoa ou momento do livro.",
   askMember: "Antes da compra, posso falar das datas, do preço, dos idiomas e de como comprar. O resto abre quando o livro for seu.",
-  askPh: "Sua pergunta", send: "Enviar", signInToAsk: "Entre para perguntar", thinking: "Pensando",
+  askLeft: "Restam {n} perguntas hoje", askPh: "Sua pergunta", send: "Enviar", signInToAsk: "Entre para perguntar", thinking: "Pensando",
   law: "Lei", opensOn: "Começa com", key: "CHAVE", openSections: "Abrir as {n} seções", opens: "Abre em", noConnection: "Conecte-se à internet uma vez para baixar o livro.", retry: "Tentar de novo",
 };
 
@@ -139,7 +139,7 @@ const de: Dict = {
   signInToEarn: "Anmelden, um Ihren Link zu erhalten",
   askOwner: "Fragen Sie nach jedem Gesetz, jeder Person und jedem Moment im Buch.",
   askMember: "Vor dem Kauf kann ich Ihnen Erscheinungstermine, Preis, Sprachen und den Kauf erklären. Alles andere öffnet sich, sobald das Buch Ihnen gehört.",
-  askPh: "Ihre Frage", send: "Senden", signInToAsk: "Zum Fragen anmelden", thinking: "Denke nach",
+  askLeft: "Heute noch {n} Fragen", askPh: "Ihre Frage", send: "Senden", signInToAsk: "Zum Fragen anmelden", thinking: "Denke nach",
   law: "Gesetz", opensOn: "Beginnt mit", key: "SCHLÜSSEL", openSections: "Die {n} Abschnitte öffnen", opens: "Ab", noConnection: "Verbinden Sie sich einmal mit dem Internet, um das Buch zu laden.", retry: "Erneut versuchen",
 };
 
