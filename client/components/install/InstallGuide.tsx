@@ -106,7 +106,7 @@ export default function InstallGuide({ mode, onClose }: { mode: Mode; onClose: (
 
         {(mode === "inapp" || mode === "desktop") && (
           <div className={styles.linkRow}>
-            <span className={styles.linkText}>lawofruin.io</span>
+            <span className={styles.linkText}>lawofruin.app</span>
             <button className={styles.textBtn} onClick={copyLink}>{copied ? "Copied" : "Copy link"}</button>
           </div>
         )}
@@ -201,7 +201,7 @@ function IosScreens({ step }: { step: number }) {
           {/* address bar and toolbar, bottom of Safari */}
           <rect x="16" y="516" width="268" height="68" fill="#1c1a17" />
           <rect x="34" y="474" width="232" height="34" rx="12" fill="#2a2724" />
-          <text x="150" y="496" fill="#d6cfc2" fontSize="12" textAnchor="middle" fontFamily="var(--font-ui)">lawofruin.io</text>
+          <text x="150" y="496" fill="#d6cfc2" fontSize="12" textAnchor="middle" fontFamily="var(--font-ui)">lawofruin.app</text>
           <g stroke="#7ea7ff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
             <path d="M44 540 l-8 8 8 8" /><path d="M86 540 l8 8 -8 8" opacity=".35" />
             <g className={step === 0 ? styles.pulse : undefined}>
@@ -216,7 +216,7 @@ function IosScreens({ step }: { step: number }) {
             <rect x="130" y="258" width="40" height="5" rx="2.5" fill="#55504a" />
             <image href="/icons/icon-192.png" x="32" y="274" width="38" height="38" />
             <text x="80" y="290" fill="#ede6d8" fontSize="12.5" fontFamily="var(--font-ui)">The Laws of Ruin</text>
-            <text x="80" y="306" fill="#8c8377" fontSize="10.5" fontFamily="var(--font-ui)">lawofruin.io</text>
+            <text x="80" y="306" fill="#8c8377" fontSize="10.5" fontFamily="var(--font-ui)">lawofruin.app</text>
             {[0, 1, 2, 3, 4].map((i) => <circle key={i} cx={46 + i * 52} cy="348" r="20" fill={["#2f6f3e", "#2e5d8f", "#6b4b2f", "#5a2e2a", "#3a3632"][i]} />)}
             <g clipPath="url(#gp-list)"><g style={{ transform: `translateY(${scroll}px)`, transition: "transform .8s cubic-bezier(.2,.8,.2,1)" }}>
               {rows.map((r, i) => {
@@ -244,7 +244,7 @@ function IosScreens({ step }: { step: number }) {
           <image href="/icons/icon-192.png" x="40" y="118" width="58" height="58" style={{ clipPath: "inset(0 round 13px)" }} />
           <text x="112" y="140" fill="#ede6d8" fontSize="14" fontFamily="var(--font-ui)">Laws of Ruin</text>
           <line x1="112" y1="150" x2="258" y2="150" stroke="#3d3934" />
-          <text x="112" y="170" fill="#8c8377" fontSize="11" fontFamily="var(--font-ui)">lawofruin.io</text>
+          <text x="112" y="170" fill="#8c8377" fontSize="11" fontFamily="var(--font-ui)">lawofruin.app</text>
           <Tap x={255} y={74} />
         </g>
       )}
@@ -262,7 +262,7 @@ function AndroidScreens({ step }: { step: number }) {
           <rect x="16" y="16" width="268" height="568" fill="#0b0a08" />
           <rect x="16" y="50" width="268" height="54" fill="#1f1d1b" />
           <rect x="30" y="62" width="200" height="30" rx="15" fill="#2e2b28" />
-          <text x="48" y="82" fill="#d6cfc2" fontSize="12" fontFamily="var(--font-ui)">lawofruin.io</text>
+          <text x="48" y="82" fill="#d6cfc2" fontSize="12" fontFamily="var(--font-ui)">lawofruin.app</text>
           <g fill="#ede6d8" className={step === 0 ? styles.pulse : undefined}><circle cx="258" cy="69" r="2.4" /><circle cx="258" cy="77" r="2.4" /><circle cx="258" cy="85" r="2.4" /></g>
           <SitePreview top={104} bottom={584} />
           {step === 0 && <Tap x={258} y={77} />}
@@ -288,7 +288,7 @@ function AndroidScreens({ step }: { step: number }) {
               <text x="56" y="246" fill="#ede6d8" fontSize="15" fontFamily="var(--font-ui)">Install app</text>
               <image href="/icons/icon-192.png" x="56" y="264" width="44" height="44" />
               <text x="112" y="284" fill="#ede6d8" fontSize="12.5" fontFamily="var(--font-ui)">Laws of Ruin</text>
-              <text x="112" y="300" fill="#8c8377" fontSize="10.5" fontFamily="var(--font-ui)">lawofruin.io</text>
+              <text x="112" y="300" fill="#8c8377" fontSize="10.5" fontFamily="var(--font-ui)">lawofruin.app</text>
               <text x="176" y="356" fill="#8ab4ff" fontSize="13" fontFamily="var(--font-ui)" textAnchor="end">Cancel</text>
               <text x="244" y="356" fill="#8ab4ff" fontSize="13" fontFamily="var(--font-ui)" textAnchor="end" fontWeight="600" className={styles.pulse}>Install</text>
               <Tap x={226} y={352} />
@@ -307,7 +307,7 @@ function InAppScreens({ step }: { step: number }) {
       <rect x="16" y="16" width="268" height="568" fill="#0b0a08" />
       <rect x="16" y="50" width="268" height="50" fill="#f2efe9" />
       <text x="34" y="80" fill="#222" fontSize="18" fontFamily="var(--font-ui)">×</text>
-      <text x="150" y="80" fill="#222" fontSize="12" textAnchor="middle" fontFamily="var(--font-ui)">lawofruin.io</text>
+      <text x="150" y="80" fill="#222" fontSize="12" textAnchor="middle" fontFamily="var(--font-ui)">lawofruin.app</text>
       <g fill="#222" className={step === 0 ? styles.pulse : undefined}><circle cx="252" cy="76" r="2.4" /><circle cx="260" cy="76" r="2.4" /><circle cx="268" cy="76" r="2.4" /></g>
       <SitePreview top={100} bottom={584} />
       {step === 0 && <Tap x={260} y={76} />}
