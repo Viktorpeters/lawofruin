@@ -11,7 +11,6 @@ import type { ApiError, Me } from "@/lib/api";
 import { useEarnStats, usePricing, usePurchases } from "@/lib/queries";
 import { useAsk, useStartEmail, useVerifyEmail } from "@/lib/actions";
 import type { Money } from "@/lib/services/referrals.service";
-import type { Currency } from "@/lib/services/shop.service";
 import { LANGS, t, type Key, type Lang } from "@/lib/i18n";
 import type { TrayItemId } from "./trayItems";
 import s from "./panels.module.css";
@@ -64,7 +63,7 @@ export default function Panel(props: Props) {
 
   return (
     <div className={`${s.wrap} ${closing ? s.closing : ""}`} onClick={close}>
-      <section className={s.panel} role="dialog" aria-label={t(lang, TITLE[id])} onClick={(e) => e.stopPropagation()} data-panel={id}>
+      <section className={`${s.panel} ${id === "ask" ? s.askPanel : ""}`} role="dialog" aria-label={t(lang, TITLE[id])} onClick={(e) => e.stopPropagation()} data-panel={id}>
         <header className={s.head}>
           <h2 className={s.title}>{t(lang, TITLE[id])}</h2>
           <button type="button" className={s.close} onClick={close} aria-label={t(lang, "close")}>×</button>
@@ -178,9 +177,14 @@ function Ask({ lang, me, owner, section, law, onOpen }: Props) {
   const ask = useAsk();
   const busy = ask.isPending;
   const err = ask.error ? (ask.error as ApiError).message : "";
-  const end = useRef<HTMLDivElement>(null);
+  const box = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { askLog = log; end.current?.scrollIntoView({ block: "end" }); }, [log, busy]);
+  // the messages scroll inside their own box; keep the newest one in view
+  useEffect(() => {
+    askLog = log;
+    const el = box.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [log, busy]);
 
   if (!me) {
     return (
@@ -207,14 +211,17 @@ function Ask({ lang, me, owner, section, law, onOpen }: Props) {
   return (
     <>
       <p className={s.small}>{t(lang, owner ? "askOwner" : "askMember")}</p>
-      <div className={s.chat}>
+      <div className={s.chat} ref={box}>
         {log.map((m, i) => (
           <p key={i} className={m.role === "user" ? s.qMsg : s.aMsg}>{m.text}</p>
         ))}
-        {busy && <p className={`${s.aMsg} ${s.thinking}`}>{t(lang, "thinking")}<span>.</span><span>.</span><span>.</span></p>}
+        {busy && (
+          <div className={s.thinking} role="status" aria-label={t(lang, "thinking")}>
+            <span /><span /><span />
+          </div>
+        )}
         {err && <p className={s.error}>{err}</p>}
         {left !== null && !busy && <p className={s.pending}>{t(lang, "askLeft", { n: Math.max(0, left) })}</p>}
-        <div ref={end} />
       </div>
       <form className={s.askForm} onSubmit={send}>
         <input className={s.search} value={q} onChange={(e) => setQ(e.target.value)} placeholder={t(lang, "askPh")} aria-label={t(lang, "askPh")} maxLength={600} />
@@ -289,11 +296,9 @@ function Earn({ lang, me, onOpen }: Props) {
 /* ---------- Purchases ---------- */
 
 function Purchases({ lang, me, onOpen }: Props) {
-  const [cur, setCur] = useState<Currency | undefined>(undefined);
+  // the server decides the currency from where the reader is; the app only shows it
   const items = usePurchases().data;
-  const price = usePricing(cur).data;
-
-  const other = price?.currency === "NGN" ? "USD" : "NGN";
+  const price = usePricing().data;
 
   return (
     <>
@@ -313,9 +318,6 @@ function Purchases({ lang, me, onOpen }: Props) {
               ) : (
                 <button type="button" className={s.line} onClick={() => onOpen("account")}>{t(lang, "signInToBuy")}</button>
               )}
-              <button type="button" className={s.switch} onClick={() => setCur(other)}>
-                {t(lang, other === "NGN" ? "payNaira" : "payDollars")}
-              </button>
             </>
           )}
         </div>
@@ -360,7 +362,7 @@ function Appearance({ lang, onLang, fontSize, setFontSize, left, setLeft, onRest
 
 /* ---------- Account ---------- */
 
-function Account({ lang, me, onSignOut }: Props) {
+function Account({ lang, me, onSignOut, onClose }: Props) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [code, setCode] = useState("");
@@ -379,7 +381,8 @@ function Account({ lang, me, onSignOut }: Props) {
   const verify = (e: React.FormEvent) => {
     e.preventDefault();
     startEmail.reset();
-    verifyEmail.mutate({ email, code, lang });   // on success the reader appears everywhere at once
+    // on success the reader appears everywhere at once, and the panel slides back down
+    verifyEmail.mutate({ email, code, lang }, { onSuccess: () => onClose() });
   };
 
   return (
@@ -396,7 +399,9 @@ function Account({ lang, me, onSignOut }: Props) {
           {!sent ? (
             <form onSubmit={start}>
               <input className={s.search} type="email" autoComplete="email" required placeholder={t(lang, "emailPh")} value={email} onChange={(e) => setEmail(e.target.value)} />
-              <button type="submit" className={s.line} disabled={busy || !email}>{t(lang, "sendCode")}</button>
+              <button type="submit" className={s.line} disabled={busy || !email} aria-busy={startEmail.isPending}>
+                {startEmail.isPending ? <><span>{t(lang, "sending")}</span><span className={s.spin} aria-hidden="true" /></> : t(lang, "sendCode")}
+              </button>
             </form>
           ) : (
             <form onSubmit={verify}>
@@ -411,7 +416,9 @@ function Account({ lang, me, onSignOut }: Props) {
                 onChange={(e) => setCode(e.target.value.replace(/[^\d ]/g, ""))}
                 autoFocus
               />
-              <button type="submit" className={s.line} disabled={busy || code.replace(/\s/g, "").length !== 6}>{t(lang, "signIn")}</button>
+              <button type="submit" className={s.line} disabled={busy || code.replace(/\s/g, "").length !== 6} aria-busy={verifyEmail.isPending}>
+                {verifyEmail.isPending ? <><span>{t(lang, "signingIn")}</span><span className={s.spin} aria-hidden="true" /></> : t(lang, "signIn")}
+              </button>
               <button type="button" className={s.switch} onClick={() => { setSent(false); setCode(""); startEmail.reset(); verifyEmail.reset(); }}>{t(lang, "changeEmail")}</button>
             </form>
           )}

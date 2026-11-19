@@ -3,7 +3,8 @@
 /* The reader menu: one round glass button at the bottom right. Tapping it brings the five
    items out in a column above it, one after another: each grows from nothing to full size,
    from the bottom right where the button is, 40ms after the one below it, with a small
-   overshoot so it lands with a snap. Each label sits in a glass chip beside its icon.
+   overshoot so it lands with a snap. Each label is a small sharp white-edged card (its own
+   picture, then the words) close beside its round icon.
    Tap an item to open its panel; tap outside, the button again or Escape to close (the items
    go back in, the last one first). Left-handed readers can mirror it (Appearance).
    Ask has its own glass button directly above, always one tap away. */
@@ -67,7 +68,10 @@ export default function Tray({ left, light, lang, onChoose, onAsk }: Props) {
               tabIndex={open ? 0 : -1}
               aria-hidden={!open}
             >
-              <span className={styles.label}>{t(lang, item.id)}</span>
+              <span className={styles.label}>
+                <span className={styles.mark}>{item.mark}</span>
+                {t(lang, item.id)}
+              </span>
               <span className={styles.icon}>{item.icon}</span>
             </button>
           );

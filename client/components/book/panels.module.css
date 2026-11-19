@@ -134,26 +134,56 @@
 .seg button[aria-pressed="true"] { border-color: #ffffff; }
 .line { display: grid; place-items: center; width: 100%; margin-top: 12px; border: 1.5px solid #ffffff; font-weight: 600; }
 .line:disabled { opacity: 0.4; cursor: default; }
+/* while a code is sending or a sign-in is checking: the words, then a turning ring beside them */
+.line[aria-busy="true"] { display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 1; }
+.spin { width: 14px; height: 14px; border: 1.5px solid rgba(255, 255, 255, 0.28); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 1.6s; } }
 a.line { text-decoration: none; }
 
 .error { margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: #ff8a80; }
 .code { font-family: var(--font-mono), monospace; font-size: 20px; letter-spacing: 0.3em; text-align: center; }
 .switch { display: block; margin: 12px auto 0; padding: 6px 4px; font-size: 13px; color: var(--soft); text-decoration: underline; text-underline-offset: 4px; }
 
-/* Ask */
-.chat { display: flex; flex-direction: column; gap: 12px; margin: 16px 0 14px; min-height: 40px; }
+/* Ask: the sheet grows with the conversation up to 60% of the screen and stops there.
+   The title and the close button stay put, the messages scroll in their own box, and the
+   question field with Send always stays at the bottom, above the messages. */
+.askPanel { display: flex; flex-direction: column; max-height: 60svh; overflow: hidden; }
+.askPanel .head { flex: none; }
+.askPanel .body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.askPanel .body > .small { flex: none; }
+@media (min-width: 900px) { .askPanel { max-height: none; } }
+
+.chat { flex: 1; min-height: 40px; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 12px; margin: 16px 0 12px; padding-right: 4px; }
 .qMsg, .aMsg { margin: 0; padding: 12px 14px; font-size: 14.5px; line-height: 1.6; white-space: pre-wrap; }
 .qMsg { align-self: flex-end; max-width: 85%; background: rgba(255, 255, 255, 0.08); color: var(--text); }
 .aMsg { align-self: flex-start; max-width: 100%; border-left: 2px solid rgba(255, 255, 255, 0.5); color: #d8d8dc; font-family: var(--font-reading), Georgia, serif; font-size: 15px; }
-.thinking { font-family: var(--font-mono), monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--soft); }
-.thinking span { animation: dot 1.2s infinite; }
-.thinking span:nth-child(2) { animation-delay: 0.2s; }
-.thinking span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dot { 0%, 60%, 100% { opacity: 0.2; } 30% { opacity: 1; } }
-.askForm { display: flex; gap: 8px; position: sticky; bottom: 0; padding-top: 8px; }
+
+/* thinking: three soft white circles that rise and brighten in turn */
+.thinking { align-self: flex-start; display: flex; gap: 7px; padding: 14px 4px; }
+.thinking span { width: 8px; height: 8px; border-radius: 50%; background: #ffffff; opacity: 0.25; animation: dot 1.1s ease-in-out infinite; }
+.thinking span:nth-child(2) { animation-delay: 0.16s; }
+.thinking span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes dot { 0%, 70%, 100% { opacity: 0.25; transform: translateY(0) scale(0.85); } 35% { opacity: 1; transform: translateY(-4px) scale(1); } }
+
+.askForm { flex: none; display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
 .askForm .search { margin-top: 0; }
-.send { padding: 0 16px; border: 1.5px solid #ffffff; color: var(--text); font-weight: 600; font-size: 13px; }
-.send:disabled { opacity: 0.4; }
+/* Send: the grey glass of the Ask button */
+.send {
+  flex: none;
+  padding: 0 18px;
+  background: rgba(114, 112, 110, 0.9);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 13px;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.send:active { transform: scale(0.97); }
+.send:disabled { opacity: 0.45; }
 
 /* Earn */
 .linkRow { position: relative; display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 4px 0 14px; border: 1px solid rgba(255, 255, 255, 0.14); background: var(--field); }
@@ -184,4 +214,5 @@ a.line { text-decoration: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .wrap, .panel, .closing, .closing .panel { animation-duration: 0.01s; }
+  .thinking span { animation-duration: 2s; }
 }

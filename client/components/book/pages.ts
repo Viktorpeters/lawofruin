@@ -29,17 +29,22 @@ const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 
 /* ---------------- fixed pages ---------------- */
 
+/* The cover follows the reader's language. Only the publisher's name stays in English.
+   A longer title (German has four lines and a ten-letter word) is set a little smaller. */
 function cover(): string {
+  const lines = t(LANG, "coverTitle").split("|");
+  const longest = Math.max(...lines.map((l) => l.length));
+  const scale = Math.min(1, 8 / longest);
   return `<div class="${s.board}">
     <div class="${s.frame}"></div><div class="${s.frame} ${s.frame2}"></div>
     <div class="${s.coverStack}">
       <div>
-        <span class="${s.foil} ${s.coverKicker}">INVESTIGATION I</span>
-        <div class="${s.foil} ${s.coverTitle}">THE<br>LAWS OF<br>RUIN</div>
+        <span class="${s.foil} ${s.coverKicker}">${esc(String(TITLE.series ?? "").toUpperCase())}</span>
+        <div class="${s.foil} ${s.coverTitle}" style="font-size:calc(clamp(44px, 14vw, 60px) * ${scale.toFixed(3)})">${lines.map(esc).join("<br>")}</div>
       </div>
       <span data-emblem>${glassSvg("foil", 64, `class="${s.emblem}"`)}</span>
       <div>
-        <span class="${s.foil} ${s.coverSub}">The Fall of Kings</span><br>
+        <span class="${s.foil} ${s.coverSub}">${esc(TITLE.sub ?? "")}</span><br>
         <span class="${s.foil} ${s.coverHouse}">ORION LEARNING INNOVATIONS</span>
       </div>
     </div>
@@ -52,7 +57,7 @@ function backCover(): string {
 }
 
 function halfTitle(): string {
-  return `<div class="${s.center}">${glassSvg("#1d1812", 22)}<div class="${s.halfTitle}">The Laws of Ruin</div></div>`;
+  return `<div class="${s.center}">${glassSvg("#1d1812", 22)}<div class="${s.halfTitle}">${esc((TITLE.name ?? []).join(" "))}</div></div>`;
 }
 
 function titlePage(): string {
@@ -100,7 +105,7 @@ function which(stance: string | null): string {
     <div class="${s.opts}">${WHICH.options
       .map((o) => `<button type="button" class="${s.opt}" data-stance="${o.id}" aria-pressed="${stance === o.id}"><span class="${s.optName}">${esc(o.name)}</span><span class="${s.optLine}">${esc(o.line)}</span></button>`)
       .join("")}</div>
-    <div class="${s.mono} ${s.turn}">Turn the page to go on</div></div>`;
+    <div class="${s.mono} ${s.turn}">${esc(t(LANG, "turnOn"))}</div></div>`;
 }
 
 function endPage(): string {
@@ -114,14 +119,13 @@ function endPage(): string {
 /* The Contents opening page: the six parts at a glance. */
 function contentsPage(): string {
   return `<div class="${s.center} ${s.tocOpen}">
-    <div class="${s.mono} ${s.tocKicker}">Investigation I · The Fall of Kings</div>
-    <h2 class="${s.tocTitle}">Contents</h2>
+    <div class="${s.mono} ${s.tocKicker}">${esc(TITLE.series ?? "")} · ${esc(TITLE.sub ?? "")}</div>
+    <h2 class="${s.tocTitle}">${esc(t(LANG, "contents"))}</h2>
     <p class="${s.pass}">${esc(PASS_LINE)}</p>
     <div class="${s.tocParts}">${PARTS.map((p) => `<div class="${s.tocPart}"><span class="${s.mono}">${t(LANG, "part")} ${p.n}</span><span class="${s.tocPartTitle}">${esc(p.title)}</span><span class="${s.mono} ${s.lock}">${LOCK} ${esc(p.opens)}</span></div>`).join("")}</div>
   </div>`;
 }
 
-const WORDS_N = ["One", "Two", "Three", "Four", "Five", "Six"];
 
 /* A part's own opening page: the cast-gold emblem, PART, the big number with a double rule,
    the title, its line, and the laws inside it. */
@@ -130,7 +134,7 @@ function partPage(n: number): string {
   return `<div class="${s.center} ${s.partPage}">
     ${partIcon(n, s.partIcon)}
     <div class="${s.partKicker}">${t(LANG, "part")}</div>
-    <div class="${s.partBig}">${LANG === "en" ? WORDS_N[n - 1] ?? n : n}</div>
+    <div class="${s.partBig}">${t(LANG, "partWords").split("|")[n - 1] ?? n}</div>
     <div class="${s.partRule}"></div>
     <div class="${s.partName}">${esc(part.title)}</div>
     <p class="${s.partLine}">${esc(part.line)}</p>
@@ -203,7 +207,7 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; parts: Flow[][] } {
       if (isP) { firstPara = false; dropped = true; }
     }
     if (sec.sources.length) {
-      preface.push({ seq: seq++, sec: sec.id, head, kind: "block", minAfter: 40, html: `<div class="${s.srcHead}">Sources for this section</div>` });
+      preface.push({ seq: seq++, sec: sec.id, head, kind: "block", minAfter: 40, html: `<div class="${s.srcHead}">${esc(t(LANG, "srcSection"))}</div>` });
       for (const src of sec.sources) preface.push({ seq: seq++, sec: sec.id, head, kind: "block", html: `<p class="${s.src}">${esc(src)}</p>` });
     }
   }
