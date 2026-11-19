@@ -189,10 +189,10 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; parts: Flow[][] } {
 
   const preface: Flow[] = [];
   for (const sec of PREFACE) {
-    const head = `Preface · ${sec.title}`;
+    const head = `${t(LANG, "preface")} · ${sec.title}`;
     preface.push({
       seq: seq++, sec: sec.id, head, kind: "block", breakBefore: true,
-      html: `<div class="${s.opener}">${glassSvg("#9b2a21", 16, `class="${s.orn}"`)}<div class="${s.secNum}">Preface · ${esc(sec.num)}</div><h2 class="${s.secTitle}">${esc(sec.title)}</h2><div class="${s.rule}"></div></div>`,
+      html: `<div class="${s.opener}">${glassSvg("#9b2a21", 16, `class="${s.orn}"`)}<div class="${s.secNum}">${esc(t(LANG, "preface"))} · ${esc(sec.num)}</div><h2 class="${s.secTitle}">${esc(sec.title)}</h2><div class="${s.rule}"></div></div>`,
     });
     const seen = new Set<string>();
     let firstPara = true;   // no indent on the first paragraph after a heading
@@ -365,6 +365,9 @@ export function pageElement(p: BuiltPage, folio: number | null): HTMLElement {
   const el = document.createElement("div");
   el.className = `${s.page} ${p.hard ? s.cover : s.paper}`;
   el.dataset.density = p.hard ? "hard" : "soft";
+  // read by the share picture: which section and which page a highlighted line is on
+  if (p.head) el.dataset.head = p.head;
+  if (p.folio && folio) el.dataset.folio = String(folio);
   el.innerHTML =
     (p.head ? `<div class="${s.rh}">${esc(p.head)}</div>` : "") +
     (p.hard ? p.html : p.flow ? `<div class="${s.inner}"><div style="display:flow-root">${p.html}</div></div>` : `<div class="${s.inner}" style="padding:0">${p.html}</div>`) +

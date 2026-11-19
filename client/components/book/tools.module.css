@@ -141,11 +141,11 @@
 .bar .barMid { animation: slideIn 0.48s var(--sheet) 0.1s both; }
 
 /* Highlight's controls: six sharp colour squares, then the eraser */
-.swatches { display: flex; align-items: center; gap: 9px; padding: 4px 2px; }
+.swatches { display: flex; align-items: center; gap: 8px; padding: 4px 2px; }
 .swatch {
   flex: none;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   padding: 0;
   background: var(--sw);
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -175,6 +175,24 @@
 }
 .eraser svg { width: 17px; height: 17px; display: block; }
 .eraser:active { transform: scale(0.86); transition-duration: 0.08s; }
+/* Share: the same round shape as the eraser, with a white edge, so it reads as the next step */
+.shareBtn {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  background: none;
+  border: 1.5px solid #ffffff;
+  color: #ffffff;
+  cursor: pointer;
+  animation: pop 0.5s var(--spring) 0.05s both;
+  transition: transform 0.4s var(--spring);
+}
+.shareBtn svg { width: 17px; height: 17px; display: block; }
+.shareBtn:active { transform: scale(0.86); transition-duration: 0.08s; }
 .eraserOn { background: #ffffff; color: #16161a; border-color: #ffffff; }
 
 /* the first-tap card */

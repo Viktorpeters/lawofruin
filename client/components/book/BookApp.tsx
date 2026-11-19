@@ -13,8 +13,9 @@ import Splash from "./Splash";
 import Tray from "./Tray";
 import ToolRow, { type ToolId } from "./ToolRow";
 import HighlightBar from "./HighlightBar";
+import ShareSheet from "./ShareSheet";
 import { useHighlighter } from "./useHighlighter";
-import { highlights, subscribe, setHighlightLang, type Colour } from "@/lib/book/highlights";
+import { highlights, subscribe, setHighlightLang, type Colour, type Highlight } from "@/lib/book/highlights";
 import ts from "./tools.module.css";
 import Panel, { type PanelId } from "./Panels";
 import { WhoCard, WordCard } from "./Cards";
@@ -52,6 +53,7 @@ export default function BookApp() {
   const [erase, setErase] = useState(false);
   const [marks, setMarks] = useState(0);                  // how many highlights there are, in this language
   const [notice, setNotice] = useState<string | null>(null);
+  const [sharing, setSharing] = useState<Highlight | null>(null);   // the highlight being made into a picture
   const [left, setLeftState] = useState(false);
   const [ready, setReady] = useState(false);
   const [minTime, setMinTime] = useState(false);
@@ -258,7 +260,11 @@ export default function BookApp() {
 
       {showBook && page && page.index > 0 && (
         <ToolRow lang={lang} open={tools} mode={mode} onClose={() => setTools(false)} onMode={setMode}>
-          {mode === "highlight" ? <HighlightBar lang={lang} colour={colour} setColour={setColour} erase={erase} setErase={setErase} any={marks > 0} /> : undefined}
+          {mode === "highlight" ? <HighlightBar lang={lang} colour={colour} setColour={setColour} erase={erase} setErase={setErase} any={marks > 0} onShare={() => {
+            // the most recent highlight becomes the picture
+            const latest = [...highlights()].sort((a, b) => b.at - a.at)[0];
+            if (latest) setSharing(latest);
+          }} /> : undefined}
         </ToolRow>
       )}
 
@@ -289,6 +295,16 @@ export default function BookApp() {
       {word && <WordCard id={word.id} at={word.at} onClose={() => setWord(null)} />}
 
       {notice && <p className={ts.soon} role="status">{notice}</p>}
+      {sharing && (
+        <ShareSheet
+          lang={lang}
+          highlight={sharing}
+          defaultName={me?.name ?? ""}
+          link={typeof window === "undefined" ? "" : me?.refCode ? `${window.location.origin}/r/${me.refCode}` : window.location.origin}
+          brand={t(lang, "coverTitle").split("|").join(" ")}
+          onClose={() => setSharing(null)}
+        />
+      )}
       {tip && !guide && !panel && !who && !tools && !mode && showBook && page && page.index > 0 && (
         <div className={s.tip} role="status">
           <span>{t(lang, "tapName")}</span>
