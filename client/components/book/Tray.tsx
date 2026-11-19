@@ -1,25 +1,23 @@
 "use client";
 
-/* The reader tray: one round button at the bottom right. Its rings are an hourglass seen from
-   above, gold on near-black. Tapping it fans the five items out in a quarter circle, up and to
-   the left, each with its label under it. Tapping an item opens its panel. Tap outside, tap the
-   button again or press Escape to close. Left-handed readers can mirror it to the bottom left
-   (Appearance). Ask has its own button directly above, so it is always one tap away.
-   Built on the same pattern as the Alcove reader tray. */
+/* The reader menu: one round glass button at the bottom right. Tapping it brings the five
+   items out in a column above it, one after another: each grows from nothing to full size,
+   from the bottom right where the button is, 40ms after the one below it, with a small
+   overshoot so it lands with a snap. Each label sits in a glass chip beside its icon.
+   Tap an item to open its panel; tap outside, the button again or Escape to close (the items
+   go back in, the last one first). Left-handed readers can mirror it (Appearance).
+   Ask has its own glass button directly above, always one tap away. */
 
 import { useCallback, useEffect, useState } from "react";
 import { ASK_ICON, TRAY_ITEMS, type TrayItemId } from "./trayItems";
 import { t, type Lang } from "@/lib/i18n";
 import styles from "./tray.module.css";
 
-/* The radius and angles (90 is straight up, 180 is straight left) keep at least 8px of clear
-   space between every icon and every label. Change them together, not one at a time. */
-const RADIUS = 152;
-const ANGLES = [85, 105, 127, 152, 180];
+const STEP = 58;   // the distance between the centres of two items, in px
 
 type Props = {
   left: boolean;
-  light: boolean;                    // over the dark cover
+  light: boolean;    // over the dark cover
   lang: Lang;
   onChoose: (id: TrayItemId) => void;
   onAsk: () => void;
@@ -35,48 +33,51 @@ export default function Tray({ left, light, lang, onChoose, onAsk }: Props) {
   }, []);
 
   const toggle = useCallback(() => setOpen((o) => !o), []);
+  const n = TRAY_ITEMS.length;
 
   return (
     <>
-      {open && <div className={styles.scrim} onClick={() => setOpen(false)} aria-hidden="true" />}
+      <div className={`${styles.scrim} ${open ? styles.scrimOn : ""}`} onClick={() => setOpen(false)} aria-hidden="true" />
 
       <button
         type="button"
-        className={`${styles.ask} ${left ? styles.left : ""} ${open ? styles.askAway : ""}`}
+        className={`${styles.ask} ${left ? styles.left : ""} ${open ? styles.askAway : ""} ${light ? styles.light : ""}`}
         onClick={() => { setOpen(false); onAsk(); }}
         aria-label={t(lang, "askTitle")}
         tabIndex={open ? -1 : 0}
       >
-        <span className={styles.itemIcon}>{ASK_ICON}</span>
-        <span className={styles.askLabel}>{t(lang, "ask")}</span>
+        {ASK_ICON}
       </button>
 
       <nav className={`${styles.tray} ${left ? styles.left : ""} ${open ? styles.open : ""} ${light ? styles.light : ""}`} aria-label="Reader menu">
         {TRAY_ITEMS.map((item, i) => {
-          const rad = (ANGLES[i] * Math.PI) / 180;
-          const x = Math.cos(rad) * RADIUS * (left ? -1 : 1);
-          const y = -Math.sin(rad) * RADIUS;
+          // the last item in the list sits nearest the button and comes out first
+          const fromButton = n - i;
           return (
             <button
               key={item.id}
               type="button"
               className={styles.item}
-              style={{ "--x": `${x.toFixed(1)}px`, "--y": `${y.toFixed(1)}px`, "--i": i } as React.CSSProperties}
+              style={{
+                "--y": `${-fromButton * STEP}px`,
+                "--in": `${(fromButton - 1) * 40}ms`,
+                "--out": `${(n - fromButton) * 30}ms`,
+              } as React.CSSProperties}
               onClick={() => { setOpen(false); onChoose(item.id); }}
               tabIndex={open ? 0 : -1}
-              aria-label={t(lang, item.id)}
+              aria-hidden={!open}
             >
-              <span className={styles.itemIcon}>{item.icon}</span>
               <span className={styles.label}>{t(lang, item.id)}</span>
+              <span className={styles.icon}>{item.icon}</span>
             </button>
           );
         })}
 
         <button type="button" className={styles.orb} onClick={toggle} aria-expanded={open} aria-label={open ? t(lang, "closeMenu") : t(lang, "openMenu")}>
-          <span className={styles.ring} />
-          <span className={styles.ring} />
-          <span className={styles.ring} />
-          <span className={styles.core} />
+          <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.glyph}>
+            <path className={styles.bar1} d="M5 8h14" />
+            <path className={styles.bar2} d="M5 16h14" />
+          </svg>
         </button>
       </nav>
     </>
