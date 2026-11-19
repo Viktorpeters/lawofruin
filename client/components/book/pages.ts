@@ -157,15 +157,23 @@ function paraHtml(f: Extract<Flow, { kind: "para" }>, from: number, to: number, 
   let html = "";
   for (let i = from; i < to; i++) {
     const t = f.tokens[i];
-    if (t.t === "text") html += t.hl ? `<span class="${s.hl}">${esc(t.s)}</span>` : esc(t.s);
-    else {
+    // every word carries its address (paragraph:word), so a highlight can find it on any page
+    // and the space after it is its own piece, painted only when the next word is highlighted too
+    const k = `data-k="${f.seq}:${i}"`;
+    const last = i === to - 1 && split;
+    const gap = (sp: string) => (sp && !last ? `<span data-s>${esc(sp)}</span>` : "");
+    if (t.t === "text") {
+      const word = t.s.trimEnd();
+      const cls = t.hl ? ` class="${s.hl}"` : "";
+      html += `<span ${k}${cls}>${esc(word)}</span>${t.hl && !last && t.s.length > word.length ? `<span data-s class="${s.hl}">${esc(t.s.slice(word.length))}</span>` : gap(t.s.slice(word.length))}`;
+    } else {
       // the punctuation after a name stays on the same line as the name
       const mark = t.tail.trimEnd();
-      html += `<span style="white-space:nowrap"${t.hl ? ` class="${s.hl}"` : ""}><button type="button" class="${t.t === "who" ? s.who : s.word}" data-${t.t}="${t.id}">${esc(t.s)}</button>${esc(mark)}</span>${esc(t.tail.slice(mark.length))}`;
+      html += `<span ${k} style="white-space:nowrap"${t.hl ? ` class="${s.hl}"` : ""}><button type="button" class="${t.t === "who" ? s.who : s.word}" data-${t.t}="${t.id}">${esc(t.s)}</button>${esc(mark)}</span>${gap(t.tail.slice(mark.length))}`;
     }
   }
   // a cut paragraph must not end on a space, or the justified last line stretches oddly
-  return `<p class="${cls.join(" ")}">${split ? html.trimEnd() : html}</p>`;
+  return `<p class="${cls.join(" ")}" data-sec="${f.sec}">${html}</p>`;
 }
 
 const LOCK = `<svg width="10" height="11" viewBox="0 0 10 11" aria-hidden="true"><rect x="1" y="5" width="8" height="5.5" fill="none" stroke="currentColor"/><path d="M2.8 5V3.4a2.2 2.2 0 0 1 4.4 0V5" fill="none" stroke="currentColor"/></svg>`;
