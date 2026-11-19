@@ -12,6 +12,7 @@ export const LANGS = [
 export type Lang = (typeof LANGS)[number]["code"];
 
 const en = {
+  coverTitle: "THE|LAWS OF|RUIN", partWords: "One|Two|Three|Four|Five|Six", turnOn: "Turn the page to go on", srcSection: "Sources for this section",
   contents: "Contents", whoswho: "Who's Who", purchases: "Purchases", earn: "Earn", appearance: "Appearance", ask: "Ask", account: "Your account",
   askTitle: "Ask the book", openMenu: "Open menu", closeMenu: "Close menu", close: "Close", swipe: "Swipe to open", language: "Language",
   openingPages: "Opening pages", cover: "The cover", titlePage: "Title page", dedication: "Dedication", epigraph: "Epigraph",
@@ -40,6 +41,7 @@ const en = {
 type Dict = typeof en;
 
 const fr: Dict = {
+  coverTitle: "LES|LOIS DE|LA RUINE", partWords: "Un|Deux|Trois|Quatre|Cinq|Six", turnOn: "Tournez la page pour continuer", srcSection: "Sources de cette section",
   contents: "Sommaire", whoswho: "Qui est qui", purchases: "Achats", earn: "Gagner", appearance: "Affichage", ask: "Demander", account: "Votre compte",
   askTitle: "Interroger le livre", openMenu: "Ouvrir le menu", closeMenu: "Fermer le menu", close: "Fermer", swipe: "Glissez pour ouvrir", language: "Langue",
   openingPages: "Pages d'ouverture", cover: "La couverture", titlePage: "Page de titre", dedication: "Dédicace", epigraph: "Épigraphe",
@@ -66,6 +68,7 @@ const fr: Dict = {
 };
 
 const es: Dict = {
+  coverTitle: "LAS|LEYES DE|LA RUINA", partWords: "Uno|Dos|Tres|Cuatro|Cinco|Seis", turnOn: "Pasa la página para continuar", srcSection: "Fuentes de esta sección",
   contents: "Índice", whoswho: "Quién es quién", purchases: "Compras", earn: "Ganar", appearance: "Apariencia", ask: "Preguntar", account: "Tu cuenta",
   askTitle: "Pregunta al libro", openMenu: "Abrir menú", closeMenu: "Cerrar menú", close: "Cerrar", swipe: "Desliza para abrir", language: "Idioma",
   openingPages: "Páginas iniciales", cover: "La portada", titlePage: "Portadilla", dedication: "Dedicatoria", epigraph: "Epígrafe",
@@ -92,6 +95,7 @@ const es: Dict = {
 };
 
 const pt: Dict = {
+  coverTitle: "AS|LEIS DA|RUÍNA", partWords: "Um|Dois|Três|Quatro|Cinco|Seis", turnOn: "Vire a página para continuar", srcSection: "Fontes desta seção",
   contents: "Sumário", whoswho: "Quem é quem", purchases: "Compras", earn: "Ganhar", appearance: "Aparência", ask: "Perguntar", account: "Sua conta",
   askTitle: "Pergunte ao livro", openMenu: "Abrir menu", closeMenu: "Fechar menu", close: "Fechar", swipe: "Deslize para abrir", language: "Idioma",
   openingPages: "Páginas iniciais", cover: "A capa", titlePage: "Folha de rosto", dedication: "Dedicatória", epigraph: "Epígrafe",
@@ -118,6 +122,7 @@ const pt: Dict = {
 };
 
 const de: Dict = {
+  coverTitle: "DIE|GESETZE|DES|UNTERGANGS", partWords: "Eins|Zwei|Drei|Vier|Fünf|Sechs", turnOn: "Blättern Sie um, um weiterzulesen", srcSection: "Quellen zu diesem Abschnitt",
   contents: "Inhalt", whoswho: "Wer ist wer", purchases: "Käufe", earn: "Verdienen", appearance: "Darstellung", ask: "Fragen", account: "Ihr Konto",
   askTitle: "Das Buch fragen", openMenu: "Menü öffnen", closeMenu: "Menü schließen", close: "Schließen", swipe: "Zum Öffnen wischen", language: "Sprache",
   openingPages: "Anfangsseiten", cover: "Der Einband", titlePage: "Titelseite", dedication: "Widmung", epigraph: "Motto",
