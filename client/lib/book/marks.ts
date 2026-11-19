@@ -4,9 +4,9 @@
 import { NAMES, WORDS, PREFACE, PARTS, VERSION } from "./content";
 
 export type Token =
-  | { t: "text"; s: string }                        // one word with its trailing space, if any
-  | { t: "who"; id: string; s: string; tail: string }
-  | { t: "word"; id: string; s: string; tail: string };
+  | { t: "text"; s: string; hl?: boolean }          // one word with its trailing space, if any
+  | { t: "who"; id: string; s: string; tail: string; hl?: boolean }
+  | { t: "word"; id: string; s: string; tail: string; hl?: boolean };
 
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // a key must not touch other letters on either side ("Intel" must not match "intelligent").
@@ -23,7 +23,19 @@ function finder() {
   return FIND;
 }
 
+/* [[double brackets]] mark a key line: its tokens carry hl, and the brackets themselves vanish */
 export function tokenize(text: string, seen: Set<string>): Token[] {
+  const out: Token[] = [];
+  text.split(/(\[\[|\]\])/).reduce((hl, piece) => {
+    if (piece === "[[") return true;
+    if (piece === "]]") return false;
+    for (const tok of tokenizePlain(piece, seen)) out.push(hl ? { ...tok, hl: true } : tok);
+    return hl;
+  }, false);
+  return out;
+}
+
+function tokenizePlain(text: string, seen: Set<string>): Token[] {
   const out: Token[] = [];
   const pushText = (chunk: string) => {
     // keep each word with the space after it, so joining tokens gives back the exact text

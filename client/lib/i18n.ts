@@ -17,7 +17,7 @@ const en = {
   openingPages: "Opening pages", cover: "The cover", titlePage: "Title page", dedication: "Dedication", epigraph: "Epigraph",
   prefaceGroup: "Preface · The Cycle", beforeLaws: "Before the laws", which: "Which are you?", thirtyLaws: "The thirty laws", investigation: "Investigation I", part: "Part",
   findName: "Find a name", files: "{n} files · readable offline",
-  textSize: "Text size", smaller: "Smaller", standard: "Standard", larger: "Larger", menuButton: "Menu button", rightHand: "Right hand", leftHand: "Left hand",
+  largest: "Largest", tapName: "Tap a name to open the file", ok: "OK", textSize: "Text size", smaller: "Smaller", standard: "Standard", larger: "Larger", menuButton: "Menu button", rightHand: "Right hand", leftHand: "Left hand",
   theBook: "The book", showTurn: "Show how to turn the pages", fromCover: "Read from the cover again",
   signInLead: "Sign in with your email to buy the book, ask it questions and get your own link to earn. No password: we send you a code.",
   emailPh: "Your email address", sendCode: "Send me a code",
@@ -34,7 +34,7 @@ const en = {
   askOwner: "Ask about any law, any person or any moment in the book.",
   askMember: "Before you buy, I can tell you about release dates, the price, the languages and how to buy. Everything else opens once the book is yours.",
   askLeft: "{n} questions left today", askPh: "Your question", send: "Send", signInToAsk: "Sign in to ask", thinking: "Thinking",
-  law: "Law", opensOn: "Opens on", key: "KEY", openSections: "Open the {n} sections", opens: "Opens", noConnection: "Connect to the internet once to download the book.", retry: "Try again",
+  judgment: "Judgment", law: "Law", opensOn: "Opens on", key: "KEY", openSections: "Open the {n} sections", opens: "Opens", noConnection: "Connect to the internet once to download the book.", retry: "Try again",
 };
 
 type Dict = typeof en;
@@ -45,7 +45,7 @@ const fr: Dict = {
   openingPages: "Pages d'ouverture", cover: "La couverture", titlePage: "Page de titre", dedication: "Dédicace", epigraph: "Épigraphe",
   prefaceGroup: "Préface · Le Cycle", beforeLaws: "Avant les lois", which: "Lequel êtes-vous ?", thirtyLaws: "Les trente lois", investigation: "Enquête I", part: "Partie",
   findName: "Chercher un nom", files: "{n} fiches · lisibles hors ligne",
-  textSize: "Taille du texte", smaller: "Plus petit", standard: "Normal", larger: "Plus grand", menuButton: "Bouton du menu", rightHand: "Main droite", leftHand: "Main gauche",
+  largest: "Très grand", tapName: "Touchez un nom pour ouvrir sa fiche", ok: "OK", textSize: "Taille du texte", smaller: "Plus petit", standard: "Normal", larger: "Plus grand", menuButton: "Bouton du menu", rightHand: "Main droite", leftHand: "Main gauche",
   theBook: "Le livre", showTurn: "Montrer comment tourner les pages", fromCover: "Relire depuis la couverture",
   signInLead: "Connectez-vous avec votre e-mail pour acheter le livre, lui poser des questions et obtenir votre lien pour gagner. Pas de mot de passe : nous vous envoyons un code.",
   emailPh: "Votre adresse e-mail", sendCode: "Recevoir un code",
@@ -62,7 +62,7 @@ const fr: Dict = {
   askOwner: "Posez une question sur n'importe quelle loi, personne ou moment du livre.",
   askMember: "Avant l'achat, je peux vous parler des dates de sortie, du prix, des langues et de la façon d'acheter. Le reste s'ouvre quand le livre est à vous.",
   askLeft: "Encore {n} questions aujourd'hui", askPh: "Votre question", send: "Envoyer", signInToAsk: "Se connecter pour demander", thinking: "Réflexion",
-  law: "Loi", opensOn: "S'ouvre sur", key: "CLÉ", openSections: "Ouvrir les {n} sections", opens: "Ouvre le", noConnection: "Connectez-vous à Internet une fois pour télécharger le livre.", retry: "Réessayer",
+  judgment: "Jugement", law: "Loi", opensOn: "S'ouvre sur", key: "CLÉ", openSections: "Ouvrir les {n} sections", opens: "Ouvre le", noConnection: "Connectez-vous à Internet une fois pour télécharger le livre.", retry: "Réessayer",
 };
 
 const es: Dict = {
@@ -71,7 +71,7 @@ const es: Dict = {
   openingPages: "Páginas iniciales", cover: "La portada", titlePage: "Portadilla", dedication: "Dedicatoria", epigraph: "Epígrafe",
   prefaceGroup: "Prefacio · El Ciclo", beforeLaws: "Antes de las leyes", which: "¿Cuál eres tú?", thirtyLaws: "Las treinta leyes", investigation: "Investigación I", part: "Parte",
   findName: "Buscar un nombre", files: "{n} fichas · legibles sin conexión",
-  textSize: "Tamaño del texto", smaller: "Más pequeño", standard: "Normal", larger: "Más grande", menuButton: "Botón del menú", rightHand: "Mano derecha", leftHand: "Mano izquierda",
+  largest: "Muy grande", tapName: "Toca un nombre para abrir su ficha", ok: "OK", textSize: "Tamaño del texto", smaller: "Más pequeño", standard: "Normal", larger: "Más grande", menuButton: "Botón del menú", rightHand: "Mano derecha", leftHand: "Mano izquierda",
   theBook: "El libro", showTurn: "Mostrar cómo pasar las páginas", fromCover: "Leer de nuevo desde la portada",
   signInLead: "Inicia sesión con tu correo para comprar el libro, hacerle preguntas y obtener tu enlace para ganar. Sin contraseña: te enviamos un código.",
   emailPh: "Tu correo electrónico", sendCode: "Enviarme un código",
@@ -88,7 +88,7 @@ const es: Dict = {
   askOwner: "Pregunta sobre cualquier ley, persona o momento del libro.",
   askMember: "Antes de comprar, puedo hablarte de las fechas, el precio, los idiomas y cómo comprar. Todo lo demás se abre cuando el libro sea tuyo.",
   askLeft: "Te quedan {n} preguntas hoy", askPh: "Tu pregunta", send: "Enviar", signInToAsk: "Inicia sesión para preguntar", thinking: "Pensando",
-  law: "Ley", opensOn: "Empieza con", key: "CLAVE", openSections: "Abrir las {n} secciones", opens: "Abre el", noConnection: "Conéctate a internet una vez para descargar el libro.", retry: "Reintentar",
+  judgment: "Juicio", law: "Ley", opensOn: "Empieza con", key: "CLAVE", openSections: "Abrir las {n} secciones", opens: "Abre el", noConnection: "Conéctate a internet una vez para descargar el libro.", retry: "Reintentar",
 };
 
 const pt: Dict = {
@@ -97,7 +97,7 @@ const pt: Dict = {
   openingPages: "Páginas iniciais", cover: "A capa", titlePage: "Folha de rosto", dedication: "Dedicatória", epigraph: "Epígrafe",
   prefaceGroup: "Prefácio · O Ciclo", beforeLaws: "Antes das leis", which: "Qual deles é você?", thirtyLaws: "As trinta leis", investigation: "Investigação I", part: "Parte",
   findName: "Procurar um nome", files: "{n} fichas · legíveis offline",
-  textSize: "Tamanho do texto", smaller: "Menor", standard: "Normal", larger: "Maior", menuButton: "Botão do menu", rightHand: "Mão direita", leftHand: "Mão esquerda",
+  largest: "Muito grande", tapName: "Toque num nome para abrir a ficha", ok: "OK", textSize: "Tamanho do texto", smaller: "Menor", standard: "Normal", larger: "Maior", menuButton: "Botão do menu", rightHand: "Mão direita", leftHand: "Mão esquerda",
   theBook: "O livro", showTurn: "Mostrar como virar as páginas", fromCover: "Ler de novo desde a capa",
   signInLead: "Entre com seu e-mail para comprar o livro, fazer perguntas a ele e receber seu link para ganhar. Sem senha: enviamos um código.",
   emailPh: "Seu e-mail", sendCode: "Enviar um código",
@@ -114,7 +114,7 @@ const pt: Dict = {
   askOwner: "Pergunte sobre qualquer lei, pessoa ou momento do livro.",
   askMember: "Antes da compra, posso falar das datas, do preço, dos idiomas e de como comprar. O resto abre quando o livro for seu.",
   askLeft: "Restam {n} perguntas hoje", askPh: "Sua pergunta", send: "Enviar", signInToAsk: "Entre para perguntar", thinking: "Pensando",
-  law: "Lei", opensOn: "Começa com", key: "CHAVE", openSections: "Abrir as {n} seções", opens: "Abre em", noConnection: "Conecte-se à internet uma vez para baixar o livro.", retry: "Tentar de novo",
+  judgment: "Julgamento", law: "Lei", opensOn: "Começa com", key: "CHAVE", openSections: "Abrir as {n} seções", opens: "Abre em", noConnection: "Conecte-se à internet uma vez para baixar o livro.", retry: "Tentar de novo",
 };
 
 const de: Dict = {
@@ -123,7 +123,7 @@ const de: Dict = {
   openingPages: "Anfangsseiten", cover: "Der Einband", titlePage: "Titelseite", dedication: "Widmung", epigraph: "Motto",
   prefaceGroup: "Vorwort · Der Kreislauf", beforeLaws: "Vor den Gesetzen", which: "Wer sind Sie?", thirtyLaws: "Die dreißig Gesetze", investigation: "Untersuchung I", part: "Teil",
   findName: "Namen suchen", files: "{n} Akten · offline lesbar",
-  textSize: "Schriftgröße", smaller: "Kleiner", standard: "Normal", larger: "Größer", menuButton: "Menütaste", rightHand: "Rechte Hand", leftHand: "Linke Hand",
+  largest: "Sehr groß", tapName: "Tippen Sie auf einen Namen, um die Akte zu öffnen", ok: "OK", textSize: "Schriftgröße", smaller: "Kleiner", standard: "Normal", larger: "Größer", menuButton: "Menütaste", rightHand: "Rechte Hand", leftHand: "Linke Hand",
   theBook: "Das Buch", showTurn: "Zeigen, wie man umblättert", fromCover: "Wieder vom Einband an lesen",
   signInLead: "Melden Sie sich mit Ihrer E-Mail an, um das Buch zu kaufen, ihm Fragen zu stellen und Ihren Link zum Verdienen zu erhalten. Kein Passwort: Wir senden Ihnen einen Code.",
   emailPh: "Ihre E-Mail-Adresse", sendCode: "Code senden",
@@ -140,7 +140,7 @@ const de: Dict = {
   askOwner: "Fragen Sie nach jedem Gesetz, jeder Person und jedem Moment im Buch.",
   askMember: "Vor dem Kauf kann ich Ihnen Erscheinungstermine, Preis, Sprachen und den Kauf erklären. Alles andere öffnet sich, sobald das Buch Ihnen gehört.",
   askLeft: "Heute noch {n} Fragen", askPh: "Ihre Frage", send: "Senden", signInToAsk: "Zum Fragen anmelden", thinking: "Denke nach",
-  law: "Gesetz", opensOn: "Beginnt mit", key: "SCHLÜSSEL", openSections: "Die {n} Abschnitte öffnen", opens: "Ab", noConnection: "Verbinden Sie sich einmal mit dem Internet, um das Buch zu laden.", retry: "Erneut versuchen",
+  judgment: "Urteil", law: "Gesetz", opensOn: "Beginnt mit", key: "SCHLÜSSEL", openSections: "Die {n} Abschnitte öffnen", opens: "Ab", noConnection: "Verbinden Sie sich einmal mit dem Internet, um das Buch zu laden.", retry: "Erneut versuchen",
 };
 
 const DICTS: Record<Lang, Dict> = { en, fr, es, pt, de };

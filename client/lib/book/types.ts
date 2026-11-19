@@ -1,6 +1,8 @@
 /* Shapes shared by the book's content files and the reader. */
 
-export type BlockKind = "p" | "sub" | "epi" | "sig" | "note";
+/* "aside" is a short note in the book's red, under the paragraph it belongs to: "Label|Text".
+   Inside any text, [[double brackets]] mark a key line, shown in red. */
+export type BlockKind = "p" | "sub" | "epi" | "sig" | "note" | "aside";
 
 export type Block = { k: BlockKind; t: string };
 

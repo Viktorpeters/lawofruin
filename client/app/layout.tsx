@@ -16,11 +16,12 @@ const display = localFont({
   fallback: ["Iowan Old Style", "Georgia", "serif"],
 });
 
-// Reading text inside the book
+// Reading text inside the book: Source Serif 4, made in optical sizes so it stays crisp and
+// dark at the small, dense default size
 const reading = localFont({
   src: [
-    { path: "../fonts/Literata/Literata-VariableFont_opsz,wght.ttf", style: "normal", weight: "200 900" },
-    { path: "../fonts/Literata/Literata-Italic-VariableFont_opsz,wght.ttf", style: "italic", weight: "200 900" },
+    { path: "../fonts/SourceSerif4/SourceSerif4-VariableFont_opsz,wght.ttf", style: "normal", weight: "200 900" },
+    { path: "../fonts/SourceSerif4/SourceSerif4-Italic-VariableFont_opsz,wght.ttf", style: "italic", weight: "200 900" },
   ],
   variable: "--font-reading",
   preload: false,           // only the reader uses it, so the hero does not wait for it
