@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Book, { type BookHandle, type PageInfo } from "./Book";
 import Splash from "./Splash";
 import Tray from "./Tray";
+import ToolRow, { type ToolId } from "./ToolRow";
 import Panel, { type PanelId } from "./Panels";
 import { WhoCard, WordCard } from "./Cards";
 import Coach from "./Coach";
@@ -41,6 +42,8 @@ export default function BookApp() {
   const [boot, setBoot] = useState<null | { returning: boolean }>(null);
   const [fontSize, setFontSizeState] = useState(SIZES[0]);
   const [tip, setTip] = useState(false);
+  const [tools, setTools] = useState(false);              // the row of reading tools is open
+  const [mode, setMode] = useState<ToolId | null>(null);  // a finger tool is on: pages do not turn
   const [left, setLeftState] = useState(false);
   const [ready, setReady] = useState(false);
   const [minTime, setMinTime] = useState(false);
@@ -170,6 +173,7 @@ export default function BookApp() {
           onWho={onWho}
           onWord={onWord}
           onLaw={setLaw}
+          paused={mode !== null}
         />
       )}
 
@@ -208,8 +212,8 @@ export default function BookApp() {
             )}
           </button>
           {/* on the closed cover: only the hint, so nothing sits on the corner the reader lifts */}
-          {page?.index === 0 || guide ? (
-            !panel && !guide && <p className={s.hint}>{t(lang, "swipe")}</p>
+          {page?.index === 0 || guide || tools || mode ? (
+            page?.index === 0 && !panel && !guide && <p className={s.hint}>{t(lang, "swipe")}</p>
           ) : (
             <Tray
               left={left}
@@ -217,9 +221,14 @@ export default function BookApp() {
               lang={lang}
               onChoose={(id) => { setWho(null); setWord(null); setPanel(id); }}
               onAsk={() => { setWho(null); setWord(null); setPanel("ask"); }}
+              onTools={() => { setWho(null); setWord(null); setTools(true); }}
             />
           )}
         </>
+      )}
+
+      {showBook && page && page.index > 0 && (
+        <ToolRow lang={lang} open={tools} mode={mode} onClose={() => setTools(false)} onMode={setMode} />
       )}
 
       {panel && (
@@ -248,7 +257,7 @@ export default function BookApp() {
       {who && <WhoCard id={who} onClose={closeWho} onJump={jump} />}
       {word && <WordCard id={word.id} at={word.at} onClose={() => setWord(null)} />}
 
-      {tip && !guide && !panel && !who && showBook && page && page.index > 0 && (
+      {tip && !guide && !panel && !who && !tools && !mode && showBook && page && page.index > 0 && (
         <div className={s.tip} role="status">
           <span>{t(lang, "tapName")}</span>
           <button type="button" onClick={endTip}>{t(lang, "ok")}</button>

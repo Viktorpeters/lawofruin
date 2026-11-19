@@ -134,12 +134,15 @@
   color: #ffffff;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.25s;
+  transition: opacity 0.25s, transform 0.45s cubic-bezier(0.34, 1.45, 0.64, 1);
 }
+.ask:active { transform: scale(0.88); transition-duration: 0.08s; }
 .ask svg { width: 19px; height: 19px; display: block; }
 .ask.left { right: auto; left: calc(max(18px, env(safe-area-inset-left)) + 7px); }
 .ask:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
 .askAway { opacity: 0; transform: scale(0.6); pointer-events: none; }
+/* Tools: the same glass button, directly above Ask */
+.tools { bottom: calc(max(18px, env(safe-area-inset-bottom)) + 56px + 16px + 42px + 12px); }
 
 @media (prefers-reduced-motion: reduce) {
   .item, .open .item, .ask, .bar1, .bar2, .scrim { transition-duration: 0.01s; transition-delay: 0s; }

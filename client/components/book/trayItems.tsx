@@ -64,3 +64,11 @@ export const TRAY_ITEMS: TrayItem[] = [
 export const ASK_ICON = (
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5h15v10h-8l-4.5 3.5v-3.5h-2.5z" {...st} /><path d="M10.2 9a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1M12 13.4v.1" {...st} /></svg>
 );
+
+/* Tools: a pencil over a ruled line, for the reading tools */
+export const TOOLS_ICON = (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M14.8 4.6l4.6 4.6L9.6 19H5v-4.6z" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12.6 6.8l4.6 4.6" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" />
+  </svg>
+);

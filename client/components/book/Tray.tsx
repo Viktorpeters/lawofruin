@@ -7,10 +7,10 @@
    picture, then the words) close beside its round icon.
    Tap an item to open its panel; tap outside, the button again or Escape to close (the items
    go back in, the last one first). Left-handed readers can mirror it (Appearance).
-   Ask has its own glass button directly above, always one tap away. */
+   Ask has its own glass button directly above, always one tap away, and Tools sits above Ask. */
 
 import { useCallback, useEffect, useState } from "react";
-import { ASK_ICON, TRAY_ITEMS, type TrayItemId } from "./trayItems";
+import { ASK_ICON, TOOLS_ICON, TRAY_ITEMS, type TrayItemId } from "./trayItems";
 import { t, type Lang } from "@/lib/i18n";
 import styles from "./tray.module.css";
 
@@ -22,9 +22,10 @@ type Props = {
   lang: Lang;
   onChoose: (id: TrayItemId) => void;
   onAsk: () => void;
+  onTools: () => void;
 };
 
-export default function Tray({ left, light, lang, onChoose, onAsk }: Props) {
+export default function Tray({ left, light, lang, onChoose, onAsk, onTools }: Props) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -39,6 +40,16 @@ export default function Tray({ left, light, lang, onChoose, onAsk }: Props) {
   return (
     <>
       <div className={`${styles.scrim} ${open ? styles.scrimOn : ""}`} onClick={() => setOpen(false)} aria-hidden="true" />
+
+      <button
+        type="button"
+        className={`${styles.ask} ${styles.tools} ${left ? styles.left : ""} ${open ? styles.askAway : ""} ${light ? styles.light : ""}`}
+        onClick={() => { setOpen(false); onTools(); }}
+        aria-label={t(lang, "tools")}
+        tabIndex={open ? -1 : 0}
+      >
+        {TOOLS_ICON}
+      </button>
 
       <button
         type="button"

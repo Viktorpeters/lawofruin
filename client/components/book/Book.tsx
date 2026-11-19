@@ -33,6 +33,7 @@ type Props = {
   onWho: (id: string) => void;
   onWord: (id: string, rect: DOMRect) => void;
   onLaw: (n: number) => void;
+  paused?: boolean;                       // a finger tool is on (Highlight, Note, Meanings): pages do not turn
 };
 
 const PLACE_KEY = "lor-place";
@@ -96,7 +97,7 @@ function finishHalfwayTurns(pf: PageFlip, spread: boolean) {
    over; move right and the page behind comes back. The curl starts at the page's edge, at the
    height of the finger, and follows it. A tap on the outer third of the page turns it too;
    a tap in the middle never does, so reading and tapping names is safe. */
-function attachGestures(pf: PageFlip, block: HTMLElement): () => void {
+function attachGestures(pf: PageFlip, block: HTMLElement, paused: () => boolean): () => void {
   type G = { id: number; x0: number; y0: number; fy0: number; t0: number; dir: "next" | "prev" | null; edgeX: number; x: number; y: number; h: number };
   let g: G | null = null;
   const local = (e: PointerEvent) => {
@@ -111,6 +112,7 @@ function attachGestures(pf: PageFlip, block: HTMLElement): () => void {
   });
 
   const down = (e: PointerEvent) => {
+    if (paused()) { g = null; return; }
     if (!e.isPrimary || (e.pointerType === "mouse" && e.button !== 0)) return;
     const p = local(e);
     g = { id: e.pointerId, x0: p.x, y0: p.y, fy0: p.y, t0: performance.now(), dir: null, edgeX: 0, x: p.x, y: p.y, h: p.h };
@@ -198,7 +200,7 @@ async function fontsReady() {
   await document.fonts.ready;
 }
 
-const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, visible, startFromPlace, onReady, onPage, onWho, onWord, onLaw }, ref) {
+const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, visible, startFromPlace, onReady, onPage, onWho, onWord, onLaw, paused = false }, ref) {
   const host = useRef<HTMLDivElement>(null);
   const flip = useRef<PageFlip | null>(null);
   const pages = useRef<BuiltPage[]>([]);
@@ -207,6 +209,8 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
   const cb = useRef({ onReady, onPage, onWho, onWord, onLaw });
   cb.current = { onReady, onPage, onWho, onWord, onLaw };
   const useSaved = useRef(startFromPlace);
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
   // where the reader is, kept outside the page-curl library so a rebuild (new text size,
   // new language) can reopen on the same words even after the old book is taken down
   const here = useRef<Anchor | null>(null);
@@ -322,7 +326,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
       });
       pf.loadFromHTML(els);
       finishHalfwayTurns(pf, size.spread);
-      detach = attachGestures(pf, b);
+      detach = attachGestures(pf, b, () => pausedRef.current);
       pf.on("flip", (e) => report(e.data));
       flip.current = pf;
       report(start);
@@ -342,6 +346,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
     window.addEventListener("resize", onResize);
 
     const onKey = (e: KeyboardEvent) => {
+      if (pausedRef.current) return;
       if (e.key === "ArrowRight" || e.key === "PageDown") flip.current?.flipNext();
       if (e.key === "ArrowLeft" || e.key === "PageUp") flip.current?.flipPrev();
     };
