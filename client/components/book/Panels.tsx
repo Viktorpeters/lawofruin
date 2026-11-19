@@ -45,27 +45,38 @@ type Props = {
 
 export default function Panel(props: Props) {
   const { id, onClose, lang } = props;
+  // closing plays the slide-out first, then the panel is removed
+  const [closing, setClosing] = useState(false);
+  const close = () => {
+    if (closing) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { onClose(); return; }
+    setClosing(true);
+    window.setTimeout(onClose, 210);
+  };
+  const closeRef = useRef(close);
+  closeRef.current = close;
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeRef.current(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, []);
+  const p = { ...props, onClose: close };
 
   return (
-    <div className={s.wrap} onClick={onClose}>
+    <div className={`${s.wrap} ${closing ? s.closing : ""}`} onClick={close}>
       <section className={s.panel} role="dialog" aria-label={t(lang, TITLE[id])} onClick={(e) => e.stopPropagation()} data-panel={id}>
         <header className={s.head}>
           <h2 className={s.title}>{t(lang, TITLE[id])}</h2>
-          <button type="button" className={s.close} onClick={onClose} aria-label={t(lang, "close")}>×</button>
+          <button type="button" className={s.close} onClick={close} aria-label={t(lang, "close")}>×</button>
         </header>
         <div className={s.body}>
-          {id === "contents" && <ContentsList {...props} />}
-          {id === "whoswho" && <WhoList {...props} />}
-          {id === "ask" && <Ask {...props} />}
-          {id === "earn" && <Earn {...props} />}
-          {id === "purchases" && <Purchases {...props} />}
-          {id === "appearance" && <Appearance {...props} />}
-          {id === "account" && <Account {...props} />}
+          {id === "contents" && <ContentsList {...p} />}
+          {id === "whoswho" && <WhoList {...p} />}
+          {id === "ask" && <Ask {...p} />}
+          {id === "earn" && <Earn {...p} />}
+          {id === "purchases" && <Purchases {...p} />}
+          {id === "appearance" && <Appearance {...p} />}
+          {id === "account" && <Account {...p} />}
         </div>
       </section>
     </div>
@@ -317,16 +328,16 @@ function Purchases({ lang, me, onOpen }: Props) {
 
 function Appearance({ lang, onLang, fontSize, setFontSize, left, setLeft, onRestart, onGuide }: Props) {
   const sizes = [
-    { v: 15, label: t(lang, "smaller") },
-    { v: 16, label: t(lang, "standard") },
-    { v: 17.5, label: t(lang, "larger") },
+    { v: 14, label: t(lang, "standard") },
+    { v: 15.5, label: t(lang, "larger") },
+    { v: 17, label: t(lang, "largest") },
   ];
   return (
     <>
       <div className={s.group}>{t(lang, "textSize")}</div>
       <div className={s.seg}>
         {sizes.map((z) => (
-          <button key={z.v} type="button" aria-pressed={fontSize === z.v} onClick={() => setFontSize(z.v)} style={{ fontSize: `${z.v - 1}px` }}>{z.label}</button>
+          <button key={z.v} type="button" aria-pressed={fontSize === z.v} onClick={() => setFontSize(z.v)} style={{ fontSize: `${z.v}px` }}>{z.label}</button>
         ))}
       </div>
       <div className={s.group}>{t(lang, "language")}</div>
