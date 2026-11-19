@@ -153,11 +153,11 @@ function paraHtml(f: Extract<Flow, { kind: "para" }>, from: number, to: number, 
   let html = "";
   for (let i = from; i < to; i++) {
     const t = f.tokens[i];
-    if (t.t === "text") html += esc(t.s);
+    if (t.t === "text") html += t.hl ? `<span class="${s.hl}">${esc(t.s)}</span>` : esc(t.s);
     else {
       // the punctuation after a name stays on the same line as the name
       const mark = t.tail.trimEnd();
-      html += `<span style="white-space:nowrap"><button type="button" class="${t.t === "who" ? s.who : s.word}" data-${t.t}="${t.id}">${esc(t.s)}</button>${esc(mark)}</span>${esc(t.tail.slice(mark.length))}`;
+      html += `<span style="white-space:nowrap"${t.hl ? ` class="${s.hl}"` : ""}><button type="button" class="${t.t === "who" ? s.who : s.word}" data-${t.t}="${t.id}">${esc(t.s)}</button>${esc(mark)}</span>${esc(t.tail.slice(mark.length))}`;
     }
   }
   // a cut paragraph must not end on a space, or the justified last line stretches oddly
@@ -186,6 +186,12 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; parts: Flow[][] } {
     let firstPara = true;   // no indent on the first paragraph after a heading
     let dropped = false;    // one drop cap per section, on its first paragraph
     for (const b of sec.blocks) {
+      if (b.k === "aside") {
+        const [label, ...rest] = b.t.split("|");
+        const body = rest.length ? rest.join("|") : label;
+        preface.push({ seq: seq++, sec: sec.id, head, kind: "block", html: `<div class="${s.aside}">${rest.length ? `<span class="${s.asideLabel}">${esc(label)}</span>` : ""}${esc(body)}</div>` });
+        continue;
+      }
       if (b.k === "sub") {
         preface.push({ seq: seq++, sec: sec.id, head, kind: "block", minAfter: 70, html: `<div class="${s.sub}">${esc(b.t)}</div>` });
         firstPara = true;
@@ -215,7 +221,7 @@ function buildFlow(): { copy: Flow[]; preface: Flow[]; parts: Flow[][] } {
       const stamps = law.eras ? `<div class="${s.stamps}">${law.eras.map((e) => `<span>${esc(e)}</span>`).join("")}</div>` : "";
       toc.push({
         seq: seq++, sec: `part-${part.n}`, head, kind: "block", minAfter: law.story ? 60 : 0,
-        html: `<div class="${s.entry}"><div class="${s.entryHead}"><span class="${s.mono}">${t(LANG, "law")} ${law.n}</span></div><div class="${s.lawTitle}">${esc(law.title)}</div><div class="${s.opensOn}">${t(LANG, "opensOn")} ${esc(law.opener)} · ${esc(law.place)}</div>${law.judgment ? `<div class="${s.judg}">${esc(law.judgment)}</div>` : ""}${stamps}</div>`,
+        html: `<div class="${s.entry}"><div class="${s.entryHead}"><span class="${s.mono}">${t(LANG, "law")} ${law.n}</span></div><div class="${s.lawTitle}">${esc(law.title)}</div><div class="${s.opensOn}">${t(LANG, "opensOn")} ${esc(law.opener)} · ${esc(law.place)}</div>${law.judgment ? `<div class="${s.judg}"><span class="${s.judgLabel}">${t(LANG, "judgment")}</span>${esc(law.judgment)}</div>` : ""}${stamps}</div>`,
       });
       if (law.story) {
         toc.push({ seq: seq++, sec: `part-${part.n}`, head, kind: "para", cls: `${s.first} ${s.story}`, tokens: tokenize(law.story, new Set<string>()) });
