@@ -10,6 +10,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import type { PageFlip } from "page-flip";
+import { paint } from "@/lib/book/highlights";
 import { buildBook, pageElement, pageClasses, type Anchor, type BuiltPage } from "./pages";
 import s from "./book.module.css";
 
@@ -19,6 +20,7 @@ export type BookHandle = {
   next: () => void;
   prev: () => void;
   emblemRect: () => DOMRect | null;
+  repaint: () => void;          // draw the reader's highlights onto the pages again
 };
 
 export type PageInfo = { index: number; count: number; dark: boolean; secs: string[] };
@@ -230,6 +232,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
         : pages.current.findIndex((p) => p.secs.includes(sec));
       if (i >= 0 && flip.current) { flip.current.turnToPage(i); report(i); }
     },
+    repaint: () => paint(bookEl.current),
     next: () => flip.current?.flipNext(),
     prev: () => flip.current?.flipPrev(),
     emblemRect: () => bookEl.current?.querySelector("[data-emblem] svg")?.getBoundingClientRect() ?? null,
@@ -324,6 +327,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
         disableFlipByClick: false,  // the library never sees taps (useMouseEvents is off); this lets flipPrev work in one-page view
         useMouseEvents: false,      // fingers and the mouse are read by attachGestures below
       });
+      els.forEach((e) => paint(e));   // the reader's highlights, on the words they belong to
       pf.loadFromHTML(els);
       finishHalfwayTurns(pf, size.spread);
       detach = attachGestures(pf, b, () => pausedRef.current);
@@ -372,6 +376,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
     const el = host.current;
     if (!el) return;
     const onClick = (e: MouseEvent) => {
+      if (pausedRef.current) return;   // a tool is on: names and words do not open cards
       const t = (e.target as HTMLElement).closest<HTMLElement>("[data-who],[data-word],[data-stance],[data-law]");
       if (!t) return;
       e.stopPropagation();

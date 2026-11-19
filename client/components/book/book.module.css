@@ -173,6 +173,27 @@
 
 /* a key line, marked [[like this]] in the text */
 .hl, .hl .who, .hl .word { color: var(--red); }
+
+/* the reader's own highlights: a soft marker stroke behind whole words, and behind the spaces
+   between them, so a run of words reads as one line of colour. */
+.host [data-c], .host [data-live] {
+  background-image: linear-gradient(transparent 10%, var(--mk) 10%, var(--mk) 94%, transparent 94%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.host [data-c="y"], .host [data-live="y"] { --mk: rgba(242, 207, 74, 0.5); }
+.host [data-c="r"], .host [data-live="r"] { --mk: rgba(224, 87, 74, 0.34); }
+.host [data-c="g"], .host [data-live="g"] { --mk: rgba(95, 194, 135, 0.4); }
+.host [data-c="b"], .host [data-live="b"] { --mk: rgba(94, 168, 238, 0.38); }
+.host [data-c="p"], .host [data-live="p"] { --mk: rgba(239, 134, 178, 0.4); }
+.host [data-c="v"], .host [data-live="v"] { --mk: rgba(167, 133, 238, 0.38); }
+/* the stroke under the finger is a touch stronger until the finger lifts */
+.host [data-live] { filter: saturate(1.25); }
+/* while painting: no text selection, no callout menu, the finger does not scroll the page */
+:global(body.lor-painting) .host { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; cursor: text; }
+:global(body.lor-painting) .who, :global(body.lor-painting) .word { pointer-events: none; }
 .hl .who, .hl .word { border-bottom-color: rgba(155, 42, 33, 0.6); }
 
 /* a side note under its paragraph */
