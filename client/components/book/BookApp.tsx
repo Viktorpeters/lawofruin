@@ -25,6 +25,8 @@ const SEEN_KEY = "lor-seen";     // set once the reader has opened the cover
 const FS_KEY = "lor-fs";
 const HAND_KEY = "lor-hand";
 const GUIDE_KEY = "lor-guide";  // set once the reading guide has been seen
+const TIP_KEY = "lor-tip";      // set once the reader has tapped a name (or closed the tip)
+export const SIZES = [14, 15.5, 17];   // text size: standard (dense, like a hardback), larger, largest
 const SPLASH_MIN = 1700;         // the hourglass turns at least this long before it flies
 
 function get(key: string) {
@@ -37,7 +39,8 @@ function set(key: string, v: string | null) {
 export default function BookApp() {
   const book = useRef<BookHandle>(null);
   const [boot, setBoot] = useState<null | { returning: boolean }>(null);
-  const [fontSize, setFontSizeState] = useState(16);
+  const [fontSize, setFontSizeState] = useState(SIZES[0]);
+  const [tip, setTip] = useState(false);
   const [left, setLeftState] = useState(false);
   const [ready, setReady] = useState(false);
   const [minTime, setMinTime] = useState(false);
@@ -72,7 +75,7 @@ export default function BookApp() {
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       const fs = Number(get(FS_KEY));
-      if (fs === 15 || fs === 16 || fs === 17.5) setFontSizeState(fs);
+      if (SIZES.includes(fs)) setFontSizeState(fs);
       setLeftState(get(HAND_KEY) === "left");
       const l = savedLang();
       setLangState(l);
@@ -107,9 +110,12 @@ export default function BookApp() {
     if (info.index > 0) set(SEEN_KEY, "1");
     // the first time the cover is opened, show how to turn the pages
     if (info.index > 0 && get(GUIDE_KEY) !== "1") setGuide(true);
+    // once the reader is inside the book, one tip: names open their file
+    if (info.index > 0 && get(TIP_KEY) !== "1") setTip(true);
   }, []);
   const onReady = useCallback(() => setReady(true), []);
-  const onWho = useCallback((id: string) => { setWord(null); whoFromList.current = false; setWho(id); }, []);
+  const endTip = useCallback(() => { set(TIP_KEY, "1"); setTip(false); }, []);
+  const onWho = useCallback((id: string) => { setWord(null); whoFromList.current = false; setWho(id); endTip(); }, [endTip]);
   const onWord = useCallback((id: string, at: DOMRect) => setWord({ id, at }), []);
   const endSplash = useCallback(() => setSplash(false), []);
   const endGuide = useCallback(() => { set(GUIDE_KEY, "1"); setGuide(false); }, []);
@@ -242,6 +248,12 @@ export default function BookApp() {
       {who && <WhoCard id={who} onClose={closeWho} onJump={jump} />}
       {word && <WordCard id={word.id} at={word.at} onClose={() => setWord(null)} />}
 
+      {tip && !guide && !panel && !who && showBook && page && page.index > 0 && (
+        <div className={s.tip} role="status">
+          <span>{t(lang, "tapName")}</span>
+          <button type="button" onClick={endTip}>{t(lang, "ok")}</button>
+        </div>
+      )}
       {guide && showBook && <Coach onDone={endGuide} />}
       {splash && <Splash target={splashTarget} onDone={endSplash} />}
     </main>
