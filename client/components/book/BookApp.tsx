@@ -12,6 +12,10 @@ import Book, { type BookHandle, type PageInfo } from "./Book";
 import Splash from "./Splash";
 import Tray from "./Tray";
 import ToolRow, { type ToolId } from "./ToolRow";
+import HighlightBar from "./HighlightBar";
+import { useHighlighter } from "./useHighlighter";
+import { highlights, subscribe, setHighlightLang, type Colour } from "@/lib/book/highlights";
+import ts from "./tools.module.css";
 import Panel, { type PanelId } from "./Panels";
 import { WhoCard, WordCard } from "./Cards";
 import Coach from "./Coach";
@@ -44,6 +48,10 @@ export default function BookApp() {
   const [tip, setTip] = useState(false);
   const [tools, setTools] = useState(false);              // the row of reading tools is open
   const [mode, setMode] = useState<ToolId | null>(null);  // a finger tool is on: pages do not turn
+  const [colour, setColour] = useState<Colour>("y");
+  const [erase, setErase] = useState(false);
+  const [marks, setMarks] = useState(0);                  // how many highlights there are, in this language
+  const [notice, setNotice] = useState<string | null>(null);
   const [left, setLeftState] = useState(false);
   const [ready, setReady] = useState(false);
   const [minTime, setMinTime] = useState(false);
@@ -152,6 +160,27 @@ export default function BookApp() {
 
   const signOut = useCallback(() => { signOutNow(); setPanel(null); }, [signOutNow]);
 
+  // highlights: one list per language; repaint the pages whenever it changes
+  useEffect(() => { setHighlightLang(lang); setMarks(highlights().length); }, [lang]);
+  useEffect(() => subscribe(() => { setMarks(highlights().length); book.current?.repaint(); }), []);
+  useEffect(() => { book.current?.repaint(); }, [version]);
+  useEffect(() => { if (mode !== "highlight") setErase(false); }, [mode]);
+  useEffect(() => { if (marks === 0) setErase(false); }, [marks]);
+  useEffect(() => {
+    if (!notice) return;
+    const id = window.setTimeout(() => setNotice(null), 2600);
+    return () => window.clearTimeout(id);
+  }, [notice]);
+
+  useHighlighter({
+    on: mode === "highlight",
+    colour,
+    erase,
+    // the Preface is free to mark; the laws are for readers who own the book
+    allowed: (sec) => owner || !/^(law|part)/.test(sec),
+    onBlocked: () => setNotice(t(lang, "hlBuyers")),
+  });
+
   if (!boot) return <main className={s.app} />;
 
   // the book shows once it is built: at once for a returning reader, behind the flight for a new one
@@ -228,7 +257,9 @@ export default function BookApp() {
       )}
 
       {showBook && page && page.index > 0 && (
-        <ToolRow lang={lang} open={tools} mode={mode} onClose={() => setTools(false)} onMode={setMode} />
+        <ToolRow lang={lang} open={tools} mode={mode} onClose={() => setTools(false)} onMode={setMode}>
+          {mode === "highlight" ? <HighlightBar lang={lang} colour={colour} setColour={setColour} erase={erase} setErase={setErase} any={marks > 0} /> : undefined}
+        </ToolRow>
       )}
 
       {panel && (
@@ -257,6 +288,7 @@ export default function BookApp() {
       {who && <WhoCard id={who} onClose={closeWho} onJump={jump} />}
       {word && <WordCard id={word.id} at={word.at} onClose={() => setWord(null)} />}
 
+      {notice && <p className={ts.soon} role="status">{notice}</p>}
       {tip && !guide && !panel && !who && !tools && !mode && showBook && page && page.index > 0 && (
         <div className={s.tip} role="status">
           <span>{t(lang, "tapName")}</span>
