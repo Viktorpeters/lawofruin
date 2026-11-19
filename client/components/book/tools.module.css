@@ -117,8 +117,9 @@
 }
 .barName .ic { width: 38px; height: 38px; }
 .barName .ic svg, .barName .wheel { width: 18px; height: 18px; }
+@media (max-width: 480px) { .barLabel { display: none; } }
 .icOn { box-shadow: 0 0 0 2px #ffffff, 0 6px 16px rgba(0, 0, 0, 0.28); }
-.barMid { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+.barMid { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; overflow-x: auto; overflow-y: visible; padding: 6px 0; scrollbar-width: none; }
 .note { font-family: var(--font-ui), system-ui, sans-serif; font-size: 11.5px; color: rgba(255, 255, 255, 0.55); }
 /* in the row, the × sits on the bar's top edge, so all six tools get the full width */
 .row .x {
@@ -138,6 +139,43 @@
 .bar .x { margin: 0; animation: pop 0.5s var(--spring) 0.12s both; }
 .bar .barName { animation: slideIn 0.48s var(--sheet) 0.05s both; }
 .bar .barMid { animation: slideIn 0.48s var(--sheet) 0.1s both; }
+
+/* Highlight's controls: six sharp colour squares, then the eraser */
+.swatches { display: flex; align-items: center; gap: 9px; padding: 4px 2px; }
+.swatch {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: var(--sw);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  animation: pop 0.5s var(--spring) both;
+  animation-delay: calc(var(--i) * 28ms + 140ms);
+  transition: transform 0.4s var(--spring), box-shadow 0.25s ease;
+}
+.swatch:active { transform: scale(0.85); transition-duration: 0.08s; }
+/* the chosen colour lifts and gets a white ring */
+.swatchOn { transform: translateY(-3px) scale(1.12); box-shadow: 0 0 0 2px #16161a, 0 0 0 3.5px #ffffff, 0 6px 14px rgba(0, 0, 0, 0.35); }
+.eraser {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-left: 4px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  cursor: pointer;
+  animation: pop 0.5s var(--spring) both;
+  transition: transform 0.4s var(--spring), background 0.2s;
+}
+.eraser svg { width: 17px; height: 17px; display: block; }
+.eraser:active { transform: scale(0.86); transition-duration: 0.08s; }
+.eraserOn { background: #ffffff; color: #16161a; border-color: #ffffff; }
 
 /* the first-tap card */
 .teach {

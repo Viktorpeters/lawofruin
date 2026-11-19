@@ -122,7 +122,8 @@ export default function ToolRow({ lang, open, mode, onClose, onMode, children }:
       <div className={s.bar} role="toolbar" aria-label={t(lang, tool.name)}>
         <span className={s.barName}>
           <span className={`${s.ic} ${s.icOn}`}>{tool.icon}</span>
-          {t(lang, tool.name)}
+          {/* on a phone the tool's own controls need the room, so only its icon shows */}
+          <span className={s.barLabel}>{t(lang, tool.name)}</span>
         </span>
         <div className={s.barMid}>{children ?? <span className={s.note}>{t(lang, "soon")}</span>}</div>
         <button type="button" className={s.x} onClick={() => { tick(); onMode(null); }} aria-label={t(lang, "exitTool")}>
