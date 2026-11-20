@@ -48,6 +48,8 @@ export function readHighlight(h: Highlight): CardText {
     else if (s.seq === h.a.seq && s.tok < h.a.tok) before += withSpace(el);
   }
   line = line.replace(/\s+/g, " ").trim();
+  // the page is not open (another language, or not built yet): use the words kept with the highlight
+  if (!line && h.text) return { line: h.text, before: "", head: h.head ?? "", page: h.page ? `p. ${h.page}` : "" };
   before = lastSentence(before.replace(/\s+/g, " ").trim());
 
   const page = first?.closest<HTMLElement>("[data-folio], [data-head]");
