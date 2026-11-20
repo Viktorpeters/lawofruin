@@ -13,7 +13,12 @@ import Splash from "./Splash";
 import Tray from "./Tray";
 import ToolRow, { type ToolId } from "./ToolRow";
 import HighlightBar from "./HighlightBar";
-import ShareSheet from "./ShareSheet";
+import ShareSheet, { downloadFile, noteFile, savedName } from "./ShareSheet";
+import NoteCard, { type Draft } from "./NoteCard";
+import OptionsMenu, { ICONS } from "./OptionsMenu";
+import { useNoter, underline, type Picked } from "./useNoter";
+import { addNote, noteById, removeNote, setNotesLang, subscribe as onNotes, updateNote, type Note } from "@/lib/book/notes";
+import nstyles from "./notes.module.css";
 import { subscribe as onBookmarks, toggle as toggleBookmark } from "@/lib/book/bookmarks";
 import { useHighlighter } from "./useHighlighter";
 import { highlights, subscribe, setHighlightLang, type Colour, type Highlight } from "@/lib/book/highlights";
@@ -55,6 +60,10 @@ export default function BookApp() {
   const [marks, setMarks] = useState(0);                  // how many highlights there are, in this language
   const [notice, setNotice] = useState<string | null>(null);
   const [sharing, setSharing] = useState<Highlight | null>(null);   // the highlight being made into a picture
+  const [sharingNote, setSharingNote] = useState<Note | null>(null); // the note being made into a picture
+  // the note card: writing a new note (on a sentence, or on the page), reading one, or editing it
+  const [card, setCard] = useState<{ mode: "write" | "read" | "edit"; draft: Draft; picked?: Picked; pageAt?: { seq: number; tok: number }; sec?: string; id?: string } | null>(null);
+  const [menu, setMenu] = useState<{ note: Note; at: DOMRect } | null>(null);
   const [left, setLeftState] = useState(false);
   const [ready, setReady] = useState(false);
   const [minTime, setMinTime] = useState(false);
@@ -168,6 +177,9 @@ export default function BookApp() {
   useEffect(() => subscribe(() => { setMarks(highlights().length); book.current?.repaint(); }), []);
   useEffect(() => { book.current?.repaint(); }, [version]);
   useEffect(() => onBookmarks(() => book.current?.fold()), []);
+  // notes: one list per language; the pen marks are redrawn whenever the list changes
+  useEffect(() => { setNotesLang(lang); book.current?.repaint(); }, [lang]);
+  useEffect(() => onNotes(() => book.current?.repaint()), []);
   useEffect(() => { if (mode !== "highlight") setErase(false); }, [mode]);
   useEffect(() => { if (marks === 0) setErase(false); }, [marks]);
   useEffect(() => {
@@ -184,6 +196,81 @@ export default function BookApp() {
     try { navigator.vibrate?.(done === "added" ? [6, 40, 10] : 8); } catch { /* not supported */ }
     setNotice(t(lang, done === "added" ? "bmAdded" : "bmRemoved"));
   }, [lang]);
+
+  // the link on every picture: the reader's own Earn link when signed in
+  const shareLink = typeof window === "undefined" ? "" : me?.refCode ? `${window.location.origin}/r/${me.refCode}` : window.location.origin;
+  const brand = t(lang, "coverTitle").split("|").join(" ");
+
+  const openNote = useCallback((id: string) => {
+    const n = noteById(id);
+    if (!n) return;
+    setWho(null); setWord(null);
+    underline(n.kind === "line" ? n.a : null, n.kind === "line" ? n.b ?? n.a : null);
+    setCard({ mode: "read", id, draft: { kind: n.kind, quote: n.quote, head: n.head, page: n.page } });
+  }, []);
+
+  const closeCard = useCallback(() => { underline(null, null); setCard(null); }, []);
+
+  const saveCard = useCallback((text: string) => {
+    if (!card) return;
+    if (card.mode === "edit" && card.id) updateNote(card.id, text);
+    else if (card.picked) {
+      const p = card.picked;
+      addNote({ kind: "line", a: p.a, b: p.b, quote: p.quote, before: p.before, sec: p.sec, head: p.head, page: p.page, text });
+    } else if (card.pageAt) {
+      addNote({ kind: "page", a: card.pageAt, quote: "", before: "", sec: card.sec ?? "", head: card.draft.head, page: card.draft.page, text });
+    }
+    try { navigator.vibrate?.([6, 40, 10]); } catch { /* not supported */ }
+    underline(null, null);
+    setCard(null);
+    setNotice(t(lang, "noteSaved"));
+  }, [card, lang]);
+
+  // a page note: written on the page the reader is on, with no sentence
+  const pageNote = useCallback(() => {
+    const here = book.current?.here();
+    if (!here || here.dark) { setNotice(t(lang, "noBmHere")); return; }
+    if (!(owner || !/^(law|part)/.test(here.sec))) { setNotice(t(lang, "noteBuyers")); return; }
+    underline(null, null);
+    setCard({ mode: "write", draft: { kind: "page", quote: "", head: here.head, page: here.page }, pageAt: here.start, sec: here.sec });
+  }, [lang, owner]);
+
+  const noteMenu = (n: Note): { icon: React.ReactNode; label: string; onPick: () => void; danger?: boolean; confirm?: string }[] => [
+    { icon: ICONS.share, label: t(lang, "sharePic"), onPick: () => { setCard(null); underline(null, null); setSharingNote(n); } },
+    { icon: ICONS.save, label: t(lang, "savePng"), onPick: async () => {
+      const f = await noteFile(n, lang, savedName(me?.name ?? ""), shareLink, brand);
+      if (f) { downloadFile(f); setNotice(t(lang, "savedImg")); }
+    } },
+    { icon: ICONS.go, label: t(lang, "goToPage"), onPick: () => {
+      setPanel(null);
+      book.current?.goTo(n.a);
+      if (n.kind === "line") window.setTimeout(() => underline(n.a, n.b ?? n.a), 500);
+      window.setTimeout(() => underline(null, null), 2600);
+    } },
+    { icon: ICONS.edit, label: t(lang, "editNote"), onPick: () => {
+      setPanel(null);
+      setCard({ mode: "edit", id: n.id, draft: { kind: n.kind, quote: n.quote, head: n.head, page: n.page } });
+    } },
+    { icon: ICONS.copy, label: t(lang, "copyText"), onPick: async () => {
+      const text = n.quote ? `“${n.quote}”\n\n${n.text}\n\n${n.head}${n.page ? `, p. ${n.page}` : ""}` : `${n.text}\n\n${n.head}${n.page ? `, p. ${n.page}` : ""}`;
+      try { await navigator.clipboard.writeText(text); setNotice(t(lang, "textCopied")); } catch { /* clipboard blocked */ }
+    } },
+    { icon: ICONS.del, label: t(lang, "del"), danger: true, confirm: t(lang, "delSure"), onPick: () => {
+      removeNote(n.id);
+      underline(null, null);
+      setCard((c) => (c?.id === n.id ? null : c));
+      setNotice(t(lang, "noteDeleted"));
+    } },
+  ];
+
+  useNoter({
+    on: mode === "note",
+    busy: !!card,
+    allowed: (sec) => owner || !/^(law|part)/.test(sec),
+    onBlocked: () => setNotice(t(lang, "noteBuyers")),
+    onPick: (p) => setCard({ mode: "write", picked: p, draft: { kind: "line", quote: p.quote, head: p.head, page: p.page } }),
+    onOpen: openNote,
+  });
 
   useHighlighter({
     on: mode === "highlight",
@@ -275,7 +362,15 @@ export default function BookApp() {
             // the most recent highlight becomes the picture
             const latest = [...highlights()].sort((a, b) => b.at - a.at)[0];
             if (latest) setSharing(latest);
-          }} /> : undefined}
+          }} /> : mode === "note" ? (
+            <>
+              <span className={nstyles.hint}>{t(lang, "tapLineOr")}</span>
+              <button type="button" className={nstyles.free} onClick={pageNote}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                {t(lang, "pageNote")}
+              </button>
+            </>
+          ) : undefined}
         </ToolRow>
       )}
 
@@ -291,6 +386,8 @@ export default function BookApp() {
           onOpen={setPanel}
           onJump={jump}
           onPlace={(a) => { setPanel(null); book.current?.goTo(a); }}
+          onNoteMenu={(n, at) => setMenu({ note: n, at })}
+          onNoteOpen={(n) => { setPanel(null); book.current?.goTo(n.a); window.setTimeout(() => openNote(n.id), 420); }}
           onWho={(id) => { setPanel(null); whoFromList.current = true; setWho(id); }}
           onSignOut={signOut}
           onLang={chooseLang}
@@ -307,15 +404,27 @@ export default function BookApp() {
       {word && <WordCard id={word.id} at={word.at} onClose={() => setWord(null)} />}
 
       {notice && <p className={ts.soon} role="status">{notice}</p>}
-      {sharing && (
-        <ShareSheet
+      {card && (
+        <NoteCard
+          key={`${card.mode}-${card.id ?? "new"}`}
           lang={lang}
-          highlight={sharing}
-          defaultName={me?.name ?? ""}
-          link={typeof window === "undefined" ? "" : me?.refCode ? `${window.location.origin}/r/${me.refCode}` : window.location.origin}
-          brand={t(lang, "coverTitle").split("|").join(" ")}
-          onClose={() => setSharing(null)}
+          mode={card.mode}
+          draft={card.draft}
+          text={card.id ? noteById(card.id)?.text ?? "" : ""}
+          date={card.id ? new Date(noteById(card.id)?.ed ?? noteById(card.id)?.at ?? Date.now()).toLocaleDateString(lang, { day: "numeric", month: "short", year: "numeric" }) : undefined}
+          raised={mode !== null}
+          onSave={saveCard}
+          onCancel={closeCard}
+          onEdit={() => setCard((c) => (c ? { ...c, mode: "edit" } : c))}
+          onMenu={(at) => { const n = card.id ? noteById(card.id) : undefined; if (n) setMenu({ note: n, at }); }}
         />
+      )}
+      {menu && <OptionsMenu anchor={menu.at} items={noteMenu(menu.note)} onClose={() => setMenu(null)} />}
+      {sharing && (
+        <ShareSheet lang={lang} highlight={sharing} defaultName={me?.name ?? ""} link={shareLink} brand={brand} onClose={() => setSharing(null)} />
+      )}
+      {sharingNote && (
+        <ShareSheet lang={lang} note={sharingNote} defaultName={me?.name ?? ""} link={shareLink} brand={brand} onClose={() => setSharingNote(null)} />
       )}
       {tip && !guide && !panel && !who && !tools && !mode && showBook && page && page.index > 0 && (
         <div className={s.tip} role="status">

@@ -96,6 +96,7 @@
 
 /* ---------- running text ---------- */
 .p {
+  position: relative;            /* the note pen marks sit in its left margin */
   margin: 0 0 0.75em;
   font-size: var(--fs);
   line-height: 1.58;
@@ -523,3 +524,47 @@
 }
 @keyframes dogOut { to { transform: scale(0.2) rotate(18deg); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .dog, .dogOut { animation-duration: 0.01s; } }
+
+/* ---------- notes ----------
+   the pen mark in the left margin beside a noted sentence: it sits in the line's own flow, so it
+   is always level with the right line */
+.penMark {
+  position: absolute;
+  left: -25px;
+  width: 22px;
+  height: 1.3em;
+  margin-top: 0.05em;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--red);
+  cursor: pointer;
+  text-indent: 0;
+  animation: penIn 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+.penMark svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes penIn { from { opacity: 0; transform: scale(0.3) rotate(-25deg); } }
+/* a page note: a small notebook in the left margin, at the foot of the page */
+.pageNote {
+  position: absolute;
+  left: 2px;
+  bottom: 40px;
+  z-index: 3;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--red);
+  cursor: pointer;
+  animation: penIn 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+.pageNote svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* the sentence a note is being written under: a thin red line */
+.host [data-nu] { background-image: linear-gradient(var(--red), var(--red)); background-size: 100% 1.5px; background-position: 0 100%; background-repeat: no-repeat; }
+:global(body.lor-noting) .host { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; cursor: pointer; }
+:global(body.lor-noting) .who, :global(body.lor-noting) .word { pointer-events: none; }

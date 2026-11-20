@@ -4,6 +4,9 @@
    phones, a side panel on wide screens. */
 
 import { bookmarks, subscribe, remove as removeBookmark, type Bookmark } from "@/lib/book/bookmarks";
+import { diary, subscribe as onNotes, type Note } from "@/lib/book/notes";
+import { ICONS } from "./OptionsMenu";
+import ns from "./notes.module.css";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { PREFACE } from "@/lib/book/preface";
 import { PARTS } from "@/lib/book/contents";
@@ -33,6 +36,8 @@ type Props = {
   onOpen: (id: PanelId) => void;
   onJump: (sec: string) => void;
   onPlace: (a: { seq: number; tok: number }) => void;   // open a bookmarked page
+  onNoteMenu: (n: Note, at: DOMRect) => void;            // the ⋮ options of a note in the diary
+  onNoteOpen: (n: Note) => void;                         // open a note's page, with the whole note on it
   onWho: (id: string) => void;
   onSignOut: () => void;
   onLang: (l: Lang) => void;
@@ -86,9 +91,12 @@ export default function Panel(props: Props) {
 
 /* ---------- Contents ---------- */
 
-function ContentsList({ onJump, onPlace, lang }: Props) {
+function ContentsList({ onJump, onPlace, onNoteMenu, onNoteOpen, lang }: Props) {
   const [marks, setMarks] = useState<Bookmark[]>(() => bookmarks());
   useEffect(() => subscribe(() => setMarks(bookmarks())), []);
+  const [notes, setNotes] = useState<Note[]>(() => diary());
+  useEffect(() => onNotes(() => setNotes(diary())), []);
+  const day = (n: Note) => new Date(n.ed ?? n.at).toLocaleDateString(lang, { day: "numeric", month: "short" });
   const row = (sec: string, label: string, title: string) => (
     <button key={sec} type="button" className={s.row} onClick={() => onJump(sec)}>
       <span className={s.rowNum}>{label}</span>
@@ -109,6 +117,30 @@ function ContentsList({ onJump, onPlace, lang }: Props) {
               </button>
               <button type="button" className={s.bmX} onClick={() => removeBookmark(b.id)} aria-label={t(lang, "removeBm")}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" /></svg>
+              </button>
+            </div>
+          ))}
+        </>
+      )}
+      {notes.length > 0 && (
+        <>
+          {/* the diary: newest first, each with the words it was written under */}
+          <div className={s.group}>{t(lang, "notes")} · {notes.length}</div>
+          {notes.map((n) => (
+            <div key={n.id} className={ns.entry} role="button" tabIndex={0} onClick={() => onNoteOpen(n)} onKeyDown={(e) => { if (e.key === "Enter") onNoteOpen(n); }}>
+              <div className={ns.entryHead}>
+                <span>{n.kind === "page" ? `${t(lang, "pageNote")} · ` : ""}{n.head}{n.page ? ` · p. ${n.page}` : ""}</span>
+                <span>{day(n)}</span>
+              </div>
+              {n.quote && <p className={ns.entryQuote}>{n.quote}</p>}
+              <p className={ns.entryBody}>{n.text}</p>
+              <button
+                type="button"
+                className={ns.dots}
+                aria-label={t(lang, "options")}
+                onClick={(e) => { e.stopPropagation(); onNoteMenu(n, e.currentTarget.getBoundingClientRect()); }}
+              >
+                {ICONS.dots}
               </button>
             </div>
           ))}
