@@ -1,0 +1,21 @@
+/* the Highlights list: each entry carries its pencil colour as a stroke behind the words */
+.item { padding-left: 0; }
+.words {
+  margin: 10px 0 0;
+  font-family: var(--font-reading), Georgia, serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #ffffff;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* the colour as a soft marker under the words, like on the page */
+.words span {
+  background-image: linear-gradient(transparent 58%, color-mix(in srgb, var(--mk) 55%, transparent) 58%, color-mix(in srgb, var(--mk) 55%, transparent) 92%, transparent 92%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.swatch { display: block; width: 17px; height: 17px; flex: none; background: var(--sw); border: 1px solid rgba(255, 255, 255, 0.35); }
+.empty { margin: 24px 0; font-size: 13px; line-height: 1.6; color: rgba(255, 255, 255, 0.55); }
