@@ -11,6 +11,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import type { PageFlip } from "page-flip";
 import { paint } from "@/lib/book/highlights";
+import { onPage as bookmarkOn } from "@/lib/book/bookmarks";
 import { buildBook, pageElement, pageClasses, type Anchor, type BuiltPage } from "./pages";
 import s from "./book.module.css";
 
@@ -21,6 +22,9 @@ export type BookHandle = {
   prev: () => void;
   emblemRect: () => DOMRect | null;
   repaint: () => void;          // draw the reader's highlights onto the pages again
+  here: () => { start: Anchor; end: Anchor | null; head: string; page: string; dark: boolean } | null;   // the page the reader is on
+  goTo: (a: Anchor) => void;    // open the page that holds this place
+  fold: () => void;             // fold the corners of bookmarked pages (and unfold the rest)
 };
 
 export type PageInfo = { index: number; count: number; dark: boolean; secs: string[] };
@@ -207,6 +211,8 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
   const flip = useRef<PageFlip | null>(null);
   const pages = useRef<BuiltPage[]>([]);
   const bookEl = useRef<HTMLDivElement | null>(null);
+  const pageEls = useRef<HTMLElement[]>([]);   // the page elements, in order
+  const at = useRef(0);                     // the page the reader is on
   // keep the latest callbacks without rebuilding the book when they change
   const cb = useRef({ onReady, onPage, onWho, onWord, onLaw });
   cb.current = { onReady, onPage, onWho, onWord, onLaw };
@@ -233,14 +239,48 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
       if (i >= 0 && flip.current) { flip.current.turnToPage(i); report(i); }
     },
     repaint: () => paint(bookEl.current),
+    here: () => {
+      const i = at.current;
+      const p = pages.current[i];
+      if (!p) return null;
+      const el = pageEls.current[i];
+      return { start: p.start, end: pages.current[i + 1]?.start ?? null, head: el?.dataset.head ?? p.head ?? "", page: el?.dataset.folio ?? "", dark: !!p.dark || !!p.hard };
+    },
+    goTo: (a) => {
+      let i = 0;
+      pages.current.forEach((p, k) => { if (p.start.seq >= 0 && cmp(p.start, a) <= 0) i = k; });
+      if (flip.current) { flip.current.turnToPage(i); report(i); }
+    },
+    fold: () => foldCorners(),
     next: () => flip.current?.flipNext(),
     prev: () => flip.current?.flipPrev(),
     emblemRect: () => bookEl.current?.querySelector("[data-emblem] svg")?.getBoundingClientRect() ?? null,
   }));
 
+  /* a folded corner on each bookmarked page; a new fold plays its animation, a removed one
+     plays it backwards before it goes */
+  function foldCorners() {
+    pageEls.current.forEach((el, i) => {
+      const p = pages.current[i];
+      if (!p || p.hard || p.dark) return;
+      const want = !!bookmarkOn(p.start, pages.current[i + 1]?.start ?? null);
+      const dog = el.querySelector<HTMLElement>(`.${s.dog}`);
+      if (want && !dog) {
+        const d = document.createElement("div");
+        d.className = s.dog;
+        d.setAttribute("aria-hidden", "true");
+        el.appendChild(d);
+      } else if (!want && dog && !dog.classList.contains(s.dogOut)) {
+        dog.classList.add(s.dogOut);
+        window.setTimeout(() => dog.remove(), 320);
+      }
+    });
+  }
+
   function report(i: number) {
     const p = pages.current[i];
     if (!p) return;
+    at.current = i;
     here.current = p.start;
     const size = measureScreen();
     write(PLACE_KEY, { i, ...p.start, sec: p.secs[0], w: size.w, h: size.h, fs: fontSize } satisfies Place);
@@ -328,6 +368,8 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
         useMouseEvents: false,      // fingers and the mouse are read by attachGestures below
       });
       els.forEach((e) => paint(e));   // the reader's highlights, on the words they belong to
+      pageEls.current = els;
+      foldCorners();                   // and the folded corners of bookmarked pages
       pf.loadFromHTML(els);
       finishHalfwayTurns(pf, size.spread);
       detach = attachGestures(pf, b, () => pausedRef.current);
