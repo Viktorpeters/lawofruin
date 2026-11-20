@@ -6,6 +6,7 @@
    A row marked `danger` (Delete) asks once: the first tap turns it into "Tap again to delete". */
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import s from "./notes.module.css";
 
 export type MenuItem = { icon: ReactNode; label: string; onPick: () => void; danger?: boolean; confirm?: string };
@@ -43,7 +44,8 @@ export default function OptionsMenu({ anchor, items, onClose }: Props) {
     window.setTimeout(it.onPick, 120);
   };
 
-  return (
+  // drawn on the page itself, so a sliding panel around the dots cannot shift it
+  return createPortal(
     <>
       <div className={`${s.menuDim} ${closing ? s.menuDimOut : ""}`} onClick={close} aria-hidden="true" />
       <div
@@ -66,7 +68,8 @@ export default function OptionsMenu({ anchor, items, onClose }: Props) {
           </button>
         ))}
       </div>
-    </>
+    </>,
+    document.body,
   );
 }
 
@@ -78,5 +81,8 @@ export const ICONS = {
   edit: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.4L16.6 4.2a1.8 1.8 0 0 1 2.6 0l.6.6a1.8 1.8 0 0 1 0 2.6L8.4 18.8zM14.5 6.3l3.2 3.2" {...st} /></svg>,
   copy: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 8.5h10v11h-10zM5.5 15.5v-11h10" {...st} /></svg>,
   del: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9.5 7V4.5h5V7M7 7l1 13h8l1-13" {...st} /></svg>,
+  folder: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7V18.5h17V8.5h-8.5L10 6H3.5z" {...st} /></svg>,
+  folderAll: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7V18.5h17V8.5h-8.5L10 6H3.5z" {...st} /><path d="M8 13.5h8" {...st} /></svg>,
+  plus: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" {...st} /></svg>,
   dots: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.6" fill="currentColor" /><circle cx="12" cy="12" r="1.6" fill="currentColor" /><circle cx="12" cy="18.5" r="1.6" fill="currentColor" /></svg>,
 };
