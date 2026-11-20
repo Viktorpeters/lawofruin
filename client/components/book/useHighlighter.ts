@@ -69,7 +69,12 @@ export function useHighlighter({ on, colour, erase, allowed, onBlocked }: Opts) 
       if (start && live.length) {
         const first = live[0].dataset.k!.split(":").map(Number);
         const last = live[live.length - 1].dataset.k!.split(":").map(Number);
-        addHighlight({ seq: first[0], tok: first[1] }, { seq: last[0], tok: last[1] }, o.current.colour, start.sec);
+        // keep the words, the section and the page with the highlight, for the list and the picture
+        const text = live.map((el) => el.textContent?.trim() ?? "").filter(Boolean).join(" ");
+        const page = live[0].closest<HTMLElement>("[data-head], [data-folio]");
+        addHighlight({ seq: first[0], tok: first[1] }, { seq: last[0], tok: last[1] }, o.current.colour, start.sec, {
+          text, head: page?.dataset.head ?? "", page: page?.dataset.folio ?? "",
+        });
       }
       start = null;
       clearLive();

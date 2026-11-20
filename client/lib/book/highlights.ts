@@ -6,7 +6,12 @@
 
 export type Spot = { seq: number; tok: number };
 export type Colour = "y" | "r" | "g" | "b" | "p" | "v";
-export type Highlight = { id: string; a: Spot; b: Spot; c: Colour; sec: string; at: number };
+export type Highlight = {
+  id: string; a: Spot; b: Spot; c: Colour; sec: string; at: number;
+  text?: string;   // the highlighted words, kept so the list and the picture work with the page closed
+  head?: string;   // "Preface · Why Power Blinds"
+  page?: string;   // the page number when it was made
+};
 
 /* the six pencils */
 export const COLOURS: { c: Colour; hex: string }[] = [
@@ -44,11 +49,11 @@ export function highlights(): Highlight[] { return list; }
 
 export function subscribe(f: () => void) { subs.add(f); return () => { subs.delete(f); }; }
 
-export function addHighlight(a: Spot, b: Spot, c: Colour, sec: string) {
+export function addHighlight(a: Spot, b: Spot, c: Colour, sec: string, extra: { text?: string; head?: string; page?: string } = {}) {
   const [from, to] = cmp(a, b) <= 0 ? [a, b] : [b, a];
   // a new stroke over an old one replaces the overlapping part of the old one
   list = list.filter((h) => cmp(h.b, from) < 0 || cmp(h.a, to) > 0);
-  list.push({ id: Math.random().toString(36).slice(2, 10), a: from, b: to, c, sec, at: Date.now() });
+  list.push({ id: Math.random().toString(36).slice(2, 10), a: from, b: to, c, sec, at: Date.now(), ...extra });
   list.sort((x, y) => cmp(x.a, y.a));
   save();
 }
@@ -58,6 +63,30 @@ export function eraseAt(s: Spot) {
   const before = list.length;
   list = list.filter((h) => cmp(s, h.a) < 0 || cmp(s, h.b) > 0);
   if (list.length !== before) save();
+}
+
+/* the list in Contents: newest first */
+export function highlightList(): Highlight[] { return [...list].sort((x, y) => y.at - x.at); }
+
+export function removeHighlight(id: string) {
+  list = list.filter((h) => h.id !== id);
+  save();
+}
+
+export function recolour(id: string, c: Colour) {
+  list = list.map((h) => (h.id === id ? { ...h, c } : h));
+  save();
+}
+
+/* a moment's glow on a highlight, when the reader is taken to it from the list */
+export function flash(h: Highlight) {
+  document.querySelectorAll<HTMLElement>("[data-k]").forEach((el) => {
+    const [seq, tok] = el.dataset.k!.split(":").map(Number);
+    if (cmp({ seq, tok }, h.a) >= 0 && cmp({ seq, tok }, h.b) <= 0) {
+      el.setAttribute("data-flash", "");
+      window.setTimeout(() => el.removeAttribute("data-flash"), 1600);
+    }
+  });
 }
 
 export function highlightAt(s: Spot): Highlight | undefined {
