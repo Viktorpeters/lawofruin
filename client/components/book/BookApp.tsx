@@ -17,7 +17,8 @@ import ShareSheet, { downloadFile, noteFile, savedName } from "./ShareSheet";
 import NoteCard, { type Draft } from "./NoteCard";
 import OptionsMenu, { ICONS } from "./OptionsMenu";
 import { useNoter, underline, type Picked } from "./useNoter";
-import { addNote, noteById, removeNote, setNotesLang, subscribe as onNotes, updateNote, type Note } from "@/lib/book/notes";
+import { addFolder, addNote, folders, moveNote, noteById, removeNote, setNotesLang, subscribe as onNotes, updateNote, type Note } from "@/lib/book/notes";
+import { NamePrompt } from "./NotesPanel";
 import nstyles from "./notes.module.css";
 import { subscribe as onBookmarks, toggle as toggleBookmark } from "@/lib/book/bookmarks";
 import { useHighlighter } from "./useHighlighter";
@@ -64,6 +65,8 @@ export default function BookApp() {
   // the note card: writing a new note (on a sentence, or on the page), reading one, or editing it
   const [card, setCard] = useState<{ mode: "write" | "read" | "edit"; draft: Draft; picked?: Picked; pageAt?: { seq: number; tok: number }; sec?: string; id?: string } | null>(null);
   const [menu, setMenu] = useState<{ note: Note; at: DOMRect } | null>(null);
+  const [moving, setMoving] = useState<{ note: Note; at: DOMRect } | null>(null);   // the Move to folder list
+  const [naming, setNaming] = useState<Note | null>(null);                         // a new folder, made while moving a note
   const [left, setLeftState] = useState(false);
   const [ready, setReady] = useState(false);
   const [minTime, setMinTime] = useState(false);
@@ -247,6 +250,7 @@ export default function BookApp() {
       if (n.kind === "line") window.setTimeout(() => underline(n.a, n.b ?? n.a), 500);
       window.setTimeout(() => underline(null, null), 2600);
     } },
+    { icon: ICONS.folder, label: t(lang, "moveTo"), onPick: () => setMoving({ note: n, at: menu?.at ?? new DOMRect(window.innerWidth - 40, 120, 30, 30) }) },
     { icon: ICONS.edit, label: t(lang, "editNote"), onPick: () => {
       setPanel(null);
       setCard({ mode: "edit", id: n.id, draft: { kind: n.kind, quote: n.quote, head: n.head, page: n.page } });
@@ -387,6 +391,15 @@ export default function BookApp() {
           onJump={jump}
           onPlace={(a) => { setPanel(null); book.current?.goTo(a); }}
           onNoteMenu={(n, at) => setMenu({ note: n, at })}
+          onNotice={setNotice}
+          onShareMany={async (list) => {
+            // a folder's notes as pictures, shared together (or saved, where sharing files is not possible)
+            const files = (await Promise.all(list.slice(0, 10).map((n) => noteFile(n, lang, savedName(me?.name ?? ""), shareLink, brand)))).filter(Boolean) as File[];
+            if (!files.length) return;
+            const data = { files, text: `${t(lang, "mission")} ${shareLink}` };
+            if (navigator.canShare?.(data)) { try { await navigator.share(data); } catch { /* closed */ } }
+            else { files.forEach((f, i) => window.setTimeout(() => downloadFile(f), i * 300)); setNotice(t(lang, "savedImg")); }
+          }}
           onNoteOpen={(n) => { setPanel(null); book.current?.goTo(n.a); window.setTimeout(() => openNote(n.id), 420); }}
           onWho={(id) => { setPanel(null); whoFromList.current = true; setWho(id); }}
           onSignOut={signOut}
@@ -420,6 +433,26 @@ export default function BookApp() {
         />
       )}
       {menu && <OptionsMenu anchor={menu.at} items={noteMenu(menu.note)} onClose={() => setMenu(null)} />}
+      {moving && (
+        <OptionsMenu
+          anchor={moving.at}
+          onClose={() => setMoving(null)}
+          items={[
+            { icon: ICONS.folderAll, label: t(lang, "noFolder"), onPick: () => { moveNote(moving.note.id, null); setNotice(t(lang, "movedTo").replace("{f}", t(lang, "noFolder"))); } },
+            ...folders().map((f) => ({ icon: ICONS.folder, label: f.name, onPick: () => { moveNote(moving.note.id, f.id); setNotice(t(lang, "movedTo").replace("{f}", f.name)); } })),
+            { icon: ICONS.plus, label: t(lang, "newFolder"), onPick: () => setNaming(moving.note) },
+          ]}
+        />
+      )}
+      {naming && (
+        <NamePrompt
+          lang={lang}
+          title={t(lang, "newFolder")}
+          start=""
+          onCancel={() => setNaming(null)}
+          onDone={(name) => { const f = addFolder(name); moveNote(naming.id, f.id); setNaming(null); setNotice(t(lang, "movedTo").replace("{f}", f.name)); }}
+        />
+      )}
       {sharing && (
         <ShareSheet lang={lang} highlight={sharing} defaultName={me?.name ?? ""} link={shareLink} brand={brand} onClose={() => setSharing(null)} />
       )}
