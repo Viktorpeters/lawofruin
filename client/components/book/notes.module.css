@@ -1,0 +1,220 @@
+/* Notes, Graphite Glass: the note card, the ⋮ options card, the Note bar's controls and the
+   diary in Contents. Sharp edges, white type, phone-style motion. */
+
+.card {
+  --sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  position: fixed;
+  z-index: 47;
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 16px 16px 10px;
+  background: rgba(22, 22, 25, 0.95);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  backdrop-filter: blur(20px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  color: #ffffff;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  transform-origin: bottom center;
+  animation: cardIn 0.5s var(--sheet) both;
+  transition: bottom 0.25s var(--sheet);
+}
+.cardOut { animation: cardOut 0.22s cubic-bezier(0.4, 0, 1, 1) both; }
+
+.meta {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.meta > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.metaRight { display: flex; align-items: center; gap: 4px; flex: none; }
+.dots {
+  width: 32px;
+  height: 32px;
+  margin: -8px -8px -8px 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: transform 0.38s cubic-bezier(0.34, 1.45, 0.64, 1), background 0.2s;
+}
+.dots svg { width: 18px; height: 18px; display: block; }
+.dots:active { transform: scale(0.85); transition-duration: 0.08s; background: rgba(255, 255, 255, 0.1); }
+
+.quote {
+  margin: 11px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid #c0392b;
+  font-family: var(--font-reading), Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+  flex: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+}
+/* a long sentence, opened: it shows in full, scrolling if it must */
+.quoteOpen { display: block; -webkit-line-clamp: unset; max-height: 30svh; overflow-y: auto; }
+.area {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  min-height: 84px;
+  max-height: 40svh;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 10px 11px;
+  resize: none;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 0;
+  outline: none;
+  color: #ffffff;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 18px;
+  line-height: 1.4;
+  transition: border-color 0.2s;
+}
+.area:focus { border-color: rgba(255, 255, 255, 0.7); }
+.area::placeholder { color: rgba(255, 255, 255, 0.38); }
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 12px 0 0;
+  max-height: 40svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* a soft fade at the bottom edge when there is more to scroll */
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 22px), transparent);
+  mask-image: linear-gradient(#000 calc(100% - 22px), transparent);
+  padding-bottom: 14px;
+  white-space: pre-wrap;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 19px;
+  line-height: 1.45;
+  color: #ffffff;
+}
+
+/* Cancel / Save, Edit / Done: words only, no fill */
+.acts { flex: none; display: flex; justify-content: flex-end; gap: 20px; margin-top: 6px; }
+.acts button {
+  padding: 10px 0;
+  background: none;
+  border: 0;
+  color: #ffffff;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.38s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+.acts button:active { transform: scale(0.94); transition-duration: 0.08s; }
+.acts button:disabled { opacity: 0.35; }
+.acts .dim { color: rgba(255, 255, 255, 0.55); }
+
+/* the Note bar: "Tap a line, or" and the Page note button */
+.hint { font-family: var(--font-ui), system-ui, sans-serif; font-size: 12px; color: rgba(255, 255, 255, 0.6); white-space: nowrap; }
+.free {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding: 8px 11px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #ffffff;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  animation: pop 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) 0.14s both;
+  transition: transform 0.38s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+.free svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
+.free:active { transform: scale(0.93); transition-duration: 0.08s; }
+
+/* ---------- the ⋮ options card ---------- */
+.menuDim { position: fixed; inset: 0; z-index: 90; background: rgba(0, 0, 0, 0.35); animation: fade 0.25s ease both; }
+.menuDimOut { animation: fadeOut 0.19s ease both; }
+.menu {
+  position: fixed;
+  z-index: 91;
+  width: 232px;
+  padding: 6px 0;
+  background: rgba(30, 30, 34, 0.97);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  transform-origin: top right;
+  animation: menuIn 0.42s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+.menuUp { transform-origin: bottom right; }
+.menuOut { animation: menuOut 0.19s cubic-bezier(0.4, 0, 1, 1) both; }
+.menuRow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 16px;
+  background: none;
+  border: 0;
+  color: #ffffff;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  animation: rowIn 0.36s cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation-delay: calc(var(--i) * 30ms + 50ms);
+  transition: background 0.15s;
+}
+.menuRow + .menuRow { border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.menuRow:active, .menuRow:focus-visible { background: rgba(255, 255, 255, 0.08); outline: none; }
+.menuRow svg { width: 17px; height: 17px; flex: none; }
+.menuDanger { color: #ef6a5c; }
+.menuArmed { background: rgba(239, 106, 92, 0.14); font-weight: 600; }
+
+/* ---------- the diary, in Contents ---------- */
+.entry { position: relative; padding: 14px 40px 16px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); cursor: pointer; animation: rowIn 0.45s cubic-bezier(0.32, 0.72, 0, 1) both; }
+.entry:active { background: rgba(255, 255, 255, 0.03); }
+.entryHead { display: flex; justify-content: space-between; gap: 10px; font-family: var(--font-mono), monospace; font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+.entryHead span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.entryQuote { margin: 9px 0 0; padding-left: 10px; border-left: 2px solid #c0392b; font-family: var(--font-reading), Georgia, serif; font-style: italic; font-size: 13.5px; line-height: 1.5; color: rgba(255, 255, 255, 0.75); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.entryBody { margin: 9px 0 0; font-family: var(--font-display), Georgia, serif; font-size: 17.5px; line-height: 1.42; color: #ffffff; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.entry .dots { position: absolute; right: 0; top: 6px; margin: 0; width: 36px; height: 36px; }
+
+@keyframes cardIn { from { opacity: 0; transform: translateY(26px) scale(0.96); filter: blur(6px); } }
+@keyframes cardOut { to { opacity: 0; transform: translateY(18px) scale(0.97); } }
+@keyframes menuIn { from { opacity: 0; transform: scale(0.55); filter: blur(8px); } 60% { filter: blur(0); } }
+@keyframes menuOut { to { opacity: 0; transform: scale(0.6); filter: blur(4px); } }
+@keyframes rowIn { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes pop { from { opacity: 0; transform: scale(0.4); } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes fadeOut { to { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .cardOut, .menu, .menuOut, .menuRow, .entry, .free, .menuDim { animation-duration: 0.01s; animation-delay: 0s; }
+}
