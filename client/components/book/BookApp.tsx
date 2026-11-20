@@ -14,6 +14,7 @@ import Tray from "./Tray";
 import ToolRow, { type ToolId } from "./ToolRow";
 import HighlightBar from "./HighlightBar";
 import ShareSheet from "./ShareSheet";
+import { subscribe as onBookmarks, toggle as toggleBookmark } from "@/lib/book/bookmarks";
 import { useHighlighter } from "./useHighlighter";
 import { highlights, subscribe, setHighlightLang, type Colour, type Highlight } from "@/lib/book/highlights";
 import ts from "./tools.module.css";
@@ -166,6 +167,7 @@ export default function BookApp() {
   useEffect(() => { setHighlightLang(lang); setMarks(highlights().length); }, [lang]);
   useEffect(() => subscribe(() => { setMarks(highlights().length); book.current?.repaint(); }), []);
   useEffect(() => { book.current?.repaint(); }, [version]);
+  useEffect(() => onBookmarks(() => book.current?.fold()), []);
   useEffect(() => { if (mode !== "highlight") setErase(false); }, [mode]);
   useEffect(() => { if (marks === 0) setErase(false); }, [marks]);
   useEffect(() => {
@@ -173,6 +175,15 @@ export default function BookApp() {
     const id = window.setTimeout(() => setNotice(null), 2600);
     return () => window.clearTimeout(id);
   }, [notice]);
+
+  // Bookmark: one tap folds the corner of the page the reader is on (or unfolds it)
+  const bookmark = useCallback(() => {
+    const here = book.current?.here();
+    if (!here || here.dark) { setNotice(t(lang, "noBmHere")); return; }
+    const done = toggleBookmark(here.start, here.end, here.head, here.page);
+    try { navigator.vibrate?.(done === "added" ? [6, 40, 10] : 8); } catch { /* not supported */ }
+    setNotice(t(lang, done === "added" ? "bmAdded" : "bmRemoved"));
+  }, [lang]);
 
   useHighlighter({
     on: mode === "highlight",
@@ -259,7 +270,7 @@ export default function BookApp() {
       )}
 
       {showBook && page && page.index > 0 && (
-        <ToolRow lang={lang} open={tools} mode={mode} onClose={() => setTools(false)} onMode={setMode}>
+        <ToolRow lang={lang} open={tools} mode={mode} onClose={() => setTools(false)} onMode={setMode} onAction={(id) => { if (id === "bookmark") bookmark(); }}>
           {mode === "highlight" ? <HighlightBar lang={lang} colour={colour} setColour={setColour} erase={erase} setErase={setErase} any={marks > 0} onShare={() => {
             // the most recent highlight becomes the picture
             const latest = [...highlights()].sort((a, b) => b.at - a.at)[0];
@@ -279,6 +290,7 @@ export default function BookApp() {
           onClose={() => setPanel(null)}
           onOpen={setPanel}
           onJump={jump}
+          onPlace={(a) => { setPanel(null); book.current?.goTo(a); }}
           onWho={(id) => { setPanel(null); whoFromList.current = true; setWho(id); }}
           onSignOut={signOut}
           onLang={chooseLang}
