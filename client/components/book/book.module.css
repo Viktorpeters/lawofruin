@@ -568,3 +568,7 @@
 .host [data-nu] { background-image: linear-gradient(var(--red), var(--red)); background-size: 100% 1.5px; background-position: 0 100%; background-repeat: no-repeat; }
 :global(body.lor-noting) .host { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; cursor: pointer; }
 :global(body.lor-noting) .who, :global(body.lor-noting) .word { pointer-events: none; }
+
+/* taken to a highlight from the list: it glows for a moment */
+.host [data-flash] { animation: flash 1.6s ease both; }
+@keyframes flash { 0%, 100% { filter: none; } 20%, 55% { filter: saturate(2.4) brightness(0.88); } }
