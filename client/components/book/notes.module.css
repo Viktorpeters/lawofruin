@@ -218,3 +218,7 @@
 @media (prefers-reduced-motion: reduce) {
   .card, .cardOut, .menu, .menuOut, .menuRow, .entry, .free, .menuDim { animation-duration: 0.01s; animation-delay: 0s; }
 }
+
+/* the Notes row in Contents */
+.notesRowIcon { width: 16px; height: 16px; flex: none; color: rgba(255, 255, 255, 0.85); }
+.notesRowIcon svg { width: 16px; height: 16px; display: block; }
