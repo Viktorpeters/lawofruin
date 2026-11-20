@@ -222,3 +222,4 @@
 /* the Notes row in Contents */
 .notesRowIcon { width: 16px; height: 16px; flex: none; color: rgba(255, 255, 255, 0.85); }
 .notesRowIcon svg { width: 16px; height: 16px; display: block; }
+.hlDot { display: block; width: 14px; height: 14px; margin: 1px; border-radius: 50%; background: conic-gradient(from 200deg, #ff5f6d, #ffc371, #f9f871, #47e5bc, #4facfe, #a06cff, #ff5f6d); }
