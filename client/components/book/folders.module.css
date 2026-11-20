@@ -1,0 +1,224 @@
+/* Note folders, like a desktop: folder icons with a tab, a sheet of paper peeking out, and a
+   front that tips open when a note is held over it. Sharp tiles, white type, spring motion. */
+
+.grid_wrap { --sheet: cubic-bezier(0.32, 0.72, 0, 1); --spring: cubic-bezier(0.34, 1.45, 0.64, 1); }
+
+.sort {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+.toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 42px;
+  height: 24px;
+  margin: 0;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  transition: transform 0.42s cubic-bezier(0.34, 1.45, 0.64, 1), background 0.2s;
+}
+.toggle:checked { border-color: #ffffff; }
+.toggle:checked::after { transform: translateX(18px); background: #ffffff; }
+
+/* the grid: three across on a phone, like icons on a desktop */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px 8px; padding: 20px 0 10px; }
+.tileWrap { position: relative; animation: tileIn 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) both; animation-delay: calc(var(--i) * 40ms); }
+.tile {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 4px;
+  background: none;
+  border: 0;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  animation: tileIn 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+  transition: transform 0.4s cubic-bezier(0.34, 1.45, 0.64, 1), background 0.2s;
+}
+.tileWrap .tile { animation: none; }
+.tile:active { transform: scale(0.93); transition-duration: 0.08s; background: rgba(255, 255, 255, 0.05); }
+.tile:active .front, .tile:hover .front { transform: perspective(160px) rotateX(-22deg); }
+.name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; font-weight: 500; }
+.count { font-family: var(--font-mono), monospace; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+.tileDots { position: absolute; top: 0; right: 0; width: 28px; height: 28px; display: grid; place-items: center; padding: 0; background: none; border: 0; color: rgba(255, 255, 255, 0.6); cursor: pointer; }
+.tileDots svg { width: 16px; height: 16px; }
+
+/* ---------- the folder icon ---------- */
+.icon { position: relative; display: block; width: 58px; height: 46px; flex: none; }
+.back {
+  position: absolute;
+  inset: 6px 0 0 0;
+  background: linear-gradient(180deg, #8a7457, #6f5c44);
+}
+.back::before {   /* the tab */
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -6px;
+  width: 24px;
+  height: 7px;
+  background: #8a7457;
+  clip-path: polygon(0 0, 78% 0, 100% 100%, 0 100%);
+}
+.paper {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 10px;
+  height: 22px;
+  background: linear-gradient(180deg, #fbf7ee, #e9e1d1);
+  transition: transform 0.4s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+.front {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #c3a77e, #a88c64);
+  box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.25) inset, 0 6px 14px rgba(0, 0, 0, 0.3);
+  transform-origin: bottom center;
+  transition: transform 0.45s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+/* a note held over it: the front tips forward and the paper rises */
+.iconOpen .front { transform: perspective(160px) rotateX(-34deg); }
+.iconOpen .paper { transform: translateY(-5px); }
+/* All notes: the book's red leather */
+.all .back, .all .back::before { background: #7e2a23; }
+.all .front { background: linear-gradient(180deg, #c0473c, #9c342b); }
+/* a reading day: slate */
+.day .back, .day .back::before { background: #4b5560; }
+.day .front { background: linear-gradient(180deg, #8794a1, #66727e); }
+/* New folder: an outline with a plus */
+.new .back { background: none; border: 1.5px dashed rgba(255, 255, 255, 0.45); inset: 6px 0 0 0; }
+.new .back::before { background: rgba(255, 255, 255, 0.45); height: 1.5px; top: -1px; clip-path: none; }
+.new .front { background: none; box-shadow: none; }
+.plus { color: #ffffff; font-size: 24px; font-weight: 300; line-height: 1; transform: translateY(-4px); }
+
+/* ---------- inside a folder ---------- */
+.inside { animation: pushIn 0.42s cubic-bezier(0.32, 0.72, 0, 1) both; }
+/* holding a note to drag it must not select its words or bring up the phone's copy menu */
+.inside [role="button"] { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.insideOut { animation: pushOut 0.26s cubic-bezier(0.4, 0, 1, 1) both; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 0 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 6px 6px 0;
+  background: none;
+  border: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+}
+.backBtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.here { display: flex; align-items: center; gap: 9px; min-width: 0; font-size: 14px; font-weight: 600; color: #ffffff; }
+.here .icon { transform: scale(0.52); margin: -11px -14px; }
+.spacer { width: 32px; }
+
+/* the drop strip: folders to drag a note onto */
+.strip { display: flex; gap: 6px; overflow-x: auto; padding: 14px 0 4px; scrollbar-width: none; }
+.strip::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 74px;
+  padding: 8px 2px 6px;
+  border: 1px solid transparent;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.75);
+  transition: transform 0.4s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.2s, background 0.2s;
+}
+.chip span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip .icon { transform: scale(0.7); margin: -6px -8px; }
+.stripLive .chip { border-color: rgba(255, 255, 255, 0.14); }
+.chipOver { transform: scale(1.12); border-color: #ffffff !important; background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+.hint { margin: 2px 0 6px; font-size: 11px; color: rgba(255, 255, 255, 0.45); }
+.empty { margin: 30px 0; text-align: center; font-size: 13px; line-height: 1.6; color: rgba(255, 255, 255, 0.55); }
+
+/* the note being dragged: it lifts out of the list and follows the finger */
+.lifted { opacity: 0.35; transform: scale(0.98); transition: opacity 0.2s, transform 0.3s; }
+.ghost {
+  position: fixed;
+  z-index: 95;
+  width: 230px;
+  padding: 12px 14px;
+  transform: translate(-50%, -110%) rotate(-2deg);
+  background: rgba(36, 36, 40, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  animation: lift 0.32s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+.ghostHead { display: block; font-family: var(--font-mono), monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ghostBody { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 6px; font-family: var(--font-display), Georgia, serif; font-size: 15px; line-height: 1.35; color: #ffffff; }
+
+/* the name card: New folder, Rename */
+.prompt {
+  position: fixed;
+  z-index: 92;
+  left: max(16px, env(safe-area-inset-left));
+  right: max(16px, env(safe-area-inset-right));
+  top: 30%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 18px 18px 8px;
+  background: rgba(26, 26, 30, 0.97);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  animation: promptIn 0.45s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+.prompt h3 { margin: 0 0 12px; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 20px; }
+.prompt input {
+  width: 100%;
+  padding: 11px 12px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0;
+  outline: none;
+  color: #ffffff;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 16px;
+}
+.prompt input:focus { border-color: #ffffff; }
+
+@keyframes tileIn { from { opacity: 0; transform: translateY(14px) scale(0.85); } }
+@keyframes pushIn { from { opacity: 0; transform: translateX(36px); } }
+@keyframes pushOut { to { opacity: 0; transform: translateX(36px); } }
+@keyframes lift { from { transform: translate(-50%, -100%) scale(0.9) rotate(0deg); opacity: 0.4; } }
+@keyframes promptIn { from { opacity: 0; transform: scale(0.88) translateY(10px); filter: blur(6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tile, .tileWrap, .inside, .insideOut, .ghost, .prompt { animation-duration: 0.01s; animation-delay: 0s; }
+}
