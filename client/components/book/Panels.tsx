@@ -8,6 +8,9 @@ import { diary, subscribe as onNotes, type Note } from "@/lib/book/notes";
 import { ICONS } from "./OptionsMenu";
 import ns from "./notes.module.css";
 import NotesPanel from "./NotesPanel";
+import HighlightsPanel from "./HighlightsPanel";
+import OptionsMenu from "./OptionsMenu";
+import { highlightList, subscribe as onHighlights, type Highlight } from "@/lib/book/highlights";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { PREFACE } from "@/lib/book/preface";
 import { PARTS } from "@/lib/book/contents";
@@ -20,10 +23,10 @@ import { LANGS, t, type Key, type Lang } from "@/lib/i18n";
 import type { TrayItemId } from "./trayItems";
 import s from "./panels.module.css";
 
-export type PanelId = TrayItemId | "account" | "ask" | "notes";
+export type PanelId = TrayItemId | "account" | "ask" | "notes" | "highlights";
 
 const TITLE: Record<PanelId, Key> = {
-  contents: "contents", notes: "notes", whoswho: "whoswho", purchases: "purchases", earn: "earn", appearance: "appearance", account: "account", ask: "askTitle",
+  contents: "contents", notes: "notes", highlights: "highlights", whoswho: "whoswho", purchases: "purchases", earn: "earn", appearance: "appearance", account: "account", ask: "askTitle",
 };
 
 type Props = {
@@ -40,6 +43,8 @@ type Props = {
   onNoteMenu: (n: Note, at: DOMRect) => void;            // the ⋮ options of a note in the diary
   onNoteOpen: (n: Note) => void;                         // open a note's page, with the whole note on it
   onShareMany: (notes: Note[]) => void;                  // a folder's "Share all as pictures"
+  onHighlightOpen: (h: Highlight) => void;               // open a highlight's page; it glows for a moment
+  onHighlightMenu: (h: Highlight, at: DOMRect) => void;  // the ⋮ options of a highlight
   onNotice: (text: string) => void;
   onWho: (id: string) => void;
   onSignOut: () => void;
@@ -80,6 +85,7 @@ export default function Panel(props: Props) {
         </header>
         <div className={s.body}>
           {id === "contents" && <ContentsList {...p} />}
+          {id === "highlights" && <HighlightsPanel lang={p.lang} onOpen={p.onHighlightOpen} onMenu={p.onHighlightMenu} />}
           {id === "notes" && <NotesPanel lang={p.lang} onNoteMenu={p.onNoteMenu} onNoteOpen={p.onNoteOpen} onShareMany={p.onShareMany} onNotice={p.onNotice} />}
           {id === "whoswho" && <WhoList {...p} />}
           {id === "ask" && <Ask {...p} />}
@@ -99,6 +105,9 @@ function ContentsList({ onJump, onPlace, onOpen, lang }: Props) {
   const [marks, setMarks] = useState<Bookmark[]>(() => bookmarks());
   useEffect(() => subscribe(() => setMarks(bookmarks())), []);
   const [notes, setNotes] = useState<Note[]>(() => diary());
+  const [hls, setHls] = useState(() => highlightList().length);
+  useEffect(() => onHighlights(() => setHls(highlightList().length)), []);
+  const [bmMenu, setBmMenu] = useState<{ b: Bookmark; at: DOMRect } | null>(null);
   useEffect(() => onNotes(() => setNotes(diary())), []);
   const row = (sec: string, label: string, title: string) => (
     <button key={sec} type="button" className={s.row} onClick={() => onJump(sec)}>
@@ -118,11 +127,31 @@ function ContentsList({ onJump, onPlace, onOpen, lang }: Props) {
                 <span className={s.rowTitle}>{b.head || t(lang, "theBook")}</span>
                 {b.page && <span className={s.rowMeta}>p. {b.page}</span>}
               </button>
-              <button type="button" className={s.bmX} onClick={() => removeBookmark(b.id)} aria-label={t(lang, "removeBm")}>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" /></svg>
+              <button type="button" className={`${s.bmX} ${ns.dots}`} onClick={(e) => setBmMenu({ b, at: e.currentTarget.getBoundingClientRect() })} aria-label={t(lang, "options")}>
+                {ICONS.dots}
               </button>
             </div>
           ))}
+        </>
+      )}
+      {bmMenu && (
+        <OptionsMenu
+          anchor={bmMenu.at}
+          onClose={() => setBmMenu(null)}
+          items={[
+            { icon: ICONS.go, label: t(lang, "goToPage"), onPick: () => onPlace(bmMenu.b.a) },
+            { icon: ICONS.del, label: t(lang, "removeBmShort"), danger: true, onPick: () => removeBookmark(bmMenu.b.id) },
+          ]}
+        />
+      )}
+      {hls > 0 && (
+        <>
+          <div className={s.group}>{t(lang, "highlights")}</div>
+          <button type="button" className={s.row} onClick={() => onOpen("highlights")}>
+            <span className={ns.notesRowIcon} aria-hidden="true"><span className={ns.hlDot} /></span>
+            <span className={s.rowTitle}>{t(lang, "highlights")}</span>
+            <span className={s.rowMeta}>{hls} ›</span>
+          </button>
         </>
       )}
       {notes.length > 0 && (
