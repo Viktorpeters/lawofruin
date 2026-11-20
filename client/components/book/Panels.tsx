@@ -3,6 +3,7 @@
 /* What each tray item, the Ask button and the profile icon open: a sheet from the bottom on
    phones, a side panel on wide screens. */
 
+import { bookmarks, subscribe, remove as removeBookmark, type Bookmark } from "@/lib/book/bookmarks";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { PREFACE } from "@/lib/book/preface";
 import { PARTS } from "@/lib/book/contents";
@@ -31,6 +32,7 @@ type Props = {
   onClose: () => void;
   onOpen: (id: PanelId) => void;
   onJump: (sec: string) => void;
+  onPlace: (a: { seq: number; tok: number }) => void;   // open a bookmarked page
   onWho: (id: string) => void;
   onSignOut: () => void;
   onLang: (l: Lang) => void;
@@ -84,7 +86,9 @@ export default function Panel(props: Props) {
 
 /* ---------- Contents ---------- */
 
-function ContentsList({ onJump, lang }: Props) {
+function ContentsList({ onJump, onPlace, lang }: Props) {
+  const [marks, setMarks] = useState<Bookmark[]>(() => bookmarks());
+  useEffect(() => subscribe(() => setMarks(bookmarks())), []);
   const row = (sec: string, label: string, title: string) => (
     <button key={sec} type="button" className={s.row} onClick={() => onJump(sec)}>
       <span className={s.rowNum}>{label}</span>
@@ -93,6 +97,23 @@ function ContentsList({ onJump, lang }: Props) {
   );
   return (
     <>
+      {marks.length > 0 && (
+        <>
+          <div className={s.group}>{t(lang, "bookmarks")}</div>
+          {marks.map((b) => (
+            <div key={b.id} className={s.bmRow}>
+              <button type="button" className={s.row} onClick={() => onPlace(b.a)}>
+                <span className={s.bmFold} aria-hidden="true" />
+                <span className={s.rowTitle}>{b.head || t(lang, "theBook")}</span>
+                {b.page && <span className={s.rowMeta}>p. {b.page}</span>}
+              </button>
+              <button type="button" className={s.bmX} onClick={() => removeBookmark(b.id)} aria-label={t(lang, "removeBm")}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" /></svg>
+              </button>
+            </div>
+          ))}
+        </>
+      )}
       <div className={s.group}>{t(lang, "openingPages")}</div>
       {row("cover", "", t(lang, "cover"))}
       {row("title", "", t(lang, "titlePage"))}
