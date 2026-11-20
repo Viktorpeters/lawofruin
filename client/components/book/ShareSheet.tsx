@@ -50,6 +50,19 @@ export async function noteFile(n: Note, lang: Lang, name: string, link: string, 
   return blob ? new File([blob], "laws-of-ruin-note.png", { type: "image/png" }) : null;
 }
 
+/* Save as PNG straight from a highlight's options: the default picture, no editor */
+export async function highlightFile(h: Highlight, lang: Lang, name: string, link: string, brand: string): Promise<File | null> {
+  await fontsReady();
+  const c = document.createElement("canvas");
+  const text = readHighlight(h);
+  drawCard(c, {
+    ...text, size: "post", hex: COLOURS.find((x) => x.c === h.c)!.hex, name, showBefore: !!text.before,
+    brand, mission: t(lang, "mission"), url: link.replace(/^https?:\/\//, ""), markedBy: t(lang, "markedBy"),
+  });
+  const blob = await cardBlob(c);
+  return blob ? new File([blob], "laws-of-ruin-highlight.png", { type: "image/png" }) : null;
+}
+
 export function downloadFile(f: File) {
   const url = URL.createObjectURL(f);
   const a = document.createElement("a");
