@@ -65,10 +65,11 @@ type Props = {
   mode: ToolId | null;                 // a finger tool is on
   onClose: () => void;                 // close the row
   onMode: (id: ToolId | null) => void;
+  onAction: (id: ToolId) => void;      // one-tap tools (Bookmark): do it and close the row
   children?: ReactNode;                // the controls of the tool that is on (colours, eraser, Share…)
 };
 
-export default function ToolRow({ lang, open, mode, onClose, onMode, children }: Props) {
+export default function ToolRow({ lang, open, mode, onClose, onMode, onAction, children }: Props) {
   const [teach, setTeach] = useState<ToolId | null>(null);
   const [closing, setClosing] = useState(false);
   const [soon, setSoon] = useState<ToolId | null>(null);
@@ -97,7 +98,8 @@ export default function ToolRow({ lang, open, mode, onClose, onMode, children }:
 
   const use = (id: ToolId) => {
     if (FINGER_TOOLS.includes(id)) { setTeach(null); onClose(); onMode(id); return; }
-    // Bookmark, Turning and Landscape come in their own steps
+    if (id === "bookmark") { setTeach(null); onAction(id); close(); return; }
+    // Turning and Landscape come in their own steps
     setSoon(id);
   };
 
