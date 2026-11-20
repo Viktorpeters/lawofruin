@@ -4,32 +4,80 @@
    everything the reader can change before sharing: the size (Square, Post, Story), the pencil
    colour, their name (or none), and whether the sentence before the line shows. Save keeps a
    PNG on the device; Share opens the phone's own share sheet (WhatsApp, Instagram…) with the
-   picture and the reader's link. */
+   picture and the reader's link.
+   It makes two kinds of picture: a highlighted line, or a note (Margin, Reply or Page). */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { COLOURS, type Colour, type Highlight } from "@/lib/book/highlights";
+import type { Note } from "@/lib/book/notes";
 import { t, type Lang } from "@/lib/i18n";
-import { cardBlob, drawCard, fontsReady, readHighlight, type CardSize, type CardText } from "./shareCard";
+import { cardBlob, drawCard, drawNote, fontsReady, MARGIN_MAX, readHighlight, type CardSize, type CardText, type NoteOpts, type NoteStyle } from "./shareCard";
 import s from "./share.module.css";
 
 const NAME_KEY = "lor-share-name";
 const get = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
 const set = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } };
 
+/* the words a note picture needs, in the reader's language */
+export function noteOpts(n: Note, lang: Lang, o: { size: CardSize; style: NoteStyle; name: string; before: boolean; link: string; brand: string }): NoteOpts {
+  return {
+    size: o.size,
+    style: o.style,
+    quote: n.quote,
+    before: o.before ? n.before : "",
+    head: n.head,
+    page: n.page ? `p. ${n.page}` : "",
+    text: n.text,
+    date: new Date(n.ed ?? n.at).toLocaleDateString(lang, { day: "numeric", month: "short", year: "numeric" }),
+    signature: o.name ? t(lang, "noteBy").replace("{n}", o.name) : "",
+    name: o.name,
+    label: t(lang, "pageNoteLabel"),
+    brand: o.brand,
+    mission: t(lang, "mission"),
+    url: o.link.replace(/^https?:\/\//, ""),
+  };
+}
+
+export const defaultStyle = (n: Note): NoteStyle => (n.kind === "page" ? "page" : n.text.length > MARGIN_MAX ? "reply" : "margin");
+export const savedName = (fallback: string) => get(NAME_KEY) ?? fallback;
+
+/* Save as PNG straight from a note's options: the default picture, no editor */
+export async function noteFile(n: Note, lang: Lang, name: string, link: string, brand: string): Promise<File | null> {
+  await fontsReady();
+  const c = document.createElement("canvas");
+  drawNote(c, noteOpts(n, lang, { size: "post", style: defaultStyle(n), name, before: !!n.before, link, brand }));
+  const blob = await cardBlob(c);
+  return blob ? new File([blob], "laws-of-ruin-note.png", { type: "image/png" }) : null;
+}
+
+export function downloadFile(f: File) {
+  const url = URL.createObjectURL(f);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = f.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
 type Props = {
   lang: Lang;
-  highlight: Highlight;
+  highlight?: Highlight;
+  note?: Note;
   defaultName: string;
   link: string;              // the reader's own link (with their Earn code when signed in)
   brand: string;
   onClose: () => void;
 };
 
-export default function ShareSheet({ lang, highlight, defaultName, link, brand, onClose }: Props) {
+export default function ShareSheet({ lang, highlight, note: noteItem, defaultName, link, brand, onClose }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [text] = useState<CardText>(() => readHighlight(highlight));
+  const [text] = useState<CardText>(() =>
+    highlight ? readHighlight(highlight) : { line: noteItem!.quote, before: noteItem!.before, head: noteItem!.head, page: noteItem!.page ? `p. ${noteItem!.page}` : "" });
+  const [style, setStyle] = useState<NoteStyle>(() => (noteItem ? defaultStyle(noteItem) : "margin"));
   const [size, setSize] = useState<CardSize>("post");
-  const [colour, setColour] = useState<Colour>(highlight.c);
+  const [colour, setColour] = useState<Colour>(highlight?.c ?? "y");
   const [name, setName] = useState(() => get(NAME_KEY) ?? defaultName);
   const [signed, setSigned] = useState(true);
   const [before, setBefore] = useState(!!text.before);
@@ -43,6 +91,10 @@ export default function ShareSheet({ lang, highlight, defaultName, link, brand, 
   // redraw whenever a choice changes
   useEffect(() => {
     if (!ready || !canvas.current) return;
+    if (noteItem) {
+      drawNote(canvas.current, noteOpts(noteItem, lang, { size, style, name: signed ? name.trim() : "", before, link, brand }));
+      return;
+    }
     drawCard(canvas.current, {
       ...text,
       size,
@@ -54,7 +106,7 @@ export default function ShareSheet({ lang, highlight, defaultName, link, brand, 
       url: link.replace(/^https?:\/\//, ""),
       markedBy: t(lang, "markedBy"),
     });
-  }, [ready, text, size, colour, name, signed, before, brand, lang, link]);
+  }, [ready, text, size, colour, name, signed, before, brand, lang, link, noteItem, style]);
 
   useEffect(() => {
     if (!note) return;
@@ -79,16 +131,7 @@ export default function ShareSheet({ lang, highlight, defaultName, link, brand, 
     return blob ? new File([blob], "laws-of-ruin.png", { type: "image/png" }) : null;
   };
 
-  const download = (f: File) => {
-    const url = URL.createObjectURL(f);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = f.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 4000);
-  };
+  const download = downloadFile;
 
   const save = async () => {
     setBusy(true);
@@ -115,11 +158,11 @@ export default function ShareSheet({ lang, highlight, defaultName, link, brand, 
   };
 
   return (
-    <div className={`${s.wrap} ${closing ? s.closing : ""}`} role="dialog" aria-label={t(lang, "shareTitle")}>
+    <div className={`${s.wrap} ${closing ? s.closing : ""}`} role="dialog" aria-label={t(lang, noteItem ? "shareNote" : "shareTitle")}>
       <div className={s.scrim} onClick={close} aria-hidden="true" />
       <section className={s.sheet}>
         <header className={s.head}>
-          <h2>{t(lang, "shareTitle")}</h2>
+          <h2>{t(lang, noteItem ? "shareNote" : "shareTitle")}</h2>
           <button type="button" className={s.x} onClick={close} aria-label={t(lang, "close")}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
@@ -142,6 +185,20 @@ export default function ShareSheet({ lang, highlight, defaultName, link, brand, 
             </div>
           </div>
 
+          {noteItem?.kind === "line" && (
+            <div className={s.row}>
+              <span className={s.label}>{t(lang, "style")}</span>
+              <div className={s.seg} role="radiogroup" aria-label={t(lang, "style")}>
+                {(["margin", "reply"] as const).map((z) => (
+                  <button key={z} type="button" role="radio" aria-checked={style === z} className={style === z ? s.segOn : ""} onClick={() => setStyle(z)}>
+                    {t(lang, z)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!noteItem && (
           <div className={s.row}>
             <span className={s.label}>{t(lang, "colour")}</span>
             <div className={s.swatches} role="radiogroup" aria-label={t(lang, "colour")}>
@@ -150,6 +207,7 @@ export default function ShareSheet({ lang, highlight, defaultName, link, brand, 
               ))}
             </div>
           </div>
+          )}
 
           <label className={s.row}>
             <span className={s.label}>{t(lang, "showName")}</span>
@@ -166,7 +224,7 @@ export default function ShareSheet({ lang, highlight, defaultName, link, brand, 
             />
           )}
 
-          {text.before && (
+          {text.before && (!noteItem || style === "margin") && (
             <label className={s.row}>
               <span className={s.label}>{t(lang, "showBefore")}</span>
               <input type="checkbox" className={s.toggle} checked={before} onChange={(e) => setBefore(e.target.checked)} />
