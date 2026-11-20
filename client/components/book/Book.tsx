@@ -12,6 +12,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import type { PageFlip } from "page-flip";
 import { paint } from "@/lib/book/highlights";
 import { onPage as bookmarkOn } from "@/lib/book/bookmarks";
+import { paintNotes, pageNotesOn } from "@/lib/book/notes";
 import { buildBook, pageElement, pageClasses, type Anchor, type BuiltPage } from "./pages";
 import s from "./book.module.css";
 
@@ -22,7 +23,7 @@ export type BookHandle = {
   prev: () => void;
   emblemRect: () => DOMRect | null;
   repaint: () => void;          // draw the reader's highlights onto the pages again
-  here: () => { start: Anchor; end: Anchor | null; head: string; page: string; dark: boolean } | null;   // the page the reader is on
+  here: () => { start: Anchor; end: Anchor | null; head: string; page: string; sec: string; dark: boolean } | null;   // the page the reader is on
   goTo: (a: Anchor) => void;    // open the page that holds this place
   fold: () => void;             // fold the corners of bookmarked pages (and unfold the rest)
 };
@@ -238,13 +239,13 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
         : pages.current.findIndex((p) => p.secs.includes(sec));
       if (i >= 0 && flip.current) { flip.current.turnToPage(i); report(i); }
     },
-    repaint: () => paint(bookEl.current),
+    repaint: () => { paint(bookEl.current); paintNotes(bookEl.current, s.penMark); foldCorners(); },
     here: () => {
       const i = at.current;
       const p = pages.current[i];
       if (!p) return null;
       const el = pageEls.current[i];
-      return { start: p.start, end: pages.current[i + 1]?.start ?? null, head: el?.dataset.head ?? p.head ?? "", page: el?.dataset.folio ?? "", dark: !!p.dark || !!p.hard };
+      return { start: p.start, end: pages.current[i + 1]?.start ?? null, head: el?.dataset.head ?? p.head ?? "", page: el?.dataset.folio ?? "", sec: el?.querySelector<HTMLElement>("[data-sec]")?.dataset.sec ?? "", dark: !!p.dark || !!p.hard };
     },
     goTo: (a) => {
       let i = 0;
@@ -263,7 +264,21 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
     pageEls.current.forEach((el, i) => {
       const p = pages.current[i];
       if (!p || p.hard || p.dark) return;
-      const want = !!bookmarkOn(p.start, pages.current[i + 1]?.start ?? null);
+      const end = pages.current[i + 1]?.start ?? null;
+      // a page note: a small notebook at the foot of the page
+      const pn = pageNotesOn(p.start, end)[0];
+      const mark = el.querySelector<HTMLElement>(`.${s.pageNote}`);
+      if (pn && (!mark || mark.dataset.note !== pn.id)) {
+        mark?.remove();
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = s.pageNote;
+        b.dataset.note = pn.id;
+        b.setAttribute("aria-label", "Page note");
+        b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h9.5a1.5 1.5 0 0 1 1.5 1.5v14.5H7.5A1.5 1.5 0 0 1 6 18zM9 8h5M9 11h3" /></svg>';
+        el.appendChild(b);
+      } else if (!pn && mark) mark.remove();
+      const want = !!bookmarkOn(p.start, end);
       const dog = el.querySelector<HTMLElement>(`.${s.dog}`);
       if (want && !dog) {
         const d = document.createElement("div");
@@ -367,7 +382,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
         disableFlipByClick: false,  // the library never sees taps (useMouseEvents is off); this lets flipPrev work in one-page view
         useMouseEvents: false,      // fingers and the mouse are read by attachGestures below
       });
-      els.forEach((e) => paint(e));   // the reader's highlights, on the words they belong to
+      els.forEach((e) => { paint(e); paintNotes(e, s.penMark); });   // the reader's highlights and note marks, on the words they belong to
       pageEls.current = els;
       foldCorners();                   // and the folded corners of bookmarked pages
       pf.loadFromHTML(els);
