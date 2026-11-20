@@ -22,10 +22,16 @@ export type Note = {
   text: string;
   at: number;           // written
   ed?: number;          // last edited
+  folder?: string;      // the folder it was moved into, if any
 };
+
+/* a folder the reader made, like a folder on a desktop */
+export type Folder = { id: string; name: string; at: number };
 
 const cmp = (x: Spot, y: Spot) => x.seq - y.seq || x.tok - y.tok;
 const key = (lang: string) => `lor-notes-${lang}`;
+const fkey = (lang: string) => `lor-folders-${lang}`;
+let flist: Folder[] = [];
 let lang = "en";
 let list: Note[] = [];
 let loaded = false;
@@ -33,10 +39,14 @@ const subs = new Set<() => void>();
 
 function load() {
   try { list = JSON.parse(localStorage.getItem(key(lang)) || "[]"); } catch { list = []; }
+  try { flist = JSON.parse(localStorage.getItem(fkey(lang)) || "[]"); } catch { flist = []; }
   loaded = true;
 }
 function save() {
-  try { localStorage.setItem(key(lang), JSON.stringify(list)); } catch { /* storage full or private mode */ }
+  try {
+    localStorage.setItem(key(lang), JSON.stringify(list));
+    localStorage.setItem(fkey(lang), JSON.stringify(flist));
+  } catch { /* storage full or private mode */ }
   subs.forEach((f) => f());
 }
 
@@ -67,6 +77,37 @@ export function removeNote(id: string) {
   list = notes().filter((n) => n.id !== id);
   save();
 }
+
+/* ---------- folders ---------- */
+
+export function folders(): Folder[] { if (!loaded) load(); return flist; }
+export function addFolder(name: string): Folder {
+  const f = { id: Math.random().toString(36).slice(2, 10), name: name.trim().slice(0, 40), at: Date.now() };
+  folders();
+  flist = [...flist, f];
+  save();
+  return f;
+}
+export function renameFolder(id: string, name: string) {
+  flist = folders().map((f) => (f.id === id ? { ...f, name: name.trim().slice(0, 40) } : f));
+  save();
+}
+/* deleting a folder never deletes its notes: they go back to All notes */
+export function removeFolder(id: string) {
+  flist = folders().filter((f) => f.id !== id);
+  list = notes().map((n) => (n.folder === id ? { ...n, folder: undefined } : n));
+  save();
+}
+export function moveNote(id: string, folder: string | null) {
+  list = notes().map((n) => (n.id === id ? { ...n, folder: folder ?? undefined } : n));
+  save();
+}
+
+/* the day a note was written, as a key ("2026-11-20"), for Sort by day */
+export const dayOf = (n: Note) => {
+  const d = new Date(n.at);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
 
 /* the page notes on a page that runs from `start` up to (not including) `end` */
 export function pageNotesOn(start: Spot, end: Spot | null): Note[] {
