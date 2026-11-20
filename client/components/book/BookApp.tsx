@@ -13,7 +13,7 @@ import Splash from "./Splash";
 import Tray from "./Tray";
 import ToolRow, { type ToolId } from "./ToolRow";
 import HighlightBar from "./HighlightBar";
-import ShareSheet, { downloadFile, noteFile, savedName } from "./ShareSheet";
+import ShareSheet, { downloadFile, highlightFile, noteFile, savedName } from "./ShareSheet";
 import NoteCard, { type Draft } from "./NoteCard";
 import OptionsMenu, { ICONS } from "./OptionsMenu";
 import { useNoter, underline, type Picked } from "./useNoter";
@@ -22,7 +22,8 @@ import { NamePrompt } from "./NotesPanel";
 import nstyles from "./notes.module.css";
 import { subscribe as onBookmarks, toggle as toggleBookmark } from "@/lib/book/bookmarks";
 import { useHighlighter } from "./useHighlighter";
-import { highlights, subscribe, setHighlightLang, type Colour, type Highlight } from "@/lib/book/highlights";
+import { COLOURS, flash, highlights, recolour, removeHighlight, subscribe, setHighlightLang, type Colour, type Highlight } from "@/lib/book/highlights";
+import hs from "./highlights.module.css";
 import ts from "./tools.module.css";
 import Panel, { type PanelId } from "./Panels";
 import { WhoCard, WordCard } from "./Cards";
@@ -31,7 +32,7 @@ import LawSheet from "./LawSheet";
 import { setBook, VERSION } from "@/lib/book/content";
 import { useBook, useMe } from "@/lib/queries";
 import { useSignOut } from "@/lib/actions";
-import { LANGS, savedLang, saveLang, t, type Lang } from "@/lib/i18n";
+import { LANGS, savedLang, saveLang, t, type Key, type Lang } from "@/lib/i18n";
 import s from "./bookapp.module.css";
 
 const SEEN_KEY = "lor-seen";     // set once the reader has opened the cover
@@ -66,6 +67,8 @@ export default function BookApp() {
   const [card, setCard] = useState<{ mode: "write" | "read" | "edit"; draft: Draft; picked?: Picked; pageAt?: { seq: number; tok: number }; sec?: string; id?: string } | null>(null);
   const [menu, setMenu] = useState<{ note: Note; at: DOMRect } | null>(null);
   const [moving, setMoving] = useState<{ note: Note; at: DOMRect } | null>(null);   // the Move to folder list
+  const [hlMenu, setHlMenu] = useState<{ h: Highlight; at: DOMRect } | null>(null);
+  const [hlColour, setHlColour] = useState<{ h: Highlight; at: DOMRect } | null>(null);
   const [naming, setNaming] = useState<Note | null>(null);                         // a new folder, made while moving a note
   const [left, setLeftState] = useState(false);
   const [ready, setReady] = useState(false);
@@ -267,6 +270,27 @@ export default function BookApp() {
     } },
   ];
 
+  // take the reader to a highlight; it glows for a moment
+  const goToHighlight = (h: Highlight) => {
+    setPanel(null);
+    book.current?.goTo(h.a);
+    window.setTimeout(() => flash(h), 450);
+  };
+
+  const highlightMenu = (h: Highlight): { icon: React.ReactNode; label: string; onPick: () => void; danger?: boolean; confirm?: string }[] => [
+    { icon: ICONS.share, label: t(lang, "sharePic"), onPick: () => setSharing(h) },
+    { icon: ICONS.save, label: t(lang, "savePng"), onPick: async () => {
+      const f = await highlightFile(h, lang, savedName(me?.name ?? ""), shareLink, brand);
+      if (f) { downloadFile(f); setNotice(t(lang, "savedImg")); }
+    } },
+    { icon: ICONS.go, label: t(lang, "goToPage"), onPick: () => goToHighlight(h) },
+    { icon: <span className={hs.swatch} style={{ "--sw": COLOURS.find((c) => c.c === h.c)!.hex } as React.CSSProperties} />, label: t(lang, "changeColour"), onPick: () => setHlColour({ h, at: hlMenu?.at ?? new DOMRect(window.innerWidth - 40, 120, 30, 30) }) },
+    { icon: ICONS.copy, label: t(lang, "copyText"), onPick: async () => {
+      try { await navigator.clipboard.writeText(`“${h.text ?? ""}”\n\n${h.head ?? ""}${h.page ? `, p. ${h.page}` : ""}`); setNotice(t(lang, "textCopied")); } catch { /* clipboard blocked */ }
+    } },
+    { icon: ICONS.del, label: t(lang, "del"), danger: true, confirm: t(lang, "delSure"), onPick: () => removeHighlight(h.id) },
+  ];
+
   useNoter({
     on: mode === "note",
     busy: !!card,
@@ -392,6 +416,8 @@ export default function BookApp() {
           onPlace={(a) => { setPanel(null); book.current?.goTo(a); }}
           onNoteMenu={(n, at) => setMenu({ note: n, at })}
           onNotice={setNotice}
+          onHighlightOpen={goToHighlight}
+          onHighlightMenu={(h, at) => setHlMenu({ h, at })}
           onShareMany={async (list) => {
             // a folder's notes as pictures, shared together (or saved, where sharing files is not possible)
             const files = (await Promise.all(list.slice(0, 10).map((n) => noteFile(n, lang, savedName(me?.name ?? ""), shareLink, brand)))).filter(Boolean) as File[];
@@ -433,6 +459,18 @@ export default function BookApp() {
         />
       )}
       {menu && <OptionsMenu anchor={menu.at} items={noteMenu(menu.note)} onClose={() => setMenu(null)} />}
+      {hlMenu && <OptionsMenu anchor={hlMenu.at} items={highlightMenu(hlMenu.h)} onClose={() => setHlMenu(null)} />}
+      {hlColour && (
+        <OptionsMenu
+          anchor={hlColour.at}
+          onClose={() => setHlColour(null)}
+          items={COLOURS.map(({ c, hex }) => ({
+            icon: <span className={hs.swatch} style={{ "--sw": hex } as React.CSSProperties} />,
+            label: `${t(lang, `c_${c}` as Key)}${c === hlColour.h.c ? "  ✓" : ""}`,
+            onPick: () => recolour(hlColour.h.id, c),
+          }))}
+        />
+      )}
       {moving && (
         <OptionsMenu
           anchor={moving.at}
