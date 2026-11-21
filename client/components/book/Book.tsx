@@ -31,7 +31,9 @@ export type BookHandle = {
 export type PageInfo = { index: number; count: number; dark: boolean; secs: string[] };
 
 type Props = {
-  fontSize: number;                       // 15, 16 or 17.5
+  fontSize: number;                       // the running text, in px (the reader sets it: 8 to 40)
+  headSize: number;                       // the headings and the big first letters, in px
+  fontFamily: string;                     // the reading font, as CSS
   version: number;                        // a new book arrived (language, sign-in, purchase): rebuild the pages
   visible: boolean;
   startFromPlace: boolean;                // returning reader: open where they stopped
@@ -207,7 +209,7 @@ async function fontsReady() {
   await document.fonts.ready;
 }
 
-const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, visible, startFromPlace, onReady, onPage, onWho, onWord, onLaw, paused = false }, ref) {
+const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, headSize, fontFamily, version, visible, startFromPlace, onReady, onPage, onWho, onWord, onLaw, paused = false }, ref) {
   const host = useRef<HTMLDivElement>(null);
   const flip = useRef<PageFlip | null>(null);
   const pages = useRef<BuiltPage[]>([]);
@@ -298,7 +300,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
     at.current = i;
     here.current = p.start;
     const size = measureScreen();
-    write(PLACE_KEY, { i, ...p.start, sec: p.secs[0], w: size.w, h: size.h, fs: fontSize } satisfies Place);
+    write(PLACE_KEY, { i, ...p.start, sec: p.secs[0], w: size.w, h: size.h, fs: fontSize * 1000 + headSize } satisfies Place);
     cb.current.onPage({ index: i, count: pages.current.length, dark: !!p.dark, secs: p.secs });
   }
 
@@ -321,6 +323,8 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
       probe.style.width = `${size.w}px`;
       probe.style.height = `${size.h}px`;
       probe.style.setProperty("--fs", `${fontSize}px`);
+      probe.style.setProperty("--hs", `${headSize}px`);
+      probe.style.setProperty("--rf", fontFamily);
       const box = document.createElement("div");
       box.className = pageClasses.inner;
       probe.appendChild(box);
@@ -341,7 +345,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
       const saved = read<Place>(PLACE_KEY);
       const anchor = before ?? (useSaved.current && saved ? { seq: saved.seq, tok: saved.tok } : null);
       if (anchor) {
-        if (!before && saved && saved.w === size.w && saved.h === size.h && saved.fs === fontSize && saved.i < built_.length) {
+        if (!before && saved && saved.w === size.w && saved.h === size.h && saved.fs === fontSize * 1000 + headSize && saved.i < built_.length) {
           start = saved.i; // same screen, same text size: the very same page
         } else {
           for (let i = 0; i < built_.length; i++) if (cmp(built_[i].start, anchor) <= 0 && built_[i].start.seq >= 0) start = i;
@@ -358,6 +362,8 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
       b.style.width = `${size.spread ? size.w * 2 : size.w}px`;
       b.style.height = `${size.h}px`;
       b.style.setProperty("--fs", `${fontSize}px`);
+      b.style.setProperty("--hs", `${headSize}px`);
+      b.style.setProperty("--rf", fontFamily);
       el.appendChild(b);
       bookEl.current = b;
 
@@ -426,7 +432,7 @@ const Book = forwardRef<BookHandle, Props>(function Book({ fontSize, version, vi
     };
     // rebuild only for a new text size or a new book; `report` reads the latest values through refs
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fontSize, version]);
+  }, [fontSize, headSize, fontFamily, version]);
 
   // one listener for every tap inside the pages
   useEffect(() => {

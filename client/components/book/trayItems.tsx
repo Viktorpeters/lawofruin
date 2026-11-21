@@ -72,3 +72,11 @@ export const TOOLS_ICON = (
     <path d="M12.6 6.8l4.6 4.6" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" />
   </svg>
 );
+
+/* Menu: a short list with bullets, for the reader menu */
+export const MENU_ICON = (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M9 7h11M9 12h11M9 17h11" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" />
+    <circle cx="4.8" cy="7" r="1.2" fill="currentColor" /><circle cx="4.8" cy="12" r="1.2" fill="currentColor" /><circle cx="4.8" cy="17" r="1.2" fill="currentColor" />
+  </svg>
+);

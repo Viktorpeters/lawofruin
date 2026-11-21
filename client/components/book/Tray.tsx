@@ -1,20 +1,22 @@
 "use client";
 
-/* The reader menu: one round glass button at the bottom right. Tapping it brings the five
-   items out in a column above it, one after another: each grows from nothing to full size,
-   from the bottom right where the button is, 40ms after the one below it, with a small
-   overshoot so it lands with a snap. Each label is a small sharp white-edged card (its own
-   picture, then the words) close beside its round icon.
-   Tap an item to open its panel; tap outside, the button again or Escape to close (the items
-   go back in, the last one first). Left-handed readers can mirror it (Appearance).
-   Ask has its own glass button directly above, always one tap away, and Tools sits above Ask. */
+/* The reader's controls: one white button in the top left corner, and nothing else, so the
+   top of the page stays clear.
+   Tap it and three glass buttons spring out to its right, one after another: Menu, Tools and
+   Ask. Each one flies out from behind the button, turning as it grows, and lands with a small
+   bounce; the white button itself turns into a ×. Tap the × and they fly back in the same way,
+   the last one first, and the × turns back.
+   Menu drops the reader menu down beneath it (Contents, Who's Who, Purchases, Earn, Appearance),
+   each item growing in after the one above it. Tools and Ask do what they always did, and the
+   buttons fold away behind them. */
 
 import { useCallback, useEffect, useState } from "react";
-import { ASK_ICON, TOOLS_ICON, TRAY_ITEMS, type TrayItemId } from "./trayItems";
+import { ASK_ICON, MENU_ICON, TOOLS_ICON, TRAY_ITEMS, type TrayItemId } from "./trayItems";
 import { t, type Lang } from "@/lib/i18n";
 import styles from "./tray.module.css";
 
-const STEP = 58;   // the distance between the centres of two items, in px
+const STEP = 52;     // the distance between two menu items, in px
+const OUT_MS = 420;  // how long the buttons take to fly back in
 
 type Props = {
   left: boolean;
@@ -25,75 +27,91 @@ type Props = {
   onTools: () => void;
 };
 
-export default function Tray({ left, light, lang, onChoose, onAsk, onTools }: Props) {
-  const [open, setOpen] = useState(false);
+export default function Tray({ light, lang, onChoose, onAsk, onTools }: Props) {
+  const [cluster, setCluster] = useState<"closed" | "open" | "closing">("closed");
+  const [menu, setMenu] = useState(false);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+  const fold = useCallback((then?: () => void) => {
+    setMenu(false);
+    setCluster((c) => (c === "closed" ? c : "closing"));
+    window.setTimeout(() => setCluster((c) => (c === "closing" ? "closed" : c)), OUT_MS);
+    if (then) window.setTimeout(then, 120);
   }, []);
 
-  const toggle = useCallback(() => setOpen((o) => !o), []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") fold(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [fold]);
+
+  const tick = () => { try { navigator.vibrate?.(6); } catch { /* not supported */ } };
+  const launch = () => {
+    tick();
+    if (cluster === "open") fold();
+    else if (cluster === "closed") setCluster("open");
+  };
+
+  const shown = cluster !== "closed";
   const n = TRAY_ITEMS.length;
+  const buttons = [
+    { key: "menu", icon: MENU_ICON, label: t(lang, menu ? "closeMenu" : "openMenu"), act: () => { tick(); setMenu((m) => !m); }, on: menu },
+    { key: "tools", icon: TOOLS_ICON, label: t(lang, "tools"), act: () => fold(onTools), on: false },
+    { key: "ask", icon: ASK_ICON, label: t(lang, "askTitle"), act: () => fold(onAsk), on: false },
+  ];
 
   return (
     <>
-      <div className={`${styles.scrim} ${open ? styles.scrimOn : ""}`} onClick={() => setOpen(false)} aria-hidden="true" />
+      <div className={`${styles.scrim} ${menu ? styles.scrimOn : ""}`} onClick={() => setMenu(false)} aria-hidden="true" />
 
-      <button
-        type="button"
-        className={`${styles.ask} ${styles.tools} ${left ? styles.left : ""} ${open ? styles.askAway : ""} ${light ? styles.light : ""}`}
-        onClick={() => { setOpen(false); onTools(); }}
-        aria-label={t(lang, "tools")}
-        tabIndex={open ? -1 : 0}
-      >
-        {TOOLS_ICON}
-      </button>
-
-      <button
-        type="button"
-        className={`${styles.ask} ${left ? styles.left : ""} ${open ? styles.askAway : ""} ${light ? styles.light : ""}`}
-        onClick={() => { setOpen(false); onAsk(); }}
-        aria-label={t(lang, "askTitle")}
-        tabIndex={open ? -1 : 0}
-      >
-        {ASK_ICON}
-      </button>
-
-      <nav className={`${styles.tray} ${left ? styles.left : ""} ${open ? styles.open : ""} ${light ? styles.light : ""}`} aria-label="Reader menu">
-        {TRAY_ITEMS.map((item, i) => {
-          // the last item in the list sits nearest the button and comes out first
-          const fromButton = n - i;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              className={styles.item}
-              style={{
-                "--y": `${-fromButton * STEP}px`,
-                "--in": `${(fromButton - 1) * 40}ms`,
-                "--out": `${(n - fromButton) * 30}ms`,
-              } as React.CSSProperties}
-              onClick={() => { setOpen(false); onChoose(item.id); }}
-              tabIndex={open ? 0 : -1}
-              aria-hidden={!open}
-            >
-              <span className={styles.label}>
-                <span className={styles.mark}>{item.mark}</span>
-                {t(lang, item.id)}
-              </span>
-              <span className={styles.icon}>{item.icon}</span>
-            </button>
-          );
-        })}
-
-        <button type="button" className={styles.orb} onClick={toggle} aria-expanded={open} aria-label={open ? t(lang, "closeMenu") : t(lang, "openMenu")}>
+      <nav className={`${styles.tray} ${shown ? styles.open : ""} ${cluster === "closing" ? styles.closing : ""} ${light ? styles.light : ""}`} aria-label="Reader menu">
+        {/* the white button: two lines that turn into a × */}
+        <button type="button" className={styles.orb} onClick={launch} aria-expanded={cluster === "open"} aria-label={cluster === "open" ? t(lang, "closeMenu") : t(lang, "openMenu")}>
           <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.glyph}>
             <path className={styles.bar1} d="M5 8h14" />
             <path className={styles.bar2} d="M5 16h14" />
           </svg>
         </button>
+
+        {/* Menu, Tools, Ask: they fly out to the right, and back in */}
+        {shown && buttons.map((b, i) => (
+          <button
+            key={b.key}
+            type="button"
+            className={`${styles.btn} ${b.on ? styles.btnOn : ""}`}
+            style={{ "--i": i, "--o": buttons.length - 1 - i, "--x": `${46 + i * 42}px` } as React.CSSProperties}
+            onClick={b.act}
+            aria-label={b.label}
+            aria-expanded={b.key === "menu" ? menu : undefined}
+            disabled={cluster === "closing"}
+          >
+            {b.icon}
+          </button>
+        ))}
+
+        {/* the reader menu, dropping down beneath the Menu button */}
+        <div className={`${styles.drop} ${menu ? styles.dropOpen : ""}`}>
+          {TRAY_ITEMS.map((item, i) => (
+            <button
+              key={item.id}
+              type="button"
+              className={styles.item}
+              style={{
+                "--y": `${(i + 1) * STEP + 8}px`,
+                "--in": `${i * 40}ms`,
+                "--out": `${(n - 1 - i) * 30}ms`,
+              } as React.CSSProperties}
+              onClick={() => fold(() => onChoose(item.id))}
+              tabIndex={menu ? 0 : -1}
+              aria-hidden={!menu}
+            >
+              <span className={styles.icon}>{item.icon}</span>
+              <span className={styles.label}>
+                <span className={styles.mark}>{item.mark}</span>
+                {t(lang, item.id)}
+              </span>
+            </button>
+          ))}
+        </div>
       </nav>
     </>
   );

@@ -8,6 +8,7 @@ import { diary, subscribe as onNotes, type Note } from "@/lib/book/notes";
 import { ICONS } from "./OptionsMenu";
 import ns from "./notes.module.css";
 import NotesPanel from "./NotesPanel";
+import FontSettings from "./FontSettings";
 import HighlightsPanel from "./HighlightsPanel";
 import OptionsMenu from "./OptionsMenu";
 import { highlightList, subscribe as onHighlights, type Highlight } from "@/lib/book/highlights";
@@ -51,6 +52,10 @@ type Props = {
   onLang: (l: Lang) => void;
   fontSize: number;
   setFontSize: (n: number) => void;
+  headSize: number;
+  setHeadSize: (n: number) => void;
+  fontId: string;
+  setFontId: (id: string) => void;
   left: boolean;
   setLeft: (v: boolean) => void;
   onRestart: () => void;
@@ -400,30 +405,16 @@ function Purchases({ lang, me, onOpen }: Props) {
 
 /* ---------- Appearance ---------- */
 
-function Appearance({ lang, onLang, fontSize, setFontSize, left, setLeft, onRestart, onGuide }: Props) {
-  const sizes = [
-    { v: 14, label: t(lang, "standard") },
-    { v: 15.5, label: t(lang, "larger") },
-    { v: 17, label: t(lang, "largest") },
-  ];
+function Appearance({ lang, onLang, fontSize, setFontSize, headSize, setHeadSize, fontId, setFontId, onRestart, onGuide }: Props) {
   return (
     <>
-      <div className={s.group}>{t(lang, "textSize")}</div>
-      <div className={s.seg}>
-        {sizes.map((z) => (
-          <button key={z.v} type="button" aria-pressed={fontSize === z.v} onClick={() => setFontSize(z.v)} style={{ fontSize: `${z.v}px` }}>{z.label}</button>
-        ))}
-      </div>
+      <div className={s.group}>{t(lang, "fontLabel")}</div>
+      <FontSettings lang={lang} fontSize={fontSize} setFontSize={setFontSize} headSize={headSize} setHeadSize={setHeadSize} fontId={fontId} setFontId={setFontId} />
       <div className={s.group}>{t(lang, "language")}</div>
       <div className={s.langs}>
         {LANGS.map((l) => (
           <button key={l.code} type="button" aria-pressed={lang === l.code} onClick={() => onLang(l.code)}>{l.name}</button>
         ))}
-      </div>
-      <div className={s.group}>{t(lang, "menuButton")}</div>
-      <div className={s.seg}>
-        <button type="button" aria-pressed={!left} onClick={() => setLeft(false)}>{t(lang, "rightHand")}</button>
-        <button type="button" aria-pressed={left} onClick={() => setLeft(true)}>{t(lang, "leftHand")}</button>
       </div>
       <div className={s.group}>{t(lang, "theBook")}</div>
       <button type="button" className={s.line} onClick={onGuide}>{t(lang, "showTurn")}</button>

@@ -29,12 +29,13 @@
   --faint: #9a8e7c;
   --red: #9b2a21;
   --gold: #a87a3a;
-  --fs: 16px;
+  /* the text size (--fs) is set by the book around the pages and on the measuring page; a size
+     set here would override it, and the pages would print larger than they were measured */
   position: relative;
   overflow: hidden;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-reading), Georgia, serif;
+  font-family: var(--rf, var(--font-reading)), Georgia, serif;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -64,14 +65,16 @@
   z-index: 1;
   height: 100%;
   overflow: hidden;
-  padding: 66px 28px 78px 30px;
+  /* tight margins, like a well-set paperback: the words get the page */
+  padding: 58px 22px 50px 26px;
 }
 .rh {
   position: absolute;
   z-index: 2;
-  top: 26px;
+  top: 27px;
   left: 40px;
   right: 40px;
+  text-overflow: ellipsis;
   text-align: center;
   font-family: var(--font-mono), monospace;
   font-size: 8.5px;
@@ -85,7 +88,7 @@
 .folio {
   position: absolute;
   z-index: 2;
-  bottom: 30px;
+  bottom: 20px;
   left: 0;
   right: 0;
   text-align: center;
@@ -99,7 +102,7 @@
   position: relative;            /* the note pen marks sit in its left margin */
   margin: 0 0 0.75em;
   font-size: var(--fs);
-  line-height: 1.58;
+  line-height: 1.5;
   text-align: justify;
   hyphens: auto;
   -webkit-hyphens: auto;
@@ -112,7 +115,7 @@
   float: left;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 600;
-  font-size: calc(var(--fs) * 3.6);
+  font-size: calc(var(--hs, 18px) * 2.6);   /* follows the heading size, never the text size */
   line-height: 0.82;
   padding: 6px 7px 0 0;
   color: var(--ink);
@@ -229,7 +232,7 @@
   margin: 10px 0 0;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 500;
-  font-size: calc(var(--fs) * 1.75);
+  font-size: calc(var(--hs, 18px) * 1.25);
   line-height: 1.08;
   text-wrap: balance;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 -0.6px 0 rgba(60, 40, 20, 0.35);
@@ -275,14 +278,14 @@
   margin: 20px 0 0;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 400;
-  font-size: 30px;
+  font-size: calc(var(--hs, 18px) * 1.667);
   letter-spacing: 0.06em;
 }
 .bigTitle {
   margin: 18px 0 16px;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 400;
-  font-size: 50px;
+  font-size: calc(var(--hs, 18px) * 2.778);
   line-height: 0.98;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 -0.6px 0 rgba(60, 40, 20, 0.35);
 }
@@ -292,31 +295,31 @@
 .house { margin-top: 8px; font-family: var(--font-mono), monospace; font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink); }
 .bottomLine { margin-top: auto; }
 
-.copy { margin: 0 0 0.9em; font-size: 12px; line-height: 1.65; color: var(--soft); text-align: left; }
+.copy { margin: 0 0 0.9em; font-size: calc(var(--fs) * 0.923); line-height: 1.65; color: var(--soft); text-align: left; }
 .copyFirst { font-weight: 600; color: var(--ink); }
 
 .dedic {
   margin: 0;
   font-family: var(--font-display), Georgia, serif;
   font-style: italic;
-  font-size: 22px;
+  font-size: calc(var(--hs, 18px) * 1.222);
   line-height: 1.5;
 }
 .epiLines {
   font-family: var(--font-display), Georgia, serif;
   font-style: italic;
-  font-size: 19px;
+  font-size: calc(var(--hs, 18px) * 1.056);
   line-height: 1.45;
 }
 .epiWho { margin: 12px 0 0; font-size: 12.5px; color: var(--soft); }
 .epiGap { height: 46px; }
 
-.forLine { font-family: var(--font-display), Georgia, serif; font-size: 30px; line-height: 1.18; }
+.forLine { font-family: var(--font-display), Georgia, serif; font-size: calc(var(--hs, 18px) * 1.667); line-height: 1.18; }
 .redRule { width: 30px; height: 1px; background: var(--red); margin: 34px 0 26px; }
 .realms { font-family: var(--font-mono), monospace; font-size: 9.5px; letter-spacing: 0.28em; line-height: 2.4; text-transform: uppercase; color: var(--soft); }
 
 .which { padding: 120px 30px 90px; }
-.whichTitle { margin: 12px 0 10px; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 36px; }
+.whichTitle { margin: 12px 0 10px; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: calc(var(--hs, 18px) * 2.0); }
 .whichLead { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--soft); }
 .opts { margin-top: 26px; display: flex; flex-direction: column; gap: 12px; }
 .opt {
@@ -332,31 +335,31 @@
 }
 .opt[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 3px 0 0 var(--red); }
 .optName { display: block; font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 20px; }
-.optLine { display: block; font-family: var(--font-reading), Georgia, serif; font-size: 13px; color: var(--soft); }
+.optLine { display: block; font-family: var(--rf, var(--font-reading)), Georgia, serif; font-size: 13px; color: var(--soft); }
 .turn { margin-top: 22px; text-align: center; }
 
-.endTitle { margin: 14px 0 12px; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 30px; line-height: 1.1; text-wrap: balance; }
+.endTitle { margin: 14px 0 12px; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: calc(var(--hs, 18px) * 1.667); line-height: 1.1; text-wrap: balance; }
 .endLine { margin: 0; font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 12px; line-height: 1.5; color: var(--soft); }
 
 /* ---------- contents ---------- */
 .tocKicker { color: var(--red); }
-.tocTitle { margin: 8px 0 6px; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 36px; line-height: 1; }
+.tocTitle { margin: 8px 0 6px; font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: calc(var(--hs, 18px) * 2.0); line-height: 1; }
 .pass { margin: 0 0 18px; font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; color: var(--soft); }
 .part { margin: 18px 0 4px; padding-top: 14px; border-top: 2px solid var(--ink); }
 .partNum { display: flex; justify-content: space-between; align-items: center; }
-.partTitle { margin: 6px 0 4px; font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 22px; letter-spacing: 0.04em; }
+.partTitle { margin: 6px 0 4px; font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: calc(var(--hs, 18px) * 1.222); letter-spacing: 0.04em; }
 .entry { border-top: 1px solid rgba(29, 24, 18, 0.18); padding: 12px 0 2px; }
 .entryHead { display: flex; justify-content: space-between; align-items: center; }
 .lock { display: inline-flex; align-items: center; gap: 5px; }
-.lawTitle { margin: 5px 0 4px; font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 19px; line-height: 1.18; }
+.lawTitle { margin: 5px 0 4px; font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: calc(var(--hs, 18px) * 1.056); line-height: 1.18; }
 .opensOn { font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10.5px; line-height: 1.35; color: var(--soft); }
 /* the Judgment: set apart with a red rule */
-.judg { margin: 10px 0 8px; padding: 1px 0 1px 12px; border-left: 2px solid var(--red); font-family: var(--font-reading), Georgia, serif; font-style: italic; font-size: 15px; line-height: 1.42; color: var(--red); }
+.judg { margin: 10px 0 8px; padding: 1px 0 1px 12px; border-left: 2px solid var(--red); font-family: var(--rf, var(--font-reading)), Georgia, serif; font-style: italic; font-size: calc(var(--fs) * 1.154); line-height: 1.42; color: var(--red); }
 .judgLabel { display: block; margin-bottom: 4px; font-family: var(--font-mono), monospace; font-style: normal; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; }
 .stamps { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 6px; }
 .stamps span { font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.1em; border: 1px solid rgba(29, 24, 18, 0.3); padding: 3px 5px; color: var(--soft); }
-.key { font-size: 13px; line-height: 1.45; }
-.story { margin: 8px 0 6px; font-size: 13.5px; line-height: 1.55; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.key { font-size: calc(var(--fs) * 1.0); line-height: 1.45; }
+.story { margin: 8px 0 6px; font-size: calc(var(--fs) * 1.038); line-height: 1.55; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
 .openLaw {
   display: block;
   margin: 10px 0 14px;
@@ -461,7 +464,7 @@
 .tocOpen { justify-content: flex-start; padding-top: 74px; }
 .tocParts { width: 100%; margin-top: 18px; border-top: 2px solid var(--ink); }
 .tocPart { display: grid; grid-template-columns: 4.2em 1fr auto; align-items: baseline; gap: 8px; padding: 13px 0; border-bottom: 1px solid rgba(29, 24, 18, 0.18); text-align: left; }
-.tocPartTitle { font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: 18px; }
+.tocPartTitle { font-family: var(--font-display), Georgia, serif; font-weight: 600; font-size: calc(var(--hs, 18px) * 1.0); }
 
 /* ---------- a part's opening page ---------- */
 .partPage { justify-content: flex-start; padding: 46px 28px 80px; }
@@ -472,34 +475,34 @@
   margin-top: 2px;
   font-family: var(--font-display), Georgia, serif;
   font-weight: 500;
-  font-size: 58px;
+  font-size: calc(var(--hs, 18px) * 3.222);
   line-height: 1;
   letter-spacing: 0.04em;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 -0.6px 0 rgba(60, 40, 20, 0.35);
 }
 /* the double underline */
 .partRule { width: 120px; height: 9px; margin: 10px 0 14px; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); }
-.partName { font-family: var(--font-display), Georgia, serif; font-style: italic; font-weight: 500; font-size: 25px; line-height: 1.1; text-wrap: balance; }
+.partName { font-family: var(--font-display), Georgia, serif; font-style: italic; font-weight: 500; font-size: calc(var(--hs, 18px) * 1.389); line-height: 1.1; text-wrap: balance; }
 .partLine { margin: 8px 0 0; font-family: var(--font-mono), monospace; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; font-size: 11.5px; line-height: 1.45; color: var(--soft); max-width: 28ch; }
 .partLaws { margin-top: 16px; width: 100%; max-width: 300px; border-top: 1px solid rgba(29, 24, 18, 0.25); }
 .partLaws div { padding: 5px 0; border-bottom: 1px solid rgba(29, 24, 18, 0.12); font-family: var(--font-display), Georgia, serif; font-size: 15px; line-height: 1.25; }
 .partLaws span { display: block; font-family: var(--font-mono), monospace; font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 2px; }
 .partOpens { margin-top: 12px; }
 
-/* ---------- a bookmark: the page's top left corner folded down ----------
-   (top left, because the top right of the screen holds the language and profile buttons)
+/* ---------- a bookmark: the page's bottom right corner folded up ----------
+   (the top of the screen holds the menu, Tools, Ask, language and profile buttons)
    The corner is cut away (showing the page beneath, a shade darker) and the flap lies across
    the page, its back a little lighter, with a soft shadow under it. It folds in with a spring,
    and folds back out when the bookmark is removed. */
 .dog {
   position: absolute;
-  top: 0;
-  left: 0;
+  bottom: 0;
+  right: 0;
   z-index: 4;
   width: 50px;
   height: 50px;
   pointer-events: none;
-  transform-origin: top left;
+  transform-origin: bottom right;
   animation: dogIn 0.6s cubic-bezier(0.34, 1.45, 0.64, 1) both;
 }
 /* the page beneath, seen through the cut */
@@ -507,15 +510,15 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #d9cfbb 0 50%, transparent 50%);
+  background: linear-gradient(315deg, #d9cfbb 0 50%, transparent 50%);
 }
 /* the flap: the back of the paper, folded over */
 .dog::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(315deg, #fbf6ec 0%, #e9dfcb 46%, #d2c6ae 50%, transparent 50%);
-  filter: drop-shadow(3px 3px 3px rgba(40, 28, 14, 0.24));
+  background: linear-gradient(135deg, #fbf6ec 0%, #e9dfcb 46%, #d2c6ae 50%, transparent 50%);
+  filter: drop-shadow(-3px -3px 3px rgba(40, 28, 14, 0.24));
 }
 .dogOut { animation: dogOut 0.3s cubic-bezier(0.4, 0, 1, 1) both; }
 @keyframes dogIn {
@@ -530,8 +533,8 @@
    is always level with the right line */
 .penMark {
   position: absolute;
-  left: -25px;
-  width: 22px;
+  left: -23px;
+  width: 20px;
   height: 1.3em;
   margin-top: 0.05em;
   display: inline-grid;
@@ -549,8 +552,8 @@
 /* a page note: a small notebook in the left margin, at the foot of the page */
 .pageNote {
   position: absolute;
-  left: 2px;
-  bottom: 40px;
+  left: 0px;
+  bottom: 34px;
   z-index: 3;
   width: 28px;
   height: 28px;
@@ -572,3 +575,9 @@
 /* taken to a highlight from the list: it glows for a moment */
 .host [data-flash] { animation: flash 1.6s ease both; }
 @keyframes flash { 0%, 100% { filter: none; } 20%, 55% { filter: saturate(2.4) brightness(0.88); } }
+
+/* on a phone the running head sits between the buttons along the top: Menu, Tools and Ask on the
+   left, language and profile on the right */
+@media (max-width: 700px) {
+  .rh { left: 64px; right: 98px; text-align: center; }
+}
