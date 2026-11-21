@@ -11,6 +11,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Book, { type BookHandle, type PageInfo } from "./Book";
 import Splash from "./Splash";
 import Tray from "./Tray";
+import "./reading-fonts.css";   // the twenty reading fonts, shipped with the app
+import { fontById, loadFont } from "@/lib/book/fonts";
+import { HEAD_MAX, HEAD_MIN, TEXT_MAX, TEXT_MIN } from "./FontSettings";
 import ToolRow, { type ToolId } from "./ToolRow";
 import HighlightBar from "./HighlightBar";
 import ShareSheet, { downloadFile, highlightFile, noteFile, savedName } from "./ShareSheet";
@@ -36,11 +39,14 @@ import { LANGS, savedLang, saveLang, t, type Key, type Lang } from "@/lib/i18n";
 import s from "./bookapp.module.css";
 
 const SEEN_KEY = "lor-seen";     // set once the reader has opened the cover
-const FS_KEY = "lor-fs";
+const FS_KEY = "lor-fs2";   // the text size in px (a new key: the old one held the three fixed steps)
+const HS_KEY = "lor-hs";    // the heading size in px
+const FF_KEY = "lor-ff";    // the reading font
 const HAND_KEY = "lor-hand";
 const GUIDE_KEY = "lor-guide";  // set once the reading guide has been seen
 const TIP_KEY = "lor-tip";      // set once the reader has tapped a name (or closed the tip)
-export const SIZES = [14, 15.5, 17];   // text size: standard (dense, like a hardback), larger, largest
+export const TEXT_DEFAULT = 10;   // small, dense pages: a lot of book on every screen
+export const HEAD_DEFAULT = 16;
 const SPLASH_MIN = 1700;         // the hourglass turns at least this long before it flies
 
 function get(key: string) {
@@ -53,7 +59,11 @@ function set(key: string, v: string | null) {
 export default function BookApp() {
   const book = useRef<BookHandle>(null);
   const [boot, setBoot] = useState<null | { returning: boolean }>(null);
-  const [fontSize, setFontSizeState] = useState(SIZES[0]);
+  // what the settings show at once, and what the book is paged in (a moment after the reader stops)
+  const [fontSize, setFontSizeState] = useState(TEXT_DEFAULT);
+  const [headSize, setHeadSizeState] = useState(HEAD_DEFAULT);
+  const [fontId, setFontIdState] = useState("source");
+  const [paged, setPaged] = useState({ fs: TEXT_DEFAULT, hs: HEAD_DEFAULT, font: fontById("source").css });
   const [tip, setTip] = useState(false);
   const [tools, setTools] = useState(false);              // the row of reading tools is open
   const [mode, setMode] = useState<ToolId | null>(null);  // a finger tool is on: pages do not turn
@@ -104,7 +114,15 @@ export default function BookApp() {
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       const fs = Number(get(FS_KEY));
-      if (SIZES.includes(fs)) setFontSizeState(fs);
+      const hs = Number(get(HS_KEY));
+      const ff = get(FF_KEY) ?? "source";
+      const okFs = fs >= TEXT_MIN && fs <= TEXT_MAX ? fs : TEXT_DEFAULT;
+      const okHs = hs >= HEAD_MIN && hs <= HEAD_MAX ? hs : HEAD_DEFAULT;
+      setFontSizeState(okFs);
+      setHeadSizeState(okHs);
+      setFontIdState(fontById(ff).id);
+      // a chosen font is fetched before the first pages are cut, so they are measured in it
+      loadFont(ff).finally(() => setPaged({ fs: okFs, hs: okHs, font: fontById(ff).css }));
       setLeftState(get(HAND_KEY) === "left");
       const l = savedLang();
       setLangState(l);
@@ -166,6 +184,17 @@ export default function BookApp() {
   }, []);
 
   const setFontSize = useCallback((n: number) => { set(FS_KEY, String(n)); setFontSizeState(n); }, []);
+  const setHeadSize = useCallback((n: number) => { set(HS_KEY, String(n)); setHeadSizeState(n); }, []);
+  const setFontId = useCallback((id: string) => { set(FF_KEY, id); setFontIdState(id); }, []);
+  // re-page the book a moment after the reader stops changing the sizes or the font
+  useEffect(() => {
+    let live = true;
+    const id = window.setTimeout(async () => {
+      await loadFont(fontId);
+      if (live) setPaged((p) => (p.fs === fontSize && p.hs === headSize && p.font === fontById(fontId).css ? p : { fs: fontSize, hs: headSize, font: fontById(fontId).css }));
+    }, 450);
+    return () => { live = false; window.clearTimeout(id); };
+  }, [fontSize, headSize, fontId]);
   const setLeft = useCallback((v: boolean) => { set(HAND_KEY, v ? "left" : null); setLeftState(v); }, []);
   const restart = useCallback(() => { setPanel(null); book.current?.flipTo(0); }, []);
 
@@ -321,7 +350,9 @@ export default function BookApp() {
       {version > 0 && (
         <Book
           ref={book}
-          fontSize={fontSize}
+          fontSize={paged.fs}
+          headSize={paged.hs}
+          fontFamily={paged.font}
           version={version}
           visible={showBook}
           startFromPlace={boot.returning}
@@ -432,6 +463,10 @@ export default function BookApp() {
           onLang={chooseLang}
           fontSize={fontSize}
           setFontSize={setFontSize}
+          headSize={headSize}
+          setHeadSize={setHeadSize}
+          fontId={fontId}
+          setFontId={setFontId}
           left={left}
           setLeft={setLeft}
           onRestart={restart}
