@@ -1,0 +1,45 @@
+/* The reading fonts a reader can choose in Appearance. They ship with the app (Latin letters,
+   which cover English, French, Spanish, Portuguese and German), so they work offline.
+   A font is only downloaded by the phone the first time a reader picks it. */
+
+@font-face { font-family: 'Lor Literata'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/literata/literata-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Literata'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/literata/literata-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Lora'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/lora/lora-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Lora'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/lora/lora-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor EB Garamond'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/ebgaramond/ebgaramond-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor EB Garamond'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/ebgaramond/ebgaramond-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Crimson Pro'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/crimson/crimson-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Crimson Pro'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/crimson/crimson-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Cormorant Garamond'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/cormorant/cormorant-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Cormorant Garamond'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/cormorant/cormorant-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Noto Serif'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/notoserif/notoserif-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Noto Serif'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/notoserif/notoserif-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Playfair Display'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/playfair/playfair-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Playfair Display'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/playfair/playfair-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Bitter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/bitter/bitter-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Bitter'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/bitter/bitter-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Roboto Slab'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/robotoslab/robotoslab-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/inter/inter-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Inter'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/inter/inter-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Open Sans'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/opensans/opensans-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Open Sans'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/opensans/opensans-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Nunito Sans'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/nunito/nunito-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Nunito Sans'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/nunito/nunito-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Merriweather'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/merriweather/merriweather-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Merriweather'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/merriweather/merriweather-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Alegreya'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/alegreya/alegreya-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Alegreya'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/alegreya/alegreya-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Libre Baskerville'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/baskerville/baskerville-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Libre Baskerville'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('/fonts/reading/baskerville/baskerville-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Spectral'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/reading/spectral/spectral-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Spectral'; font-style: italic; font-weight: 400; font-display: swap; src: url('/fonts/reading/spectral/spectral-400-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Spectral'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/reading/spectral/spectral-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor PT Serif'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/reading/ptserif/ptserif-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor PT Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url('/fonts/reading/ptserif/ptserif-400-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor PT Serif'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/reading/ptserif/ptserif-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Atkinson Hyperlegible'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/reading/atkinson/atkinson-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Atkinson Hyperlegible'; font-style: italic; font-weight: 400; font-display: swap; src: url('/fonts/reading/atkinson/atkinson-400-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Atkinson Hyperlegible'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/reading/atkinson/atkinson-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Lato'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/reading/lato/lato-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Lato'; font-style: italic; font-weight: 400; font-display: swap; src: url('/fonts/reading/lato/lato-400-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Lor Lato'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/reading/lato/lato-700-normal.woff2') format('woff2'); }
